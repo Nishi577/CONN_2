@@ -90,7 +90,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       {/* Main 3-Pane Modular Workspace */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0">
         {/* LEFT PANE: Navigation & Status (lg:col-span-2) */}
-        <aside className="lg:col-span-2 border-r border-[#E8E4D9] bg-[#FAF8F5] p-4 sm:p-5 flex flex-col justify-between space-y-6">
+        <aside className="lg:col-span-2 border-r border-[#E8E4D9] bg-[#FAF8F5] p-4 sm:p-5 flex flex-col justify-between space-y-6 lg:sticky lg:top-[57px] lg:self-start lg:max-h-[calc(100vh-57px)] lg:overflow-y-auto">
           <div className="space-y-6">
             <div>
               <span className="text-[10px] uppercase tracking-widest font-mono-code text-[#6B665E] block mb-3 font-semibold">
@@ -240,7 +240,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             </div>
             <button
               onClick={onLogout}
-              className="w-full text-center text-xs text-[#6B665E] hover:text-red-600 font-medium transition-colors"
+              className="w-full text-center text-xs text-[#6B665E] hover:text-red-600 font-medium transition-colors cursor-pointer"
             >
               Sign Out
             </button>
@@ -258,7 +258,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           </main>
         ) : (
           <>
-            <main className="lg:col-span-5 border-r border-[#E8E4D9] bg-[#FAF8F5] p-5 sm:p-8 overflow-y-auto">
+            <main className="lg:col-span-5 border-r border-[#E8E4D9] bg-[#FAF8F5] p-5 sm:p-8">
               {activeTab === 'identity_hub' && (
                 <IdentityHubManager
                   profile={profile}
@@ -312,64 +312,70 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               )}
             </main>
 
-            {/* RIGHT PANE: Live Interactive Preview (lg:col-span-5) */}
-            <aside className="lg:col-span-5 bg-[#EFECE6] p-4 sm:p-6 flex flex-col items-center justify-start overflow-y-auto relative">
-              {/* Preview Header controls */}
-              <div className="w-full max-w-sm flex items-center justify-between mb-4 bg-white/80 backdrop-blur-xs p-2 rounded-2xl border border-[#E8E4D9] shadow-2xs">
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setPreviewDevice('mobile')}
-                    className={`p-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                      previewDevice === 'mobile' ? 'bg-[#1C1B18] text-[#FAF8F5]' : 'text-[#6B665E] hover:text-[#1C1B18]'
-                    }`}
-                    title="Mobile View"
-                  >
-                    <Smartphone className="w-3.5 h-3.5" />
-                    <span className="text-[11px]">Mobile</span>
-                  </button>
+            {/* RIGHT PANE: Live Sticky Interactive Preview (lg:col-span-5) */}
+            <aside className="lg:col-span-5 bg-[#EFECE6] p-4 sm:p-6 lg:p-7 flex flex-col items-center justify-start relative">
+              <div className="w-full lg:sticky lg:top-[72px] lg:self-start flex flex-col items-center justify-start max-h-[calc(100vh-80px)]">
+                {/* Preview Header controls */}
+                <div
+                  className={`w-full flex items-center justify-between mb-3.5 bg-white/90 backdrop-blur-md p-2 rounded-2xl border border-[#E8E4D9] shadow-2xs transition-all ${
+                    previewDevice === 'mobile' ? 'max-w-[420px]' : 'max-w-xl'
+                  }`}
+                >
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setPreviewDevice('mobile')}
+                      className={`p-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+                        previewDevice === 'mobile' ? 'bg-[#1C1B18] text-[#FAF8F5]' : 'text-[#6B665E] hover:text-[#1C1B18]'
+                      }`}
+                      title="Mobile View"
+                    >
+                      <Smartphone className="w-3.5 h-3.5" />
+                      <span className="text-[11px]">Mobile</span>
+                    </button>
+
+                    <button
+                      onClick={() => setPreviewDevice('desktop')}
+                      className={`p-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+                        previewDevice === 'desktop' ? 'bg-[#1C1B18] text-[#FAF8F5]' : 'text-[#6B665E] hover:text-[#1C1B18]'
+                      }`}
+                      title="Desktop View"
+                    >
+                      <Monitor className="w-3.5 h-3.5" />
+                      <span className="text-[11px]">Full</span>
+                    </button>
+                  </div>
 
                   <button
-                    onClick={() => setPreviewDevice('desktop')}
-                    className={`p-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                      previewDevice === 'desktop' ? 'bg-[#1C1B18] text-[#FAF8F5]' : 'text-[#6B665E] hover:text-[#1C1B18]'
-                    }`}
-                    title="Desktop View"
+                    onClick={onViewPublicProfile}
+                    className="text-[11px] font-medium text-[#6B665E] hover:text-[#1C1B18] flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[#E8E4D9]/50 transition-colors cursor-pointer"
                   >
-                    <Monitor className="w-3.5 h-3.5" />
-                    <span className="text-[11px]">Full</span>
+                    Open Live <ExternalLink className="w-3 h-3" />
                   </button>
                 </div>
 
-                <button
-                  onClick={onViewPublicProfile}
-                  className="text-[11px] font-medium text-[#6B665E] hover:text-[#1C1B18] flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[#E8E4D9]/50 transition-colors"
+                {/* Live Phone/Canvas Frame (Slightly Zoomed) */}
+                <div
+                  className={`transition-all duration-300 w-full overflow-hidden shadow-2xl border border-[#1C1B18]/10 flex flex-col ${
+                    previewDevice === 'mobile'
+                      ? 'max-w-[420px] rounded-[42px] border-[9px] border-[#1C1B18] bg-white h-[calc(100vh-165px)] max-h-[790px] min-h-[560px]'
+                      : 'max-w-xl rounded-2xl border-2 border-[#E8E4D9] bg-white h-[calc(100vh-165px)] max-h-[790px] min-h-[560px]'
+                  }`}
                 >
-                  Open Live <ExternalLink className="w-3 h-3" />
-                </button>
-              </div>
+                  {/* Phone Notch/Speaker Header if mobile */}
+                  {previewDevice === 'mobile' && (
+                    <div className="w-full bg-[#1C1B18] h-6 flex justify-center items-center shrink-0">
+                      <div className="w-20 h-3 bg-black rounded-b-xl" />
+                    </div>
+                  )}
 
-              {/* Live Phone/Canvas Frame */}
-              <div
-                className={`transition-all duration-300 w-full overflow-hidden shadow-2xl border border-[#1C1B18]/10 ${
-                  previewDevice === 'mobile'
-                    ? 'max-w-sm rounded-[40px] border-8 border-[#1C1B18] bg-white aspect-9/19 max-h-[780px]'
-                    : 'max-w-xl rounded-2xl border-2 border-[#E8E4D9] bg-white min-h-[680px]'
-                }`}
-              >
-                {/* Phone Notch/Speaker Header if mobile */}
-                {previewDevice === 'mobile' && (
-                  <div className="w-full bg-[#1C1B18] h-6 flex justify-center items-center shrink-0">
-                    <div className="w-20 h-3 bg-black rounded-b-xl" />
+                  <div className="flex-1 h-full overflow-y-auto min-h-0 bg-white">
+                    <PublicProfile
+                      profile={profile}
+                      onOpenShare={onOpenShare}
+                      onShowToast={onShowToast}
+                      isEmbeddedPreview={true}
+                    />
                   </div>
-                )}
-
-                <div className="h-full overflow-y-auto">
-                  <PublicProfile
-                    profile={profile}
-                    onOpenShare={onOpenShare}
-                    onShowToast={onShowToast}
-                    isEmbeddedPreview={true}
-                  />
                 </div>
               </div>
             </aside>

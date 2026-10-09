@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ConnProfile, SocialProfile } from '../../types';
 import {
   User,
@@ -15,6 +15,9 @@ import {
   Linkedin,
   Globe,
   Radio,
+  Upload,
+  Camera,
+  AlertCircle,
 } from 'lucide-react';
 
 interface ProfileEditorProps {
@@ -31,6 +34,9 @@ const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400',
 ];
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
 export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeProfile, onShowToast }) => {
   const [name, setName] = useState(profile.name);
   const [username, setUsername] = useState(profile.username);
@@ -42,6 +48,27 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
   const [newsletterEnabled, setNewsletterEnabled] = useState(profile.newsletterEnabled || false);
   const [newsletterHeadline, setNewsletterHeadline] = useState(profile.newsletterHeadline || '');
   const [newsletterSubtext, setNewsletterSubtext] = useState(profile.newsletterSubtext || '');
+
+  // Upload UI state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+
+  // Sync state if active profile changes externally
+  useEffect(() => {
+    setName(profile.name);
+    setUsername(profile.username);
+    setBio(profile.bio);
+    setAvatarUrl(profile.avatarUrl);
+    setLocation(profile.location || '');
+    setPronouns(profile.pronouns || '');
+    setStatusBadge(profile.statusBadge || '');
+    setSocials(profile.socials || []);
+    setNewsletterEnabled(profile.newsletterEnabled || false);
+    setNewsletterHeadline(profile.newsletterHeadline || '');
+    setNewsletterSubtext(profile.newsletterSubtext || '');
+    setAvatarError(null);
+  }, [profile.id]);
 
   // Social profiles state
   const [socials, setSocials] = useState<SocialProfile[]>(profile.socials || []);
@@ -63,6 +90,112 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
   const handleRemoveSocial = (index: number) => {
     const updated = socials.filter((_, i) => i !== index);
     setSocials(updated);
+  };
+
+  const processFile = (file: File) => {
+    setAvatarError(null);
+
+    // Validate mime type or extension
+    const isMimeValid = ALLOWED_TYPES.includes(file.type.toLowerCase());
+    const isExtensionValid = /\.(jpe?g|png|webp)$/i.test(file.name);
+    if (!isMimeValid && !isExtensionValid) {
+      setAvatarError('Unsupported file type. Please upload a JPG, PNG, or WEBP image.');
+      return;
+    }
+
+    // Validate size limit
+    if (file.size > MAX_FILE_SIZE) {
+      setAvatarError('File size exceeds 5MB limit. Please choose a smaller image.');
+      return;
+    }
+
+    // Read as Data URL & optimize for local storage
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const rawDataUrl = e.target?.result as string;
+      if (!rawDataUrl) {
+        setAvatarError('Unable to read selected image file.');
+        return;
+      }
+
+      // Optimize image dimensions for smooth local persistence
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const MAX_DIM = 800;
+          let width = img.naturalWidth || img.width;
+          let height = img.naturalHeight || img.height;
+
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              const outputMime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+              const optimizedData = canvas.toDataURL(outputMime, 0.92);
+              setAvatarUrl(optimizedData);
+              return;
+            }
+          }
+          setAvatarUrl(rawDataUrl);
+        } catch {
+          setAvatarUrl(rawDataUrl);
+        }
+      };
+
+      img.onerror = () => {
+        setAvatarUrl(rawDataUrl);
+      };
+
+      img.src = rawDataUrl;
+    };
+
+    reader.onerror = () => {
+      setAvatarError('Failed to read image file. Please try again.');
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+    // Reset file input value to allow selecting same file again
+    e.target.value = '';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -103,32 +236,107 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
         <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider">
           Profile Avatar
         </label>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <img
-            src={avatarUrl}
-            alt={name}
-            className="w-20 h-20 rounded-full object-cover border-2 border-[#E8E4D9] shadow-sm"
-          />
-
-          <div className="flex-1 space-y-2">
-            <input
-              type="text"
-              placeholder="Avatar image URL..."
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18]"
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-white border border-[#E8E4D9] rounded-2xl shadow-2xs">
+          {/* Avatar Preview Circle with Change overlay */}
+          <div className="relative group shrink-0">
+            <img
+              src={avatarUrl}
+              alt={name}
+              className="w-20 h-20 rounded-full object-cover border-2 border-[#E8E4D9] shadow-xs bg-[#FAF8F5]"
             />
-            <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute inset-0 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer"
+              title="Upload new profile photo"
+            >
+              <Camera className="w-5 h-5 mb-0.5" />
+              <span className="text-[9px] font-medium uppercase tracking-wider">Change</span>
+            </button>
+          </div>
+
+          <div className="flex-1 w-full space-y-3">
+            {/* Upload Button & Dropzone Control */}
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`border border-dashed rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 cursor-pointer transition-all ${
+                isDragging
+                  ? 'border-[#1C1B18] bg-[#FAF8F5] ring-2 ring-[#1C1B18]/10'
+                  : 'border-[#D5D0C5] hover:border-[#1C1B18] bg-[#FAF8F5]/70 hover:bg-[#FAF8F5]'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/jpg"
+                onChange={handleFileInputChange}
+                className="hidden"
+                aria-label="Upload profile photo"
+              />
+
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white border border-[#E8E4D9] flex items-center justify-center text-[#1C1B18] shrink-0 shadow-2xs">
+                  <Upload className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-[#1C1B18] flex items-center gap-1.5">
+                    <span>{AVATAR_PRESETS.includes(avatarUrl) ? 'Upload Photo' : 'Change Photo'}</span>
+                    <span className="text-[10px] text-[#6B665E] font-normal hidden sm:inline">
+                      or drag & drop
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#6B665E]">JPG, PNG, or WEBP (max 5MB)</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                className="px-3.5 py-1.5 bg-[#1C1B18] text-[#FAF8F5] text-xs font-medium rounded-lg hover:bg-[#33312B] transition-colors shrink-0 shadow-2xs cursor-pointer"
+              >
+                {AVATAR_PRESETS.includes(avatarUrl) ? 'Upload Photo' : 'Upload New'}
+              </button>
+            </div>
+
+            {/* Inline Error Display */}
+            {avatarError && (
+              <div className="flex items-center justify-between gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 animate-fade-in">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                  <span>{avatarError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAvatarError(null)}
+                  className="text-red-500 hover:text-red-800 text-xs font-bold px-1"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Presets Selection */}
+            <div className="flex flex-wrap items-center gap-2 pt-0.5">
               <span className="text-[11px] text-[#6B665E]">Or select preset:</span>
               <div className="flex items-center gap-1.5">
                 {AVATAR_PRESETS.map((preset, idx) => (
                   <button
                     type="button"
                     key={idx}
-                    onClick={() => setAvatarUrl(preset)}
-                    className={`w-6 h-6 rounded-full overflow-hidden border-2 transition-transform hover:scale-110 ${
-                      avatarUrl === preset ? 'border-[#1C1B18] ring-1 ring-[#1C1B18]' : 'border-[#E8E4D9]'
+                    onClick={() => {
+                      setAvatarUrl(preset);
+                      setAvatarError(null);
+                    }}
+                    className={`w-7 h-7 rounded-full overflow-hidden border-2 transition-transform hover:scale-110 cursor-pointer ${
+                      avatarUrl === preset ? 'border-[#1C1B18] ring-2 ring-[#1C1B18]/20 scale-105' : 'border-[#E8E4D9]'
                     }`}
+                    title={`Preset avatar ${idx + 1}`}
                   >
                     <img src={preset} alt="" className="w-full h-full object-cover" />
                   </button>
