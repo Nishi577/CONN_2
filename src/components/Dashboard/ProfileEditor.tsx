@@ -226,9 +226,42 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 font-sans-ui text-[#1C1B18]">
-      <div className="pb-4 border-b border-[#E8E4D9]">
-        <h2 className="font-serif-display text-2xl font-normal text-[#1C1B18]">Profile & Identity</h2>
-        <p className="text-xs text-[#6B665E]">Customize how your personal space presents itself to the world.</p>
+      {/* Header & Explainer */}
+      <div className="pb-4 border-b border-[#E8E4D9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 bg-[#1C1B18] text-[#FAF8F5] rounded-lg">
+              <User className="w-4 h-4 text-[#D49A3E]" />
+            </span>
+            <h2 className="font-serif-display text-2xl font-normal text-[#1C1B18]">Profile Identity & Header</h2>
+          </div>
+          <p className="text-xs text-[#6B665E] mt-1">
+            Configure your avatar, bio summary, handle, location, and social media handles.
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          className="px-5 py-2.5 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] text-xs font-medium rounded-xl transition-all shadow-xs shrink-0 flex items-center gap-1.5"
+        >
+          <Check className="w-3.5 h-3.5 text-[#D49A3E]" />
+          <span>Save Profile</span>
+        </button>
+      </div>
+
+      {/* Feature Output Explainer Card */}
+      <div className="p-4 bg-white border border-[#E8E4D9] rounded-2xl flex items-start gap-3 shadow-2xs">
+        <span className="p-2 bg-[#FAF8F5] border border-[#E8E4D9] rounded-xl text-[#C85A32] shrink-0 mt-0.5">
+          <Sparkles className="w-4 h-4" />
+        </span>
+        <div className="space-y-1 text-xs">
+          <span className="font-bold text-[#1C1B18] uppercase tracking-wider text-[10px] font-mono-code block">
+            Public Profile Output
+          </span>
+          <p className="text-[#6B665E] leading-relaxed">
+            These details appear at the very top of your public profile (<strong>conn.bio/{profile.username}</strong>) as your header hero section: displaying your photo, bio, status badge, and clickable social network badges.
+          </p>
+        </div>
       </div>
 
       {/* Avatar Section */}

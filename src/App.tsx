@@ -96,7 +96,11 @@ export default function App() {
   }, [allProfiles]);
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1C1B18] font-sans-ui flex flex-col antialiased">
+    <div
+      className={`min-h-screen ${
+        currentView === 'dashboard' ? 'lg:h-screen lg:overflow-hidden' : ''
+      } bg-[#FAF8F5] text-[#1C1B18] font-sans-ui flex flex-col antialiased`}
+    >
       {/* Navigation header bar */}
       <Navbar
         currentView={currentView}
@@ -113,7 +117,11 @@ export default function App() {
       />
 
       {/* Main View Switcher */}
-      <div className="flex-1">
+      <div
+        className={`flex-1 min-h-0 ${
+          currentView === 'dashboard' ? 'lg:overflow-hidden lg:flex lg:flex-col' : ''
+        }`}
+      >
         {currentView === 'landing' && (
           <LandingPage
             onSignUp={() => {

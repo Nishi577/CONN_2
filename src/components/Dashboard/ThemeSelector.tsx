@@ -1,11 +1,30 @@
 import React, { useState } from 'react';
-import { ConnProfile, LinkShape, CustomDesignFamily } from '../../types';
+import { ConnProfile, LinkShape, CustomDesignFamily, ThemeOption } from '../../types';
 import { EDITORIAL_THEMES } from '../../data/themes';
 import { ThemeEditor } from './ThemeEditor';
 import { BackgroundStudio } from './BackgroundStudio';
 import { MotionStudio } from './MotionStudio';
 import { ElementPositionStudio } from './ElementPositionStudio';
-import { Check, Sparkles, Sliders, Palette, Sun, Zap, Move, Plus, Trash2, X, FolderPlus } from 'lucide-react';
+import {
+  Check,
+  Sparkles,
+  Sliders,
+  Palette,
+  Sun,
+  Zap,
+  Move,
+  Plus,
+  Trash2,
+  X,
+  FolderPlus,
+  ArrowRight,
+  Square,
+  Maximize2,
+  Circle,
+  Minus,
+  Pipette,
+  CheckCircle2,
+} from 'lucide-react';
 
 interface ThemeSelectorProps {
   profile: ConnProfile;
@@ -13,11 +32,31 @@ interface ThemeSelectorProps {
   onShowToast: (msg: string) => void;
 }
 
-const SHAPE_OPTIONS: { id: LinkShape; label: string; desc: string }[] = [
-  { id: 'sharp', label: 'Sharp Corner', desc: '0px radius, clean architectural grid' },
-  { id: 'rounded', label: 'Soft Radius', desc: '12px subtle rounded corners' },
-  { id: 'pill', label: 'Pill Shape', desc: 'Full stadium curve' },
-  { id: 'underline', label: 'Editorial Line', desc: 'Minimal bottom border rule' },
+const SHAPE_OPTIONS: { id: LinkShape; label: string; desc: string; icon: React.ReactNode }[] = [
+  {
+    id: 'sharp',
+    label: 'Sharp Corner',
+    desc: '0px radius, clean architectural grid',
+    icon: <Square className="w-4 h-4" />,
+  },
+  {
+    id: 'rounded',
+    label: 'Soft Radius',
+    desc: '12px subtle rounded corners',
+    icon: <Maximize2 className="w-4 h-4 rounded" />,
+  },
+  {
+    id: 'pill',
+    label: 'Stadium Pill',
+    desc: 'Full stadium pill curve',
+    icon: <Circle className="w-4 h-4" />,
+  },
+  {
+    id: 'underline',
+    label: 'Editorial Line',
+    desc: 'Minimal bottom border rule',
+    icon: <Minus className="w-4 h-4" />,
+  },
 ];
 
 const ACCENT_PRESETS = [
@@ -29,23 +68,40 @@ const ACCENT_PRESETS = [
   { name: 'Rose Clay', hex: '#B85338' },
 ];
 
-export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeProfile, onShowToast }) => {
+export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
+  profile,
+  onChangeProfile,
+  onShowToast,
+}) => {
   const [selectedThemeId, setSelectedThemeId] = useState(profile.themeId);
-  const [customAccent, setCustomAccent] = useState(profile.customAccentColor || '');
-  const [linkShape, setLinkShape] = useState<LinkShape>(profile.customLinkShape || 'sharp');
-  const [activeSubSection, setActiveSubSection] = useState<'collection' | 'editor' | 'background' | 'motion' | 'elements'>('collection');
+  const [customAccent, setCustomAccent] = useState(profile.customAccentColor || '#C85A32');
+  const [customHexInput, setCustomHexInput] = useState(profile.customAccentColor || '#C85A32');
+  const [linkShape, setLinkShape] = useState<LinkShape>(profile.customLinkShape || 'rounded');
+  const [activeSubSection, setActiveSubSection] = useState<
+    'collection' | 'editor' | 'background' | 'motion' | 'elements'
+  >('collection');
 
   // Design Family Filter and Creator State
   const [selectedFamily, setSelectedFamily] = useState<string>('all');
   const [isAddFamilyModalOpen, setIsAddFamilyModalOpen] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState('');
   const [newFamilyDesc, setNewFamilyDesc] = useState('');
-  const [newFamilyFont, setNewFamilyFont] = useState<'serif-display' | 'serif-editorial' | 'mono-code' | 'sans-ui'>('serif-display');
-  const [newFamilyBorder, setNewFamilyBorder] = useState<'sharp' | 'rounded' | 'brutalist' | 'paper' | 'double' | 'glass'>('rounded');
+  const [newFamilyFont, setNewFamilyFont] = useState<
+    'serif-display' | 'serif-editorial' | 'mono-code' | 'sans-ui'
+  >('serif-display');
+  const [newFamilyBorder, setNewFamilyBorder] = useState<
+    'sharp' | 'rounded' | 'brutalist' | 'paper' | 'double' | 'glass'
+  >('rounded');
   const [newFamilyAccent, setNewFamilyAccent] = useState('#C85A32');
   const [newFamilyBg, setNewFamilyBg] = useState('#FAF8F5');
 
   const customFamilies: CustomDesignFamily[] = profile.customDesignFamilies || [];
+
+  // Active theme helper
+  const activeThemeObj: ThemeOption =
+    profile.themeId === 'custom' && profile.customTheme
+      ? profile.customTheme
+      : EDITORIAL_THEMES.find((t) => t.id === profile.themeId) || EDITORIAL_THEMES[0];
 
   const handleCreateDesignFamily = (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,195 +172,208 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
 
   const handleApplyAccent = (hex: string) => {
     setCustomAccent(hex);
+    setCustomHexInput(hex);
     onChangeProfile({
       ...profile,
       customAccentColor: hex,
     });
-    onShowToast('Accent color updated');
+    onShowToast(`Accent color updated to ${hex}`);
   };
+
+  const handleCustomHexSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (/^#([0-9A-F]{3}){1,2}$/i.test(customHexInput)) {
+      handleApplyAccent(customHexInput);
+    } else {
+      onShowToast('Please enter a valid hex color code (e.g. #C85A32)');
+    }
+  };
+
+  const subSections = [
+    { id: 'collection', label: 'Theme Presets', icon: Palette, color: 'text-[#C85A32]' },
+    { id: 'editor', label: 'Colors & Typography', icon: Sliders, color: 'text-[#D49A3E]' },
+    { id: 'background', label: 'Background Studio', icon: Sun, color: 'text-[#385842]' },
+    { id: 'motion', label: 'Motion & Hover', icon: Zap, color: 'text-[#4E78E6]' },
+    { id: 'elements', label: 'Elements & Layout', icon: Move, color: 'text-[#B85338]' },
+  ] as const;
 
   return (
     <div className="space-y-8 font-sans-ui text-[#1C1B18]">
-      {/* Header & Sub-section Switcher */}
-      <div className="pb-4 border-b border-[#E8E4D9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="font-serif-display text-2xl font-normal text-[#1C1B18]">Appearance & Editorial Identity</h2>
-          <p className="text-xs text-[#6B665E]">
-            Select from our 12 curated themes or design bespoke colors using the Theme Studio.
-          </p>
+      {/* HEADER & SUB-STUDIO NAVIGATION */}
+      <div className="space-y-4 pb-6 border-b border-[#E8E4D9]">
+        {/* Top Header Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 bg-[#1C1B18] text-[#FAF8F5] rounded-lg">
+                <Palette className="w-4 h-4 text-[#D49A3E]" />
+              </span>
+              <h2 className="font-serif-display text-2xl font-normal text-[#1C1B18]">
+                Appearance & Visual Design
+              </h2>
+            </div>
+            <p className="text-xs text-[#6B665E] mt-1">
+              Curate your page with bespoke editorial palettes, typography treatments, canvas backgrounds, and motion.
+            </p>
+          </div>
+
+          {/* Current Active Theme Badge */}
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[#E8E4D9] rounded-xl text-xs shadow-2xs shrink-0">
+            <span
+              className="w-3 h-3 rounded-full border border-black/10 shrink-0"
+              style={{ backgroundColor: activeThemeObj.accentHex || activeThemeObj.bgHex }}
+            />
+            <div className="flex flex-col">
+              <span className="text-[9px] uppercase font-mono-code text-[#6B665E] leading-none">
+                Active Theme
+              </span>
+              <span className="font-medium text-[#1C1B18] leading-tight">
+                {profile.themeId === 'custom' ? 'Custom Studio' : activeThemeObj.name}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Sub-section Switcher Tabs */}
-        <div className="flex flex-wrap bg-[#E8E4D9]/50 p-1 rounded-xl shrink-0 gap-1">
-          <button
-            onClick={() => setActiveSubSection('collection')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-              activeSubSection === 'collection'
-                ? 'bg-white text-[#1C1B18] shadow-2xs font-semibold'
-                : 'text-[#6B665E] hover:text-[#1C1B18]'
-            }`}
-          >
-            <Palette className="w-3.5 h-3.5 text-[#C85A32]" />
-            <span>Themes</span>
-          </button>
-          <button
-            onClick={() => setActiveSubSection('editor')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-              activeSubSection === 'editor'
-                ? 'bg-white text-[#1C1B18] shadow-2xs font-semibold'
-                : 'text-[#6B665E] hover:text-[#1C1B18]'
-            }`}
-          >
-            <Sliders className="w-3.5 h-3.5 text-[#D49A3E]" />
-            <span>Colors & Fonts</span>
-          </button>
-          <button
-            onClick={() => setActiveSubSection('background')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-              activeSubSection === 'background'
-                ? 'bg-white text-[#1C1B18] shadow-2xs font-semibold'
-                : 'text-[#6B665E] hover:text-[#1C1B18]'
-            }`}
-          >
-            <Sun className="w-3.5 h-3.5 text-[#385842]" />
-            <span>Background</span>
-          </button>
-          <button
-            onClick={() => setActiveSubSection('motion')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-              activeSubSection === 'motion'
-                ? 'bg-white text-[#1C1B18] shadow-2xs font-semibold'
-                : 'text-[#6B665E] hover:text-[#1C1B18]'
-            }`}
-          >
-            <Zap className="w-3.5 h-3.5 text-[#4E78E6]" />
-            <span>Motion & Hover</span>
-          </button>
-          <button
-            onClick={() => setActiveSubSection('elements')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-              activeSubSection === 'elements'
-                ? 'bg-white text-[#1C1B18] shadow-2xs font-semibold'
-                : 'text-[#6B665E] hover:text-[#1C1B18]'
-            }`}
-          >
-            <Move className="w-3.5 h-3.5 text-[#B85338]" />
-            <span>Elements & Positioning</span>
-          </button>
+        {/* Studio Sub-Navigation Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto p-1 bg-[#E8E4D9]/40 border border-[#E8E4D9] rounded-2xl scrollbar-none">
+          {subSections.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeSubSection === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveSubSection(tab.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                  isActive
+                    ? 'bg-[#1C1B18] text-[#FAF8F5] shadow-xs font-semibold'
+                    : 'text-[#6B665E] hover:text-[#1C1B18] hover:bg-white/60'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#FAF8F5]' : tab.color}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      {/* VIEW: CURATED PRESETS & THEMES COLLECTION */}
       {activeSubSection === 'collection' && (
-        <>
-          {/* CURATED EDITORIAL THEMES GRID & DESIGN FAMILY SELECTOR */}
-          <div>
-            {/* DESIGN FAMILY TABS & ADD BUTTON */}
-            <div className="mb-6 space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <label className="block text-xs font-mono-code uppercase font-bold text-[#1C1B18]">
-                    Design Families & Aesthetics
-                  </label>
-                  <p className="text-[11px] text-[#6B665E]">
-                    Filter presets by typography and structural philosophy, or create your own bespoke family.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsAddFamilyModalOpen(true)}
-                    className="px-3 py-1.5 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shadow-2xs shrink-0"
-                  >
-                    <Plus className="w-3.5 h-3.5 text-[#D49A3E]" />
-                    <span>Add Design Family</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveSubSection('editor')}
-                    className="text-xs font-medium text-[#C85A32] hover:underline flex items-center gap-1 shrink-0"
-                  >
-                    <Sliders className="w-3 h-3" />
-                    <span>Theme Studio</span>
-                  </button>
-                </div>
+        <div className="space-y-8">
+          {/* ACTION TOOLBAR: FILTER PILLS & ACTION BUTTONS */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <label className="block text-xs font-mono-code uppercase font-bold text-[#1C1B18]">
+                  Curated Editorial Palettes
+                </label>
+                <p className="text-[11px] text-[#6B665E]">
+                  Select a theme preset designed around editorial typography and restrained aesthetics.
+                </p>
               </div>
 
-              {/* Family Filter Pills */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                {[
-                  { id: 'all', name: 'All Families' },
-                  { id: 'editorial', name: 'Editorial' },
-                  { id: 'studio', name: 'Studio' },
-                  { id: 'terminal', name: 'Terminal' },
-                  { id: 'paper', name: 'Paper' },
-                  { id: 'modernist', name: 'Modernist' },
-                ].map((fam) => (
-                  <button
-                    key={fam.id}
-                    type="button"
-                    onClick={() => setSelectedFamily(fam.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono-code transition-all ${
-                      selectedFamily === fam.id
-                        ? 'bg-[#1C1B18] text-[#FAF8F5] font-bold shadow-2xs'
-                        : 'bg-[#FAF8F5] text-[#6B665E] hover:bg-[#E8E4D9] border border-[#E8E4D9]'
-                    }`}
-                  >
-                    {fam.name}
-                  </button>
-                ))}
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsAddFamilyModalOpen(true)}
+                  className="px-3.5 py-2 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] text-[#1C1B18] rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shadow-2xs hover:bg-[#FAF8F5]"
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#C85A32]" />
+                  <span>Add Family</span>
+                </button>
 
-                {/* Custom Families */}
-                {customFamilies.map((cf) => (
-                  <div key={cf.id} className="flex items-center">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedFamily(cf.id)}
-                      className={`px-3 py-1.5 rounded-l-lg text-xs font-mono-code transition-all flex items-center gap-1.5 border-y border-l ${
-                        selectedFamily === cf.id
-                          ? 'bg-[#1C1B18] text-[#FAF8F5] border-[#1C1B18] font-bold shadow-2xs'
-                          : 'bg-[#FAF8F5] text-[#6B665E] hover:bg-[#E8E4D9] border-[#E8E4D9]'
-                      }`}
-                    >
-                      <Sparkles className="w-3 h-3 text-[#D49A3E]" />
-                      <span>{cf.name}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteDesignFamily(cf.id, cf.name)}
-                      className="px-1.5 py-1.5 bg-[#FAF8F5] text-red-600 hover:bg-red-50 border border-[#E8E4D9] rounded-r-lg text-xs transition-colors"
-                      title={`Delete ${cf.name}`}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+                <button
+                  type="button"
+                  onClick={() => setActiveSubSection('editor')}
+                  className="px-3.5 py-2 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shadow-xs"
+                >
+                  <Sliders className="w-3.5 h-3.5 text-[#D49A3E]" />
+                  <span>Custom Studio</span>
+                </button>
               </div>
             </div>
 
-            {/* If a custom family is selected, show its overview card */}
-            {selectedFamily !== 'all' && customFamilies.find((cf) => cf.id === selectedFamily) && (
-              (() => {
-                const cf = customFamilies.find((f) => f.id === selectedFamily)!;
-                return (
-                  <div className="mb-6 p-4 bg-[#FAF8F5] border border-[#E8E4D9] rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs uppercase font-mono-code font-bold text-[#C85A32]">Custom Family</span>
-                        <h4 className="font-serif-display text-lg font-bold text-[#1C1B18]">{cf.name}</h4>
-                      </div>
-                      <p className="text-xs text-[#6B665E] mt-0.5">{cf.description}</p>
-                      <div className="flex items-center gap-3 text-[11px] font-mono-code text-[#6B665E] mt-2">
-                        <span>Font: <strong>{cf.fontFamilyDisplay}</strong></span>
-                        <span>•</span>
-                        <span>Border: <strong>{cf.borderStyle}</strong></span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          Accent: <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: cf.accentHex }} />
-                        </span>
-                      </div>
-                    </div>
+            {/* Filter Pills */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              {[
+                { id: 'all', name: 'All Families', count: EDITORIAL_THEMES.length },
+                { id: 'editorial', name: 'Editorial' },
+                { id: 'studio', name: 'Studio' },
+                { id: 'terminal', name: 'Terminal' },
+                { id: 'paper', name: 'Paper' },
+                { id: 'modernist', name: 'Modernist' },
+              ].map((fam) => (
+                <button
+                  key={fam.id}
+                  type="button"
+                  onClick={() => setSelectedFamily(fam.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono-code transition-all ${
+                    selectedFamily === fam.id
+                      ? 'bg-[#1C1B18] text-[#FAF8F5] font-bold shadow-2xs'
+                      : 'bg-white text-[#6B665E] hover:text-[#1C1B18] hover:border-[#1C1B18] border border-[#E8E4D9]'
+                  }`}
+                >
+                  <span>{fam.name}</span>
+                  {fam.count && <span className="ml-1.5 opacity-60">({fam.count})</span>}
+                </button>
+              ))}
 
+              {/* Custom User Families */}
+              {customFamilies.map((cf) => (
+                <div key={cf.id} className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFamily(cf.id)}
+                    className={`px-3 py-1.5 rounded-l-xl text-xs font-mono-code transition-all flex items-center gap-1.5 border-y border-l ${
+                      selectedFamily === cf.id
+                        ? 'bg-[#1C1B18] text-[#FAF8F5] border-[#1C1B18] font-bold shadow-2xs'
+                        : 'bg-white text-[#6B665E] hover:text-[#1C1B18] border-[#E8E4D9]'
+                    }`}
+                  >
+                    <Sparkles className="w-3 h-3 text-[#D49A3E]" />
+                    <span>{cf.name}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDesignFamily(cf.id, cf.name)}
+                    className="px-2 py-1.5 bg-white text-[#6B665E] hover:text-red-600 hover:bg-red-50 border border-[#E8E4D9] rounded-r-xl text-xs transition-colors"
+                    title={`Delete ${cf.name}`}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CUSTOM DESIGN FAMILY OVERVIEW CARD */}
+          {selectedFamily !== 'all' && customFamilies.find((cf) => cf.id === selectedFamily) && (
+            (() => {
+              const cf = customFamilies.find((f) => f.id === selectedFamily)!;
+              return (
+                <div className="p-5 bg-white border border-[#E8E4D9] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase font-mono-code font-bold text-[#C85A32] px-2 py-0.5 bg-[#C85A32]/10 rounded-md">
+                        Custom Design Family
+                      </span>
+                      <h4 className="font-serif-display text-lg font-bold text-[#1C1B18]">{cf.name}</h4>
+                    </div>
+                    <p className="text-xs text-[#6B665E]">{cf.description}</p>
+                    <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono-code text-[#6B665E] pt-1">
+                      <span>Typography: <strong className="text-[#1C1B18]">{cf.fontFamilyDisplay}</strong></span>
+                      <span>•</span>
+                      <span>Geometry: <strong className="text-[#1C1B18]">{cf.borderStyle}</strong></span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        Accent: <span className="w-2.5 h-2.5 rounded-full inline-block border border-black/10" style={{ backgroundColor: cf.accentHex }} />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={() => {
@@ -313,86 +382,171 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                           customAccentColor: cf.accentHex,
                           customLinkShape: cf.borderStyle === 'sharp' ? 'sharp' : 'rounded',
                         });
-                        onShowToast(`Applied ${cf.name} design family styling`);
+                        onShowToast(`Applied ${cf.name} styling defaults`);
                       }}
-                      className="px-3.5 py-2 bg-[#1C1B18] text-white rounded-xl text-xs font-bold hover:bg-[#33312B] transition-colors shrink-0"
+                      className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] rounded-xl text-xs font-medium transition-all shadow-xs flex items-center gap-1.5"
                     >
-                      Apply Family Defaults
+                      <Check className="w-3.5 h-3.5 text-[#D49A3E]" />
+                      <span>Apply Family Defaults</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteDesignFamily(cf.id, cf.name)}
+                      className="p-2 border border-[#E8E4D9] hover:border-red-300 text-[#6B665E] hover:text-red-600 rounded-xl text-xs transition-colors"
+                      title="Delete Family"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                );
-              })()
-            )}
+                </div>
+              );
+            })()
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {EDITORIAL_THEMES.filter((t) => {
-                if (selectedFamily === 'all') return true;
-                return t.themeFamily === selectedFamily;
-              }).map((theme) => {
-                const isSelected = selectedThemeId === theme.id && profile.themeId !== 'custom';
-                return (
-                  <div
-                    key={theme.id}
-                    onClick={() => handleSelectTheme(theme.id)}
-                    className={`group cursor-pointer p-5 border rounded-2xl transition-all duration-300 relative ${
-                      isSelected
-                        ? 'ring-2 ring-[#1C1B18] shadow-md border-transparent scale-[1.01]'
-                        : 'border-[#E8E4D9] hover:border-[#1C1B18]'
-                    }`}
-                    style={{
-                      backgroundColor: theme.bgHex,
-                      color: theme.textHex,
-                    }}
-                  >
-                    {isSelected && (
-                      <div className="absolute top-4 right-4 p-1 rounded-full bg-[#1C1B18] text-[#FAF8F5]">
-                        <Check className="w-3.5 h-3.5" />
+          {/* THEMES CARDS GRID */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4.5">
+            {EDITORIAL_THEMES.filter((t) => {
+              if (selectedFamily === 'all') return true;
+              return t.themeFamily === selectedFamily;
+            }).map((theme) => {
+              const isSelected = selectedThemeId === theme.id && profile.themeId !== 'custom';
+              return (
+                <div
+                  key={theme.id}
+                  onClick={() => handleSelectTheme(theme.id)}
+                  className={`group cursor-pointer p-5 border rounded-2xl transition-all duration-300 relative flex flex-col justify-between ${
+                    isSelected
+                      ? 'ring-2 ring-[#1C1B18] shadow-md border-transparent scale-[1.01]'
+                      : 'border-[#E8E4D9] hover:border-[#1C1B18] hover:shadow-xs'
+                  }`}
+                  style={{
+                    backgroundColor: theme.bgHex,
+                    color: theme.textHex,
+                  }}
+                >
+                  {/* Top Bar inside Card */}
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div>
+                        <span
+                          className="text-[9px] uppercase font-mono-code tracking-wider px-2 py-0.5 rounded-full border opacity-75 inline-block mb-1.5"
+                          style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
+                        >
+                          {theme.themeFamily}
+                        </span>
+                        <h3
+                          className={`text-xl font-normal tracking-tight ${
+                            theme.fontFamilyDisplay === 'serif-editorial'
+                              ? 'font-serif-editorial'
+                              : theme.fontFamilyDisplay === 'mono-code'
+                              ? 'font-mono-code'
+                              : 'font-serif-display'
+                          }`}
+                        >
+                          {theme.name}
+                        </h3>
                       </div>
-                    )}
 
-                    <div className="mb-4">
-                      <h3
-                        className={`text-xl font-normal tracking-tight mb-1 ${
-                          theme.fontFamilyDisplay === 'serif-editorial'
-                            ? 'font-serif-editorial'
-                            : theme.fontFamilyDisplay === 'mono-code'
-                            ? 'font-mono-code'
-                            : 'font-serif-display'
-                        }`}
-                      >
-                        {theme.name}
-                      </h3>
-                      <p className="text-xs leading-relaxed opacity-80 max-w-xs">{theme.description}</p>
+                      {isSelected ? (
+                        <span className="px-2.5 py-1 rounded-full bg-[#1C1B18] text-[#FAF8F5] text-[10px] font-mono-code font-bold flex items-center gap-1 shrink-0 shadow-2xs">
+                          <Check className="w-3 h-3 text-[#D49A3E]" /> Active
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectTheme(theme.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity px-2.5 py-1 rounded-lg border text-[10px] font-medium shrink-0 bg-white/80 hover:bg-white text-[#1C1B18]"
+                          style={{ borderColor: theme.borderHex }}
+                        >
+                          Apply
+                        </button>
+                      )}
                     </div>
 
-                    {/* Micro preview card */}
+                    <p className="text-xs leading-relaxed opacity-75 mb-4 line-clamp-2">
+                      {theme.description}
+                    </p>
+
+                    {/* Micro Preview Card */}
                     <div
-                      className="p-3 border rounded-lg text-xs space-y-2 opacity-90"
-                      style={{ backgroundColor: theme.cardBgHex, borderColor: theme.borderHex }}
+                      className="p-3 border rounded-xl text-xs space-y-1.5 opacity-95 transition-transform group-hover:scale-[1.01]"
+                      style={{
+                        backgroundColor: theme.cardBgHex,
+                        borderColor: theme.borderHex,
+                        borderRadius: theme.linkShape === 'sharp' ? '4px' : theme.linkShape === 'pill' ? '9999px' : '10px',
+                      }}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-[11px]">On Digital Quietude</span>
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: theme.accentHex }} />
+                        <span className="font-medium text-[11px] truncate">On Digital Quietude Essay</span>
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: theme.accentHex }}
+                        />
                       </div>
-                      <div className="h-1.5 w-3/4 rounded opacity-20 bg-current" />
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between text-[10px] font-mono-code opacity-60 pt-3 border-t border-current/10">
-                      <span className="capitalize">{theme.linkShape} Links</span>
-                      <span>{theme.fontFamilyDisplay}</span>
+                      <div className="h-1 w-2/3 rounded opacity-25 bg-current" />
                     </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  {/* Bottom Metadata & Color Swatches */}
+                  <div
+                    className="mt-4 pt-3.5 border-t flex items-center justify-between text-[10px] font-mono-code opacity-70"
+                    style={{ borderColor: theme.borderHex }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="capitalize">{theme.linkShape}</span>
+                      <span>&bull;</span>
+                      <span className="truncate max-w-[90px]">{theme.fontFamilyDisplay}</span>
+                    </div>
+
+                    {/* 4 Swatches */}
+                    <div className="flex items-center gap-1">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full border border-black/10"
+                        title="Canvas Background"
+                        style={{ backgroundColor: theme.bgHex }}
+                      />
+                      <span
+                        className="w-2.5 h-2.5 rounded-full border border-black/10"
+                        title="Card Background"
+                        style={{ backgroundColor: theme.cardBgHex }}
+                      />
+                      <span
+                        className="w-2.5 h-2.5 rounded-full border border-black/10"
+                        title="Accent Color"
+                        style={{ backgroundColor: theme.accentHex }}
+                      />
+                      <span
+                        className="w-2.5 h-2.5 rounded-full border border-black/10"
+                        title="Text Color"
+                        style={{ backgroundColor: theme.textHex }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* LINK CARD SHAPES */}
-          <div className="pt-6 border-t border-[#E8E4D9]">
-            <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-3">
-              Link Treatment & Geometry
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* LINK GEOMETRY & CARD TREATMENT SECTION */}
+          <div className="p-6 bg-white border border-[#E8E4D9] rounded-2xl space-y-4 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <label className="block text-xs font-mono-code uppercase font-bold text-[#1C1B18]">
+                  Link Treatment & Card Geometry
+                </label>
+                <p className="text-[11px] text-[#6B665E]">
+                  Control corner radii and structural silhouettes for all link blocks across your space.
+                </p>
+              </div>
+              <span className="text-[10px] font-mono-code text-[#6B665E] uppercase px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded-md shrink-0">
+                Active: {(profile.customLinkShape || linkShape).toUpperCase()}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
               {SHAPE_OPTIONS.map((shape) => {
                 const active = (profile.customLinkShape || linkShape) === shape.id;
                 return (
@@ -400,52 +554,206 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                     type="button"
                     key={shape.id}
                     onClick={() => handleApplyShape(shape.id)}
-                    className={`p-4 border rounded-xl text-left transition-all ${
-                      active ? 'bg-[#1C1B18] text-[#FAF8F5] border-[#1C1B18]' : 'bg-white border-[#E8E4D9] hover:border-[#1C1B18]'
+                    className={`p-4 border rounded-xl text-left transition-all relative flex flex-col justify-between ${
+                      active
+                        ? 'bg-[#1C1B18] text-[#FAF8F5] border-[#1C1B18] shadow-xs'
+                        : 'bg-[#FAF8F5] border-[#E8E4D9] text-[#1C1B18] hover:border-[#1C1B18] hover:bg-white'
                     }`}
                   >
-                    <div className="text-xs font-medium mb-1">{shape.label}</div>
-                    <div className={`text-[10px] ${active ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>{shape.desc}</div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`p-1 rounded ${active ? 'text-[#D49A3E]' : 'text-[#6B665E]'}`}>
+                          {shape.icon}
+                        </span>
+                        {active && <Check className="w-3.5 h-3.5 text-[#D49A3E]" />}
+                      </div>
+                      <div className="text-xs font-medium mb-1">{shape.label}</div>
+                    </div>
+                    <div className={`text-[10px] ${active ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
+                      {shape.desc}
+                    </div>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* RESTRAINED ACCENT COLOR */}
-          <div className="pt-6 border-t border-[#E8E4D9]">
-            <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-3">
-              Restrained Accent Palette
+          {/* RESTRAINED ACCENT PALETTE SECTION */}
+          <div className="p-6 bg-white border border-[#E8E4D9] rounded-2xl space-y-4 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <label className="block text-xs font-mono-code uppercase font-bold text-[#1C1B18]">
+                  Restrained Accent Palette
+                </label>
+                <p className="text-[11px] text-[#6B665E]">
+                  Select an editorial accent hue or configure a custom hex color.
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0"
+                  style={{ backgroundColor: customAccent }}
+                />
+                <span className="text-[10px] font-mono-code text-[#6B665E] uppercase">
+                  {customAccent}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              {ACCENT_PRESETS.map((acc, idx) => {
+                const isActive = customAccent.toLowerCase() === acc.hex.toLowerCase();
+                return (
+                  <button
+                    type="button"
+                    key={idx}
+                    onClick={() => handleApplyAccent(acc.hex)}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium transition-all border ${
+                      isActive
+                        ? 'bg-[#1C1B18] text-[#FAF8F5] border-[#1C1B18] shadow-xs'
+                        : 'bg-[#FAF8F5] text-[#1C1B18] border-[#E8E4D9] hover:border-[#1C1B18] hover:bg-white'
+                    }`}
+                  >
+                    <span
+                      className="w-3 h-3 rounded-full border border-black/10 shrink-0"
+                      style={{ backgroundColor: acc.hex }}
+                    />
+                    <span>{acc.name}</span>
+                    {isActive && <Check className="w-3 h-3 text-[#D49A3E] ml-0.5" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Custom Hex Input Form */}
+            <form onSubmit={handleCustomHexSubmit} className="pt-3 border-t border-[#E8E4D9] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex items-center gap-2 flex-1">
+                <div className="relative flex items-center">
+                  <input
+                    type="color"
+                    value={customHexInput}
+                    onChange={(e) => {
+                      setCustomHexInput(e.target.value);
+                      handleApplyAccent(e.target.value);
+                    }}
+                    className="w-9 h-9 rounded-xl border border-[#E8E4D9] cursor-pointer p-0.5 bg-white shrink-0"
+                    title="Pick custom color"
+                  />
+                </div>
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={customHexInput}
+                    onChange={(e) => setCustomHexInput(e.target.value)}
+                    placeholder="#C85A32"
+                    className="w-full px-3 py-2 border border-[#E8E4D9] rounded-xl text-xs font-mono-code text-[#1C1B18] bg-[#FAF8F5] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#1C1B18]"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] rounded-xl text-xs font-medium transition-all shadow-2xs flex items-center justify-center gap-1.5 shrink-0"
+              >
+                <Pipette className="w-3.5 h-3.5 text-[#D49A3E]" />
+                <span>Apply Custom Hex</span>
+              </button>
+            </form>
+          </div>
+
+          {/* ADVANCED DESIGN STUDIOS JUMP SECTION */}
+          <div className="pt-2">
+            <label className="block text-xs font-mono-code uppercase font-bold text-[#6B665E] mb-3">
+              Deep Customization Studios
             </label>
-            <div className="flex flex-wrap items-center gap-3">
-              {ACCENT_PRESETS.map((acc, idx) => (
-                <button
-                  type="button"
-                  key={idx}
-                  onClick={() => handleApplyAccent(acc.hex)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] rounded-xl text-xs font-medium transition-all"
-                >
-                  <span className="w-3.5 h-3.5 rounded-full border border-black/10" style={{ backgroundColor: acc.hex }} />
-                  <span>{acc.name}</span>
-                </button>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveSubSection('editor')}
+                className="p-4 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] rounded-2xl text-left transition-all group shadow-2xs flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-[#FAF8F5] border border-[#E8E4D9] flex items-center justify-center text-[#D49A3E] group-hover:bg-[#1C1B18] group-hover:text-white transition-colors">
+                    <Sliders className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-[#1C1B18]">Colors & Typography Studio</div>
+                    <div className="text-[10px] text-[#6B665E]">Contrast score, fonts, and custom palettes</div>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-[#6B665E] group-hover:text-[#1C1B18] group-hover:translate-x-0.5 transition-all" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSubSection('background')}
+                className="p-4 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] rounded-2xl text-left transition-all group shadow-2xs flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-[#FAF8F5] border border-[#E8E4D9] flex items-center justify-center text-[#385842] group-hover:bg-[#1C1B18] group-hover:text-white transition-colors">
+                    <Sun className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-[#1C1B18]">Background Studio</div>
+                    <div className="text-[10px] text-[#6B665E]">Paper grain, ambient mesh, and gradients</div>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-[#6B665E] group-hover:text-[#1C1B18] group-hover:translate-x-0.5 transition-all" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSubSection('motion')}
+                className="p-4 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] rounded-2xl text-left transition-all group shadow-2xs flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-[#FAF8F5] border border-[#E8E4D9] flex items-center justify-center text-[#4E78E6] group-hover:bg-[#1C1B18] group-hover:text-white transition-colors">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-[#1C1B18]">Motion & Hover Studio</div>
+                    <div className="text-[10px] text-[#6B665E]">Micro-interactions, float, and hover lifts</div>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-[#6B665E] group-hover:text-[#1C1B18] group-hover:translate-x-0.5 transition-all" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSubSection('elements')}
+                className="p-4 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] rounded-2xl text-left transition-all group shadow-2xs flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-[#FAF8F5] border border-[#E8E4D9] flex items-center justify-center text-[#B85338] group-hover:bg-[#1C1B18] group-hover:text-white transition-colors">
+                    <Move className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-[#1C1B18]">Elements & Positioning Studio</div>
+                    <div className="text-[10px] text-[#6B665E]">Alignment, decorative objects, and spacing</div>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-[#6B665E] group-hover:text-[#1C1B18] group-hover:translate-x-0.5 transition-all" />
+              </button>
             </div>
           </div>
-        </>
+        </div>
       )}
 
+      {/* VIEW: THEME CUSTOMIZATION BUILDER */}
       {activeSubSection === 'editor' && (
         <ThemeEditor profile={profile} onChangeProfile={onChangeProfile} onShowToast={onShowToast} />
       )}
 
+      {/* VIEW: BACKGROUND STUDIO */}
       {activeSubSection === 'background' && (
         <BackgroundStudio profile={profile} onChangeProfile={onChangeProfile} onShowToast={onShowToast} />
       )}
 
+      {/* VIEW: MOTION & HOVER STUDIO */}
       {activeSubSection === 'motion' && (
         <MotionStudio profile={profile} onChangeProfile={onChangeProfile} onShowToast={onShowToast} />
       )}
 
+      {/* VIEW: ELEMENTS & POSITIONING STUDIO */}
       {activeSubSection === 'elements' && (
         <ElementPositionStudio profile={profile} onChangeProfile={onChangeProfile} onShowToast={onShowToast} />
       )}
@@ -603,9 +911,9 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#1C1B18] text-white rounded-xl text-xs font-bold hover:bg-[#33312B] transition-colors shadow-xs flex items-center gap-1.5"
+                  className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] rounded-xl text-xs font-bold hover:bg-[#33312B] transition-colors shadow-xs flex items-center gap-1.5"
                 >
-                  <Check className="w-3.5 h-3.5" />
+                  <Check className="w-3.5 h-3.5 text-[#D49A3E]" />
                   <span>Create Design Family</span>
                 </button>
               </div>

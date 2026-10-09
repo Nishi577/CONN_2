@@ -62,7 +62,7 @@ const ALL_SECTION_DEFINITIONS: { id: ProfileSectionId; label: string; defaultSiz
   { id: 'contact', label: 'Smart Contact Router', defaultSize: 'small' },
 ];
 
-const BUILTIN_THEME_FAMILIES: { id: ThemeFamily; name: string; icon: string; description: string; isCustom?: boolean }[] = [
+const BUILTIN_THEME_FAMILIES: { id: ThemeFamily; name: string; icon: string; description: string; isCustom?: boolean; data?: CustomDesignFamily }[] = [
   {
     id: 'editorial',
     name: 'Editorial',

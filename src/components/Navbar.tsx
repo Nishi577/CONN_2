@@ -42,10 +42,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-6">
           <button
             onClick={() => onNavigate('landing')}
-            className="flex items-center gap-2 group text-left"
+            className="flex items-center gap-2.5 group text-left"
           >
             <span className="font-serif-display text-3xl font-normal tracking-tight text-[#1C1B18] group-hover:opacity-80 transition-opacity">
               Conn.
+            </span>
+            <span className="hidden sm:inline text-[11px] uppercase font-mono-code px-2.5 py-0.5 rounded-full border border-[#E8E4D9] text-[#6B665E]">
+              Editorial Profiles
             </span>
           </button>
 
@@ -53,11 +56,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <nav className="hidden md:flex items-center gap-1 text-xs font-medium">
             <button
               onClick={() => onNavigate('landing')}
-              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-                currentView === 'landing'
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${currentView === 'landing'
                   ? 'bg-[#E8E4D9]/60 text-[#1C1B18]'
                   : 'text-[#6B665E] hover:text-[#1C1B18]'
-              }`}
+                }`}
             >
               <Home className="w-3.5 h-3.5" />
               <span>Home</span>
@@ -66,11 +68,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isLoggedIn && (
               <button
                 onClick={() => onNavigate('dashboard')}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-                  currentView === 'dashboard'
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${currentView === 'dashboard'
                     ? 'bg-[#1C1B18] text-[#FAF8F5]'
                     : 'text-[#6B665E] hover:text-[#1C1B18]'
-                }`}
+                  }`}
               >
                 <Layout className="w-3.5 h-3.5" />
                 <span>Dashboard Workspace</span>
@@ -90,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Profile Switcher & Actions */}
         <div className="flex items-center gap-3">
           {/* Sample Profile Selector Dropdown */}
-          <div className="hidden sm:flex items-center gap-2 border border-[#E8E4D9] bg-white rounded-xl px-2.5 py-1 text-xs">
+          {/* <div className="hidden sm:flex items-center gap-2 border border-[#E8E4D9] bg-white rounded-xl px-2.5 py-1 text-xs">
             <span className="text-[10px] uppercase font-mono-code text-[#6B665E]">Active:</span>
             <select
               value={activeProfile.username}
@@ -106,7 +107,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           {/* Share Button */}
           <button
