@@ -107,6 +107,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
     id: 'custom-1',
     name: 'Atelier Gold Custom',
     description: 'Bespoke custom theme.',
+    themeFamily: 'editorial',
     bgClass: '',
     bgHex: '#FAF8F5',
     textHex: '#1C1B18',
@@ -790,6 +791,27 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
             >
               <span>Paper Grain Texture</span>
               <Sparkles className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Form Bottom Action Row */}
+          <div className="pt-4 border-t border-[#E8E4D9] flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={handleSaveToSavedThemes}
+              className="px-4 py-2.5 bg-[#FAF8F5] hover:bg-[#E8E4D9] border border-[#E8E4D9] text-[#1C1B18] text-xs font-medium rounded-xl flex items-center gap-1.5 transition-all"
+            >
+              <Bookmark className="w-3.5 h-3.5 text-[#C85A32]" />
+              <span>Save Theme</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleApplyCustomTheme}
+              className="px-5 py-2.5 bg-[#1C1B18] hover:bg-[#33312B] text-[#FAF8F5] text-xs font-medium rounded-xl flex items-center gap-2 transition-all shadow-xs"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#D49A3E]" />
+              <span>Apply to Profile</span>
             </button>
           </div>
         </div>

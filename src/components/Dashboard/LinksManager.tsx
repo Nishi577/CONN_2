@@ -464,14 +464,21 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E8E4D9]">
         <div>
-          <h2 className="font-serif-display text-2xl font-normal text-[#1C1B18]">Links & Workspace</h2>
-          <p className="text-xs text-[#6B665E]">Organize, categorize, and drag-and-drop links across categories.</p>
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 bg-[#1C1B18] text-[#FAF8F5] rounded-lg">
+              <LinkIcon className="w-4 h-4 text-[#C85A32]" />
+            </span>
+            <h2 className="font-serif-display text-2xl font-normal text-[#1C1B18]">Links & Content Library</h2>
+          </div>
+          <p className="text-xs text-[#6B665E] mt-1">
+            Curate essays, projects, music, and resources. Drag cards to reorder or move across categories.
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsCategoryModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#FAF8F5] border border-[#E8E4D9] hover:border-[#1C1B18] text-[#1C1B18] text-xs font-medium rounded-xl transition-all shadow-2xs"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] text-[#1C1B18] text-xs font-medium rounded-xl transition-all shadow-2xs"
           >
             <FolderPlus className="w-3.5 h-3.5 text-[#C85A32]" />
             <span>Manage Categories</span>
@@ -481,9 +488,24 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
             onClick={() => openAddModal()}
             className="flex items-center gap-2 px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] text-xs font-medium rounded-xl shadow-xs transition-all hover:scale-102"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-[#D49A3E]" />
             <span>Add New Link</span>
           </button>
+        </div>
+      </div>
+
+      {/* Feature Output Explainer Card */}
+      <div className="p-4 bg-white border border-[#E8E4D9] rounded-2xl flex items-start gap-3 shadow-2xs">
+        <span className="p-2 bg-[#FAF8F5] border border-[#E8E4D9] rounded-xl text-[#C85A32] shrink-0 mt-0.5">
+          <Sparkles className="w-4 h-4" />
+        </span>
+        <div className="space-y-1 text-xs">
+          <span className="font-bold text-[#1C1B18] uppercase tracking-wider text-[10px] font-mono-code block">
+            Public Profile Output & How It Works
+          </span>
+          <p className="text-[#6B665E] leading-relaxed">
+            Links appear as clean, typography-driven cards grouped under their category headers. Star any item as <strong>"Featured"</strong> to pin it prominently at the top of your public page. Every visitor click is counted in your private analytics.
+          </p>
         </div>
       </div>
 

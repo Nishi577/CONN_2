@@ -317,7 +317,7 @@ export const IdentityHubManager: React.FC<IdentityHubManagerProps> = ({
               onClick={() => setSubTab(tab.id as any)}
               className={`px-3.5 py-2 rounded-xl text-xs font-medium shrink-0 flex items-center gap-1.5 transition-all ${
                 subTab === tab.id
-                  ? 'bg-[#1C1B18] text-[#FAF8F5] shadow-2xs'
+                  ? 'bg-[#1C1B18] text-[#FAF8F5] shadow-2xs font-semibold'
                   : 'text-[#6B665E] hover:text-[#1C1B18] hover:bg-[#FAF8F5]'
               }`}
             >
@@ -326,6 +326,21 @@ export const IdentityHubManager: React.FC<IdentityHubManagerProps> = ({
             </button>
           );
         })}
+      </div>
+
+      {/* Feature Output Explainer Card */}
+      <div className="p-4 bg-[#FAF8F5] border border-[#E8E4D9] rounded-2xl flex items-start gap-3 shadow-2xs">
+        <span className="p-2 bg-white border border-[#E8E4D9] rounded-xl text-[#D49A3E] shrink-0 mt-0.5">
+          <Sparkles className="w-4 h-4" />
+        </span>
+        <div className="space-y-1 text-xs">
+          <span className="font-bold text-[#1C1B18] uppercase tracking-wider text-[10px] font-mono-code block">
+            Public Profile Output & Purpose
+          </span>
+          <p className="text-[#6B665E] leading-relaxed">
+            The Living Hub powers real-time dynamic cards on your profile: your <strong>"Now"</strong> section (what you are currently building, reading, and learning), connected developer platforms, and your live availability badge.
+          </p>
+        </div>
       </div>
 
       {/* SUB-TAB 1: DIGITAL IDENTITY IMPORT & AUTOMATIC DISCOVERY */}
