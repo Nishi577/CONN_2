@@ -402,7 +402,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             </div>
             <button
               onClick={onLogout}
-              className="w-full text-center text-xs text-[#6B665E] hover:text-red-600 font-medium transition-colors"
+              className="w-full text-center text-xs text-[#6B665E] hover:text-red-600 font-medium transition-colors cursor-pointer"
             >
               Sign Out
             </button>
@@ -478,13 +478,17 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             </main>
 
             {/* RIGHT PANE: Live Interactive Preview (lg:col-span-5) - STATIC */}
-            <aside className="lg:col-span-5 bg-[#EFECE6] p-4 sm:p-6 flex flex-col items-center justify-start overflow-hidden h-full relative shrink-0">
+            <aside className="lg:col-span-5 bg-[#EFECE6] p-4 sm:p-6 lg:p-7 flex flex-col items-center justify-start overflow-hidden h-full relative shrink-0">
               {/* Preview Header controls */}
-              <div className="w-full max-w-sm flex items-center justify-between mb-3 bg-white/95 backdrop-blur-xs p-2 rounded-2xl border border-[#E8E4D9] shadow-2xs shrink-0">
+              <div
+                className={`w-full flex items-center justify-between mb-3 bg-white/95 backdrop-blur-md p-2 rounded-2xl border border-[#E8E4D9] shadow-2xs shrink-0 transition-all ${
+                  previewDevice === 'mobile' ? 'max-w-[420px]' : 'max-w-xl'
+                }`}
+              >
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setPreviewDevice('mobile')}
-                    className={`p-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    className={`p-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
                       previewDevice === 'mobile' ? 'bg-[#1C1B18] text-[#FAF8F5]' : 'text-[#6B665E] hover:text-[#1C1B18]'
                     }`}
                     title="Mobile View"
@@ -495,7 +499,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
                   <button
                     onClick={() => setPreviewDevice('desktop')}
-                    className={`p-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    className={`p-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
                       previewDevice === 'desktop' ? 'bg-[#1C1B18] text-[#FAF8F5]' : 'text-[#6B665E] hover:text-[#1C1B18]'
                     }`}
                     title="Desktop View"
@@ -507,14 +511,18 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
                 <button
                   onClick={onViewPublicProfile}
-                  className="text-[11px] font-medium text-[#6B665E] hover:text-[#1C1B18] flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[#E8E4D9]/50 transition-colors"
+                  className="text-[11px] font-medium text-[#6B665E] hover:text-[#1C1B18] flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[#E8E4D9]/50 transition-colors cursor-pointer"
                 >
-                  <span>Open Full Page</span> <ExternalLink className="w-3 h-3" />
+                  <span>Open Live</span> <ExternalLink className="w-3 h-3" />
                 </button>
               </div>
 
               {/* Helper badge */}
-              <div className="w-full max-w-sm mb-3 px-3 py-1.5 bg-[#FAF8F5]/80 border border-[#E8E4D9] rounded-xl text-[10px] text-[#6B665E] flex items-center justify-center gap-1.5 text-center shrink-0">
+              <div
+                className={`w-full mb-3 px-3 py-1.5 bg-[#FAF8F5]/80 border border-[#E8E4D9] rounded-xl text-[10px] text-[#6B665E] flex items-center justify-center gap-1.5 text-center shrink-0 transition-all ${
+                  previewDevice === 'mobile' ? 'max-w-[420px]' : 'max-w-xl'
+                }`}
+              >
                 <Sparkles className="w-3 h-3 text-[#D49A3E] shrink-0" />
                 <span>Live Preview &bull; Changes on the left update here in real-time</span>
               </div>
@@ -524,8 +532,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 <div
                   className={`transition-all duration-300 w-full overflow-hidden shadow-2xl border border-[#1C1B18]/10 flex flex-col h-full ${
                     previewDevice === 'mobile'
-                      ? 'max-w-xs sm:max-w-sm rounded-[40px] border-8 border-[#1C1B18] bg-white max-h-[720px]'
-                      : 'max-w-xl rounded-2xl border-2 border-[#E8E4D9] bg-white max-h-[720px]'
+                      ? 'max-w-[420px] rounded-[42px] border-[9px] border-[#1C1B18] bg-white max-h-[780px]'
+                      : 'max-w-xl rounded-2xl border-2 border-[#E8E4D9] bg-white max-h-[780px]'
                   }`}
                 >
                   {/* Phone Notch/Speaker Header if mobile */}
@@ -535,7 +543,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     </div>
                   )}
 
-                  <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar">
+                  <div className="flex-1 h-full overflow-y-auto min-h-0 bg-white custom-scrollbar">
                     <PublicProfile
                       profile={profile}
                       onOpenShare={onOpenShare}
