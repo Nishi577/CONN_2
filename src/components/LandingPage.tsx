@@ -29,35 +29,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#1C1B18] font-sans-ui selection:bg-[#E8E4D9]">
-      {/* Top Header Navbar */}
-      <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between border-b border-[#E8E4D9]/60">
-        <div className="flex items-center gap-3">
-          <span className="font-serif-display text-3xl font-normal tracking-tight text-[#1C1B18]">
-            Conn.
-          </span>
-          <span className="hidden sm:inline text-xs uppercase font-mono-code px-2.5 py-0.5 rounded-full border border-[#E8E4D9] text-[#6B665E]">
-            Editorial Profiles
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={onLogin}
-            className="text-xs font-medium text-[#6B665E] hover:text-[#1C1B18] px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5"
-          >
-            <Lock className="w-3.5 h-3.5 opacity-60" />
-            <span>Log In</span>
-          </button>
-          <button
-            onClick={onSignUp}
-            className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] text-xs font-medium rounded-xl transition-all shadow-2xs hover:scale-102 flex items-center gap-1.5"
-          >
-            <span>Sign Up Free</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </header>
-
       {/* Hero Section: Product as Hero */}
       <section className="max-w-6xl mx-auto px-6 pt-12 sm:pt-20 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
