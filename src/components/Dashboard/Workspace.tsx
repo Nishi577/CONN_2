@@ -144,9 +144,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const completionPercentage = Math.round((completedCount / completionTasks.length) * 100);
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1C1B18] font-sans-ui flex flex-col">
+    <div className="h-full flex-1 flex flex-col min-h-0 bg-[#FAF8F5] text-[#1C1B18] font-sans-ui overflow-hidden">
       {/* Sub-header status bar */}
-      <div className="bg-[#1C1B18] text-[#FAF8F5] px-4 sm:px-8 py-2.5 flex items-center justify-between text-xs font-mono-code">
+      <div className="shrink-0 bg-[#1C1B18] text-[#FAF8F5] px-4 sm:px-8 py-2.5 flex items-center justify-between text-xs font-mono-code z-10 shadow-xs">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Workspace
@@ -183,9 +183,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       </div>
 
       {/* Main 3-Pane Modular Workspace */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0">
-        {/* LEFT PANE: Navigation & Status (lg:col-span-2) */}
-        <aside className="lg:col-span-2 border-r border-[#E8E4D9] bg-[#FAF8F5] p-4 sm:p-5 flex flex-col justify-between space-y-6 overflow-y-auto">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0 h-full overflow-hidden">
+        {/* LEFT PANE: Navigation & Status (lg:col-span-2) - STATIC */}
+        <aside className="lg:col-span-2 border-r border-[#E8E4D9] bg-[#FAF8F5] p-4 sm:p-5 flex flex-col justify-between space-y-6 overflow-y-auto h-full custom-scrollbar shrink-0 select-none">
           <div className="space-y-6">
             {/* GROUP 1: CONTENT & IDENTITY */}
             <div className="space-y-1">
@@ -409,9 +409,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           </div>
         </aside>
 
-        {/* CENTER PANE: Active Editor Canvas or Full Visual Page Builder */}
+        {/* CENTER PANE: Active Editor Canvas or Full Visual Page Builder - SCROLLABLE WITH SMOOTH EFFECT */}
         {activeTab === 'visual_builder' ? (
-          <main className="lg:col-span-10 bg-[#FAF8F5] p-5 sm:p-8 overflow-y-auto">
+          <main className="lg:col-span-10 bg-[#FAF8F5] p-5 sm:p-8 overflow-y-auto h-full scroll-smooth custom-scrollbar pb-24 focus:outline-hidden">
             <VisualLayoutBuilder
               profile={profile}
               onUpdateProfile={onChangeProfile}
@@ -420,7 +420,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           </main>
         ) : (
           <>
-            <main className="lg:col-span-5 border-r border-[#E8E4D9] bg-[#FAF8F5] p-5 sm:p-8 overflow-y-auto">
+            <main
+              id="dashboard-center-scroll-panel"
+              className="lg:col-span-5 border-r border-[#E8E4D9] bg-[#FAF8F5] p-5 sm:p-8 overflow-y-auto h-full scroll-smooth custom-scrollbar pb-28 focus:outline-hidden relative"
+            >
               {activeTab === 'identity_hub' && (
                 <IdentityHubManager
                   profile={profile}
@@ -474,10 +477,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               )}
             </main>
 
-            {/* RIGHT PANE: Live Interactive Preview (lg:col-span-5) */}
-            <aside className="lg:col-span-5 bg-[#EFECE6] p-4 sm:p-6 flex flex-col items-center justify-start overflow-y-auto relative">
+            {/* RIGHT PANE: Live Interactive Preview (lg:col-span-5) - STATIC */}
+            <aside className="lg:col-span-5 bg-[#EFECE6] p-4 sm:p-6 flex flex-col items-center justify-start overflow-hidden h-full relative shrink-0">
               {/* Preview Header controls */}
-              <div className="w-full max-w-sm flex items-center justify-between mb-3 bg-white/90 backdrop-blur-xs p-2 rounded-2xl border border-[#E8E4D9] shadow-2xs">
+              <div className="w-full max-w-sm flex items-center justify-between mb-3 bg-white/95 backdrop-blur-xs p-2 rounded-2xl border border-[#E8E4D9] shadow-2xs shrink-0">
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setPreviewDevice('mobile')}
@@ -511,33 +514,35 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               </div>
 
               {/* Helper badge */}
-              <div className="w-full max-w-sm mb-3 px-3 py-1.5 bg-[#FAF8F5]/80 border border-[#E8E4D9] rounded-xl text-[10px] text-[#6B665E] flex items-center justify-center gap-1.5 text-center">
+              <div className="w-full max-w-sm mb-3 px-3 py-1.5 bg-[#FAF8F5]/80 border border-[#E8E4D9] rounded-xl text-[10px] text-[#6B665E] flex items-center justify-center gap-1.5 text-center shrink-0">
                 <Sparkles className="w-3 h-3 text-[#D49A3E] shrink-0" />
                 <span>Live Preview &bull; Changes on the left update here in real-time</span>
               </div>
 
               {/* Live Phone/Canvas Frame */}
-              <div
-                className={`transition-all duration-300 w-full overflow-hidden shadow-2xl border border-[#1C1B18]/10 ${
-                  previewDevice === 'mobile'
-                    ? 'max-w-sm rounded-[40px] border-8 border-[#1C1B18] bg-white aspect-9/19 max-h-[780px]'
-                    : 'max-w-xl rounded-2xl border-2 border-[#E8E4D9] bg-white min-h-[680px]'
-                }`}
-              >
-                {/* Phone Notch/Speaker Header if mobile */}
-                {previewDevice === 'mobile' && (
-                  <div className="w-full bg-[#1C1B18] h-6 flex justify-center items-center shrink-0">
-                    <div className="w-20 h-3 bg-black rounded-b-xl" />
-                  </div>
-                )}
+              <div className="w-full flex-1 min-h-0 flex items-center justify-center">
+                <div
+                  className={`transition-all duration-300 w-full overflow-hidden shadow-2xl border border-[#1C1B18]/10 flex flex-col h-full ${
+                    previewDevice === 'mobile'
+                      ? 'max-w-xs sm:max-w-sm rounded-[40px] border-8 border-[#1C1B18] bg-white max-h-[720px]'
+                      : 'max-w-xl rounded-2xl border-2 border-[#E8E4D9] bg-white max-h-[720px]'
+                  }`}
+                >
+                  {/* Phone Notch/Speaker Header if mobile */}
+                  {previewDevice === 'mobile' && (
+                    <div className="w-full bg-[#1C1B18] h-6 flex justify-center items-center shrink-0">
+                      <div className="w-20 h-3 bg-black rounded-b-xl" />
+                    </div>
+                  )}
 
-                <div className="h-full overflow-y-auto">
-                  <PublicProfile
-                    profile={profile}
-                    onOpenShare={onOpenShare}
-                    onShowToast={onShowToast}
-                    isEmbeddedPreview={true}
-                  />
+                  <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar">
+                    <PublicProfile
+                      profile={profile}
+                      onOpenShare={onOpenShare}
+                      onShowToast={onShowToast}
+                      isEmbeddedPreview={true}
+                    />
+                  </div>
                 </div>
               </div>
             </aside>

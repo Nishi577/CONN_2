@@ -187,8 +187,8 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
         liveDemoUrl: finalLiveDemo || undefined,
       };
 
-      const updatedLinks = formIsFeatured
-        ? profile.links.map((l) => ({ ...l, isFeatured: false })).concat(newLink)
+      const updatedLinks: LinkItem[] = formIsFeatured
+        ? [...profile.links.map((l) => ({ ...l, isFeatured: false })), newLink]
         : [...profile.links, newLink];
 
       onChangeProfile({ ...profile, links: updatedLinks });
