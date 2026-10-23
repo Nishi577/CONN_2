@@ -405,8 +405,8 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
               type="text"
               required
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full py-2.5 pl-1 text-sm bg-transparent font-mono-code"
+              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+              className="w-full py-2.5 pl-1 text-sm bg-transparent font-mono-code focus:outline-hidden"
             />
           </div>
         </div>
@@ -521,13 +521,19 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
             placeholder="URL or handle..."
             value={newSocialUrl}
             onChange={(e) => setNewSocialUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddSocial();
+              }
+            }}
             className="flex-1 px-3.5 py-2 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18]"
           />
 
           <button
             type="button"
             onClick={handleAddSocial}
-            className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] text-xs font-medium rounded-xl hover:bg-[#33312B] transition-colors shrink-0"
+            className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] text-xs font-medium rounded-xl hover:bg-[#33312B] transition-colors shrink-0 cursor-pointer"
           >
             + Add
           </button>
