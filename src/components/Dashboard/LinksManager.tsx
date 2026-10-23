@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Move,
   Settings,
+  Search,
 } from 'lucide-react';
 
 interface LinksManagerProps {
@@ -43,6 +44,7 @@ const DEFAULT_CATEGORIES: string[] = [
 
 export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangeProfile, onShowToast }) => {
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grouped' | 'flat'>('grouped');
   
   // Modals state
@@ -455,8 +457,15 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
   const displayCategories = Array.from(new Set([...usedCategories, ...customCatNames]));
 
   const filteredLinks = profile.links.filter((l) => {
-    if (selectedCategoryFilter === 'All') return true;
-    return l.category === selectedCategoryFilter;
+    const matchesCategory = selectedCategoryFilter === 'All' || l.category === selectedCategoryFilter;
+    if (!matchesCategory) return false;
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      l.title.toLowerCase().includes(q) ||
+      l.url.toLowerCase().includes(q) ||
+      (l.description && l.description.toLowerCase().includes(q))
+    );
   });
 
   return (
@@ -510,43 +519,66 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
       </div>
 
       {/* Filter and View mode options */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {/* Category filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-1">
-          <button
-            onClick={() => setSelectedCategoryFilter('All')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg shrink-0 transition-colors ${
-              selectedCategoryFilter === 'All'
-                ? 'bg-[#1C1B18] text-[#FAF8F5]'
-                : 'bg-[#E8E4D9]/40 text-[#6B665E] hover:text-[#1C1B18]'
-            }`}
-          >
-            All ({profile.links.length})
-          </button>
-          {allCategories.map((cat) => {
-            const count = profile.links.filter((l) => l.category === cat).length;
-            if (count === 0 && selectedCategoryFilter !== cat) return null;
-            return (
+      {/* Filter, Search and View mode options */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* Search input and Category filters */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+          <div className="relative w-full sm:w-56 shrink-0">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#6B665E]" />
+            <input
+              type="text"
+              placeholder="Search links..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8 pr-7 py-1.5 text-xs bg-white border border-[#E8E4D9] rounded-xl focus:border-[#1C1B18] placeholder:text-[#6B665E]/60 text-[#1C1B18]"
+            />
+            {searchQuery && (
               <button
-                key={cat}
-                onClick={() => setSelectedCategoryFilter(cat)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg shrink-0 transition-colors ${
-                  selectedCategoryFilter === cat
-                    ? 'bg-[#1C1B18] text-[#FAF8F5]'
-                    : 'bg-[#E8E4D9]/40 text-[#6B665E] hover:text-[#1C1B18]'
-                }`}
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6B665E] hover:text-[#1C1B18] p-0.5 cursor-pointer"
+                title="Clear search"
               >
-                {cat} ({count})
+                <X className="w-3 h-3" />
               </button>
-            );
-          })}
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-1">
+            <button
+              onClick={() => setSelectedCategoryFilter('All')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg shrink-0 transition-colors cursor-pointer ${
+                selectedCategoryFilter === 'All'
+                  ? 'bg-[#1C1B18] text-[#FAF8F5]'
+                  : 'bg-[#E8E4D9]/40 text-[#6B665E] hover:text-[#1C1B18]'
+              }`}
+            >
+              All ({profile.links.length})
+            </button>
+            {allCategories.map((cat) => {
+              const count = profile.links.filter((l) => l.category === cat).length;
+              if (count === 0 && selectedCategoryFilter !== cat) return null;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategoryFilter(cat)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg shrink-0 transition-colors cursor-pointer ${
+                    selectedCategoryFilter === cat
+                      ? 'bg-[#1C1B18] text-[#FAF8F5]'
+                      : 'bg-[#E8E4D9]/40 text-[#6B665E] hover:text-[#1C1B18]'
+                  }`}
+                >
+                  {cat} ({count})
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* View toggle button */}
-        <div className="flex items-center bg-[#E8E4D9]/50 p-1 rounded-xl shrink-0 self-start sm:self-auto">
+        <div className="flex items-center bg-[#E8E4D9]/50 p-1 rounded-xl shrink-0 self-start md:self-auto">
           <button
             onClick={() => setViewMode('grouped')}
-            className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 ${
+            className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
               viewMode === 'grouped' ? 'bg-white text-[#1C1B18] shadow-2xs' : 'text-[#6B665E]'
             }`}
           >
@@ -555,7 +587,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
           </button>
           <button
             onClick={() => setViewMode('flat')}
-            className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 ${
+            className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
               viewMode === 'flat' ? 'bg-white text-[#1C1B18] shadow-2xs' : 'text-[#6B665E]'
             }`}
           >
@@ -582,7 +614,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
             + Add Your First Link
           </button>
         </div>
-      ) : viewMode === 'grouped' && selectedCategoryFilter === 'All' ? (
+      ) : viewMode === 'grouped' && selectedCategoryFilter === 'All' && !searchQuery.trim() ? (
         /* GROUPED CATEGORIES VIEW WITH CROSS-CATEGORY DRAG & DROP */
         <div className="space-y-6">
           {displayCategories.map((categoryName) => {
@@ -755,6 +787,46 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
               </div>
             );
           })}
+        </div>
+      ) : filteredLinks.length === 0 ? (
+        <div className="p-10 text-center border-2 border-dashed border-[#E8E4D9] rounded-2xl bg-white my-4 shadow-2xs">
+          <div className="w-12 h-12 rounded-full bg-[#FAF8F5] border border-[#E8E4D9] text-[#6B665E] flex items-center justify-center mx-auto mb-3">
+            {searchQuery ? <Search className="w-5 h-5 text-[#C85A32]" /> : <LinkIcon className="w-5 h-5 text-[#C85A32]" />}
+          </div>
+          <h3 className="font-serif-display text-xl mb-1 text-[#1C1B18]">
+            {searchQuery ? `No links matching "${searchQuery}"` : `No links in "${selectedCategoryFilter}"`}
+          </h3>
+          <p className="text-xs text-[#6B665E] max-w-sm mx-auto mb-5 leading-relaxed">
+            {searchQuery
+              ? 'Try refining your search keyword or clearing the filter.'
+              : 'You don\'t have any links filed under this category yet. Add a new item or switch back to view all links.'}
+          </p>
+          <div className="flex items-center justify-center gap-2.5">
+            {searchQuery ? (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] text-xs font-medium rounded-xl hover:bg-[#33312B] transition-colors cursor-pointer"
+              >
+                Clear Search
+              </button>
+            ) : (
+              <button
+                onClick={() => openAddModal(selectedCategoryFilter !== 'All' ? selectedCategoryFilter : undefined)}
+                className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] text-xs font-medium rounded-xl hover:bg-[#33312B] transition-colors cursor-pointer"
+              >
+                + Add to {selectedCategoryFilter}
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setSelectedCategoryFilter('All');
+                setSearchQuery('');
+              }}
+              className="px-4 py-2 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] text-[#1C1B18] text-xs font-medium rounded-xl transition-colors cursor-pointer"
+            >
+              Show All Links
+            </button>
+          </div>
         </div>
       ) : (
         /* FLAT STREAM VIEW WITH REORDER BUTTONS */
