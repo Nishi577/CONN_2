@@ -756,6 +756,32 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
             );
           })}
         </div>
+      ) : filteredLinks.length === 0 ? (
+        <div className="p-10 text-center border-2 border-dashed border-[#E8E4D9] rounded-2xl bg-white my-4 shadow-2xs">
+          <div className="w-12 h-12 rounded-full bg-[#FAF8F5] border border-[#E8E4D9] text-[#6B665E] flex items-center justify-center mx-auto mb-3">
+            <LinkIcon className="w-5 h-5 text-[#C85A32]" />
+          </div>
+          <h3 className="font-serif-display text-xl mb-1 text-[#1C1B18]">
+            No links in &ldquo;{selectedCategoryFilter}&rdquo;
+          </h3>
+          <p className="text-xs text-[#6B665E] max-w-sm mx-auto mb-5 leading-relaxed">
+            You don&apos;t have any links filed under this category yet. Add a new item or switch back to view all links.
+          </p>
+          <div className="flex items-center justify-center gap-2.5">
+            <button
+              onClick={() => openAddModal(selectedCategoryFilter !== 'All' ? selectedCategoryFilter : undefined)}
+              className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] text-xs font-medium rounded-xl hover:bg-[#33312B] transition-colors cursor-pointer"
+            >
+              + Add to {selectedCategoryFilter}
+            </button>
+            <button
+              onClick={() => setSelectedCategoryFilter('All')}
+              className="px-4 py-2 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] text-[#1C1B18] text-xs font-medium rounded-xl transition-colors cursor-pointer"
+            >
+              Show All Links
+            </button>
+          </div>
+        </div>
       ) : (
         /* FLAT STREAM VIEW WITH REORDER BUTTONS */
         <div className="space-y-3">
