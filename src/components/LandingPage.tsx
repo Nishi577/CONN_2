@@ -63,7 +63,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Hero Copy */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E8E4D9]/40 border border-[#E8E4D9] rounded-full text-[11px] font-mono-code text-[#6B665E]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E8E4D9]/40 border border-[#E8E4D9] rounded-full text-xs font-mono-code text-[#6B665E]">
               <span className="w-2 h-2 rounded-full bg-[#C85A32]" />
               <span>A personal space on the internet.</span>
             </div>
@@ -78,7 +78,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* Profile Sample Selector Pills */}
             <div className="pt-2">
-              <span className="block text-[11px] font-mono-code uppercase tracking-wider text-[#6B665E] mb-2.5">
+              <span className="block text-xs font-mono-code uppercase tracking-wider text-[#6B665E] mb-2.5">
                 Inspect Live Sample Profiles:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -140,7 +140,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section className="border-t border-[#E8E4D9] bg-[#F5F2EC] py-20">
         <div className="max-w-5xl mx-auto px-6 space-y-12">
           <div className="max-w-2xl space-y-3">
-            <span className="text-[11px] font-mono-code uppercase tracking-widest text-[#C85A32] font-semibold">
+            <span className="text-xs font-mono-code uppercase tracking-widest text-[#C85A32] font-semibold">
               OUR PHILOSOPHY
             </span>
             <h2 className="font-serif-display text-4xl sm:text-5xl font-normal text-[#1C1B18]">

@@ -223,7 +223,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ profile }) => {
           <div className="font-serif-display text-3xl font-normal text-[#1C1B18]">
             {displayViews.toLocaleString()}
           </div>
-          <span className="text-[11px] font-mono-code text-emerald-700 flex items-center gap-1 mt-1">
+          <span className="text-xs font-mono-code text-emerald-700 flex items-center gap-1 mt-1">
             <TrendingUp className="w-3 h-3" /> +14.2% in {timeframe}
           </span>
         </div>
@@ -236,7 +236,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ profile }) => {
           <div className="font-serif-display text-3xl font-normal text-[#1C1B18]">
             {displayClicks.toLocaleString()}
           </div>
-          <span className="text-[11px] font-mono-code text-emerald-700 flex items-center gap-1 mt-1">
+          <span className="text-xs font-mono-code text-emerald-700 flex items-center gap-1 mt-1">
             <TrendingUp className="w-3 h-3" /> +19.8% in {timeframe}
           </span>
         </div>
@@ -249,7 +249,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ profile }) => {
           <div className="font-serif-display text-3xl font-normal text-[#1C1B18]">
             {displayCtr}%
           </div>
-          <span className="text-[11px] font-mono-code text-[#6B665E] mt-1 block">
+          <span className="text-xs font-mono-code text-[#6B665E] mt-1 block">
             High editorial retention
           </span>
         </div>
@@ -262,7 +262,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ profile }) => {
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C1B18]">
               Engagement Trend (Views vs Clicks)
             </h3>
-            <p className="text-[11px] text-[#6B665E]">
+            <p className="text-xs text-[#6B665E]">
               Daily interaction volume over the selected {timeframe} timeframe.
             </p>
           </div>
@@ -341,7 +341,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ profile }) => {
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C1B18]">
               Top Performing Links
             </h3>
-            <span className="text-[10px] font-mono-code px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded-md text-[#6B665E]">
+            <span className="text-2xs font-mono-code px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded-md text-[#6B665E]">
               Ranked by clicks
             </span>
           </div>
@@ -390,7 +390,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ profile }) => {
                   <div className="text-xs font-semibold text-[#1C1B18]">{dev.device}</div>
                   <div className="font-serif-display text-xl text-[#1C1B18]">{dev.percentage}%</div>
                   {dev.count !== undefined && (
-                    <div className="text-[10px] font-mono-code text-[#6B665E]">{dev.count} users</div>
+                    <div className="text-2xs font-mono-code text-[#6B665E]">{dev.count} users</div>
                   )}
                 </div>
               );
@@ -398,7 +398,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ profile }) => {
           </div>
 
           <div className="pt-2">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#6B665E] mb-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#6B665E] mb-2">
               Traffic Channels / Referrers
             </h4>
             <div className="space-y-2">
@@ -423,7 +423,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ profile }) => {
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C1B18]">
               Real-time Click Log
             </h3>
-            <p className="text-[11px] text-[#6B665E]">
+            <p className="text-xs text-[#6B665E]">
               Live stream of visitor interactions captured in link_clicks_log.
             </p>
           </div>
@@ -440,13 +440,13 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ profile }) => {
                 <div className="w-2 h-2 rounded-full bg-[#C85A32] shrink-0" />
                 <div className="min-w-0">
                   <div className="font-medium text-[#1C1B18] truncate">{log.linkTitle}</div>
-                  <div className="text-[10px] font-mono-code text-[#6B665E]">
+                  <div className="text-2xs font-mono-code text-[#6B665E]">
                     Link ID: {log.linkId}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5 shrink-0 font-mono-code text-[11px]">
+              <div className="flex items-center gap-2.5 shrink-0 font-mono-code text-xs">
                 <span className="px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded text-[#1C1B18]">
                   {log.referrer}
                 </span>

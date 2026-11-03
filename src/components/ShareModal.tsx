@@ -3,8 +3,6 @@ import { ConnProfile } from '../types';
 
 import { X, Copy, Check, QrCode, Share2, ExternalLink, Download } from 'lucide-react';
 
-import { X, Copy, Check, QrCode, Share2, ExternalLink, Send } from 'lucide-react';
-
 
 interface ShareModalProps {
   profile: ConnProfile;
@@ -34,9 +32,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({ profile, isOpen, onClose
 
   if (!isOpen) return null;
 
+  // Use custom domain if set, otherwise use clean username-based URL
   const profileUrl = profile.customDomain
     ? `https://${profile.customDomain}`
-    : `${window.location.origin}/#${profile.username}`;
+    : typeof window !== 'undefined'
+    ? `${window.location.origin}/${profile.username}`
+    : `https://conn.bio/${profile.username}`;
+
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(profileUrl)}&margin=8`;
 
   const handleCopy = async () => {
@@ -115,15 +117,28 @@ export const ShareModal: React.FC<ShareModalProps> = ({ profile, isOpen, onClose
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-[#1C1B18] text-[#FAF8F5] flex items-center justify-center font-serif-display text-xl">
             C
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h3 className="font-serif-display text-2xl font-normal tracking-tight text-[#1C1B18]">Share Profile</h3>
-            <p className="text-xs text-[#6B665E]">conn.bio/{profile.username}</p>
+            <p className="text-xs text-[#6B665E] truncate">conn.bio/{profile.username}</p>
           </div>
+          <span className={`px-2 py-0.5 rounded-full text-2xs font-mono-code font-bold uppercase tracking-wider ${
+            (profile.isPublic ?? true)
+              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+              : 'bg-amber-100 text-amber-800 border border-amber-300'
+          }`}>
+            {(profile.isPublic ?? true) ? '● Live' : '○ Private'}
+          </span>
         </div>
+
+        {!(profile.isPublic ?? true) && (
+          <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
+            ⚠️ <strong>Draft profile:</strong> This profile is currently unpublished. Visitors won't be able to view it until you publish it in the workspace.
+          </div>
+        )}
 
         {/* Tab switch */}
         <div className="flex bg-[#E8E4D9]/50 p-1 rounded-lg mb-6">

@@ -8,8 +8,12 @@ import {
   ProfileSectionConfig,
   ProfileSectionId,
 } from '../types';
-import { EDITORIAL_THEMES } from '../data/themes';
 import { recordLinkClick, recordProfileView } from '../lib/storage';
+import {
+  resolveActiveTheme,
+  getTypeScaleClass,
+  getFontFamilyClass,
+} from '../lib/themeModeUtils';
 import {
   getBackgroundStyleAndElements,
   getElementTransformStyle,
@@ -32,6 +36,7 @@ import {
   MapPin,
   Check,
   ArrowUpRight,
+  ArrowLeft,
   Send,
   Globe,
   Mail,
@@ -60,14 +65,15 @@ import {
   Lock,
   UserPlus,
   Download,
-  ArrowLeft,
 } from 'lucide-react';
 
 interface PublicProfileProps {
   profile: ConnProfile;
   onOpenShare: () => void;
-  onShowToast: (msg: string) => void;
+  onShowToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
   isEmbeddedPreview?: boolean;
+  onNavigateHome?: () => void;
+  onNavigateDashboard?: () => void;
   onBack?: () => void;
 }
 
@@ -76,10 +82,36 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   onOpenShare,
   onShowToast,
   isEmbeddedPreview = false,
+  onNavigateHome,
+  onNavigateDashboard,
   onBack,
 }) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [copiedPublicLink, setCopiedPublicLink] = useState(false);
+
+  const handleCopyPublicUrl = async () => {
+    const url = typeof window !== 'undefined'
+      ? `${window.location.origin}/${profile.username}`
+      : `https://conn.bio/${profile.username}`;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const el = document.createElement('textarea');
+        el.value = url;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
+      setCopiedPublicLink(true);
+      onShowToast(`Copied profile link: ${url}`);
+      setTimeout(() => setCopiedPublicLink(false), 2000);
+    } catch {
+      onShowToast('Failed to copy profile link');
+    }
+  };
 
   // Audience Context Filter (All, Recruiter, Developer, Client, Academic)
   const [activeContext, setActiveContext] = useState<AudienceContext>('public');
@@ -185,12 +217,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   };
 
   // Find active theme configuration
-  const theme =
-    profile.themeId === 'custom' && profile.customTheme
-      ? profile.customTheme
-      : EDITORIAL_THEMES.find((t) => t.id === profile.themeId) ||
-        profile.customTheme ||
-        EDITORIAL_THEMES[0];
+  const theme = resolveActiveTheme(profile);
 
   const themeFamily: ThemeFamily =
     profile.layoutConfig?.themeFamily || theme.themeFamily || 'editorial';
@@ -318,22 +345,21 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     }
   };
 
+  // Heading font: custom design family wins, then the theme family convention,
+  // then the theme's own display font token.
   const displayFontClass =
-    activeCustomFamily?.fontFamilyDisplay === 'mono-code'
-      ? 'font-mono-code'
-      : activeCustomFamily?.fontFamilyDisplay === 'serif-editorial'
-      ? 'font-serif-editorial'
-      : activeCustomFamily?.fontFamilyDisplay === 'sans-ui'
-      ? 'font-sans-ui'
-      : activeCustomFamily?.fontFamilyDisplay === 'serif-display'
-      ? 'font-serif-display'
-      : themeFamily === 'terminal'
+    getFontFamilyClass(activeCustomFamily?.fontFamilyDisplay) ||
+    (themeFamily === 'terminal'
       ? 'font-mono-code'
       : themeFamily === 'paper' || themeFamily === 'editorial'
-      ? 'font-serif-editorial'
-      : theme.fontFamilyDisplay === 'mono-code'
-      ? 'font-mono-code'
-      : 'font-serif-display';
+        ? 'font-serif-editorial'
+        : getFontFamilyClass(theme.fontFamilyDisplay) || 'font-serif-display');
+
+  // Body font comes from the theme's body token (was previously hardcoded to sans).
+  const bodyFontClass = getFontFamilyClass(theme.fontFamilyBody) || 'font-sans-ui';
+
+  // Base type scale picked in the Theme Studio ('sm' | 'md' | 'lg').
+  const typeScaleClass = getTypeScaleClass(theme.fontSize);
 
   // Sections configuration
   const defaultSectionsList: ProfileSectionConfig[] = (
@@ -400,7 +426,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
         >
           <div
-            className="flex items-center justify-between pb-2 border-b text-[10px]"
+            className="flex items-center justify-between pb-2 border-b text-2xs"
             style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
           >
             <div className="flex items-center gap-1.5">
@@ -488,7 +514,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
         >
           {/* Paper tape accent */}
-          <div className="absolute -top-3 left-8 px-4 py-0.5 bg-amber-100/80 text-amber-900 text-[9px] font-mono-code uppercase font-bold tracking-wider border border-amber-200/60 shadow-xs rotate-1">
+          <div className="absolute -top-3 left-8 px-4 py-0.5 bg-amber-100/80 text-amber-900 text-2xs font-mono-code uppercase font-bold tracking-wider border border-amber-200/60 shadow-xs rotate-1">
             PARCHMENT RECORD
           </div>
 
@@ -579,7 +605,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.textHex, backgroundColor: theme.cardBgHex }}
         >
           <div
-            className="flex items-center justify-between text-[10px] font-mono-code font-bold uppercase border-b-2 pb-2"
+            className="flex items-center justify-between text-2xs font-mono-code font-bold uppercase border-b-2 pb-2"
             style={{ borderColor: theme.textHex }}
           >
             <span>INDEX // 01</span>
@@ -682,7 +708,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 />
                 {profile.statusBadge && (
                   <div
-                    className="absolute -bottom-1 -right-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border shadow-xs flex items-center gap-1.5 whitespace-nowrap"
+                    className="absolute -bottom-1 -right-1 px-2.5 py-0.5 rounded-full text-xs font-medium border shadow-xs flex items-center gap-1.5 whitespace-nowrap"
                     style={{
                       backgroundColor: theme.bgHex,
                       color: theme.textHex,
@@ -755,7 +781,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                   >
                     <span>{profile.role}</span>
                     {profile.organization && <span>@ {profile.organization}</span>}
-                    <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 font-bold">
+                    <span className="text-2xs text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 font-bold">
                       Verified ✓
                     </span>
                   </div>
@@ -815,13 +841,13 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.borderHex }}
         >
           <span
-            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            className="text-xs font-mono-code uppercase font-bold flex items-center gap-1.5"
             style={{ color: accentColor }}
           >
             <Activity className="w-3.5 h-3.5" /> {cfg.customTitle || 'NOW Live Activity'}
           </span>
           <span
-            className="text-[10px] font-mono-code"
+            className="text-2xs font-mono-code"
             style={{ color: theme.mutedHex }}
           >
             {themeFamily === 'terminal' ? '$ cat now.status' : 'Real-Time'}
@@ -832,7 +858,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           {profile.nowSection.building && (
             <div>
               <span
-                className="font-mono-code text-[10px] uppercase block"
+                className="font-mono-code text-2xs uppercase block"
                 style={{ color: theme.mutedHex }}
               >
                 Building
@@ -843,7 +869,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           {profile.nowSection.learning && (
             <div>
               <span
-                className="font-mono-code text-[10px] uppercase block"
+                className="font-mono-code text-2xs uppercase block"
                 style={{ color: theme.mutedHex }}
               >
                 Learning
@@ -854,7 +880,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           {profile.nowSection.workingOn && (
             <div>
               <span
-                className="font-mono-code text-[10px] uppercase block"
+                className="font-mono-code text-2xs uppercase block"
                 style={{ color: theme.mutedHex }}
               >
                 Working On
@@ -865,7 +891,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           {profile.nowSection.reading && (
             <div>
               <span
-                className="font-mono-code text-[10px] uppercase block"
+                className="font-mono-code text-2xs uppercase block"
                 style={{ color: theme.mutedHex }}
               >
                 Reading
@@ -884,31 +910,17 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       profile.motionConfig?.microInteractions?.linkHoverEffect || 'lift'
     );
 
-    return (
-      <section key={cfg.instanceKey || cfg.id} className="space-y-6">
-        <div
-          className="flex items-center justify-between border-b pb-2"
-          style={{ borderColor: theme.borderHex }}
-        >
-          <span
-            className="text-[11px] font-mono-code uppercase font-bold tracking-widest flex items-center gap-1.5"
-            style={{ color: theme.mutedHex }}
-          >
-            <Folder className="w-3.5 h-3.5" style={{ color: accentColor }} />{' '}
-            {cfg.customTitle || 'Projects & Works'}
-          </span>
-          <span
-            className="text-[10px] font-mono-code"
-            style={{ color: theme.mutedHex }}
-          >
-            {regularLinks.length} Items
-          </span>
-        </div>
+    const relevantLinks = cfg.subCategoryFilter
+      ? regularLinks.filter((l) => l.category === cfg.subCategoryFilter)
+      : regularLinks;
 
-        {themeFamily === 'studio' ? (
-          /* STUDIO VISUAL GRID */
+    const relevantCategories = Array.from(new Set(relevantLinks.map((l) => l.category)));
+
+    const renderLinksList = (links: LinkItem[]) => {
+      if (themeFamily === 'studio') {
+        return (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {regularLinks.map((link) => (
+            {links.map((link) => (
               <a
                 key={link.id}
                 href={link.url}
@@ -943,14 +955,17 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               </a>
             ))}
           </div>
-        ) : themeFamily === 'terminal' ? (
-          /* TERMINAL DIRECTORY LIST */
+        );
+      }
+
+      if (themeFamily === 'terminal') {
+        return (
           <div
             className="p-4 border font-mono-code text-xs rounded-xl space-y-2"
             style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
           >
             <div className="text-emerald-400 font-bold">$ ls -la projects/</div>
-            {regularLinks.map((link) => (
+            {links.map((link) => (
               <a
                 key={link.id}
                 href={link.url}
@@ -965,79 +980,148 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                     {link.title.toLowerCase().replace(/\s+/g, '-')}
                   </span>
                 </div>
-                <span className="text-[10px]" style={{ color: accentColor }}>
+                <span className="text-2xs" style={{ color: accentColor }}>
                   [EXECUTE →]
                 </span>
               </a>
             ))}
           </div>
-        ) : (
-          /* STANDARD / EDITORIAL / PAPER LIST */
-          <div className="space-y-3">
-            {regularLinks.map((link) => (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noreferrer"
-                onClick={(e) => handleLinkClick(link, e)}
-                className={`group flex items-center justify-between p-4 border transition-all duration-200 ${getShapeStyle()} ${linkHover}`}
-                style={{
-                  backgroundColor: theme.cardBgHex,
-                  borderColor: theme.borderHex,
-                }}
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  {link.thumbnailUrl ? (
-                    <img
-                      src={link.thumbnailUrl}
-                      alt=""
-                      className="w-10 h-10 rounded-lg object-cover shrink-0 border"
-                      style={{ borderColor: theme.borderHex }}
-                    />
-                  ) : (
-                    <div
-                      className="w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 text-sm"
-                      style={{ borderColor: theme.borderHex, color: accentColor }}
-                    >
-                      {renderIcon(link.iconName)}
-                    </div>
-                  )}
+        );
+      }
 
-                  <div className="min-w-0 pr-2">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm sm:text-base font-medium tracking-tight truncate group-hover:underline">
-                        {link.title}
-                      </h4>
-                      {link.badge && (
-                        <span
-                          className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0"
-                          style={{ backgroundColor: accentColor, color: '#FFFFFF' }}
-                        >
-                          {link.badge}
-                        </span>
-                      )}
-                    </div>
-                    {link.description && (
-                      <p
-                        className="text-xs truncate font-light mt-0.5"
-                        style={{ color: theme.mutedHex }}
+      return (
+        <div className="space-y-3">
+          {links.map((link) => (
+            <a
+              key={link.id}
+              href={link.url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => handleLinkClick(link, e)}
+              className={`group flex items-center justify-between p-4 border transition-all duration-200 ${getShapeStyle()} ${linkHover}`}
+              style={{
+                backgroundColor: theme.cardBgHex,
+                borderColor: theme.borderHex,
+              }}
+            >
+              <div className="flex items-center gap-3.5 min-w-0">
+                {link.thumbnailUrl ? (
+                  <img
+                    src={link.thumbnailUrl}
+                    alt=""
+                    className="w-10 h-10 rounded-lg object-cover shrink-0 border"
+                    style={{ borderColor: theme.borderHex }}
+                  />
+                ) : (
+                  <div
+                    className="w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 text-sm"
+                    style={{ borderColor: theme.borderHex, color: accentColor }}
+                  >
+                    {renderIcon(link.iconName)}
+                  </div>
+                )}
+
+                <div className="min-w-0 pr-2">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm sm:text-base font-medium tracking-tight truncate group-hover:underline">
+                      {link.title}
+                    </h4>
+                    {link.badge && (
+                      <span
+                        className="text-2xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0"
+                        style={{ backgroundColor: accentColor, color: '#FFFFFF' }}
                       >
-                        {link.description}
-                      </p>
+                        {link.badge}
+                      </span>
                     )}
                   </div>
+                  {link.description && (
+                    <p
+                      className="text-xs truncate font-light mt-0.5"
+                      style={{ color: theme.mutedHex }}
+                    >
+                      {link.description}
+                    </p>
+                  )}
                 </div>
+              </div>
 
-                <div
-                  className="p-1.5 rounded-full border shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
-                  style={{ borderColor: theme.borderHex }}
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
+              <div
+                className="p-1.5 rounded-full border shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
+                style={{ borderColor: theme.borderHex }}
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </div>
+            </a>
+          ))}
+        </div>
+      );
+    };
+
+    return (
+      <section key={cfg.instanceKey || cfg.id} className="space-y-6">
+        <div
+          className="flex items-center justify-between border-b pb-2"
+          style={{ borderColor: theme.borderHex }}
+        >
+          <span
+            className="text-xs font-mono-code uppercase font-bold tracking-widest flex items-center gap-1.5"
+            style={{ color: theme.mutedHex }}
+          >
+            <Folder className="w-3.5 h-3.5" style={{ color: accentColor }} />{' '}
+            {cfg.customTitle || 'Projects & Works'}
+          </span>
+          <span
+            className="text-2xs font-mono-code"
+            style={{ color: theme.mutedHex }}
+          >
+            {relevantLinks.length} Items
+          </span>
+        </div>
+
+        {relevantCategories.length > 1 ? (
+          <div className="space-y-6">
+            {relevantCategories.map((catName) => {
+              const catLinks = relevantLinks.filter((l) => l.category === catName);
+              if (catLinks.length === 0) return null;
+              const isCollapsed = !!collapsedCats[catName];
+
+              return (
+                <div key={catName} className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleCategoryCollapse(catName)}
+                    className="w-full flex items-center justify-between py-1.5 border-b text-left group cursor-pointer transition-colors"
+                    style={{ borderColor: `${theme.borderHex}80` }}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isCollapsed ? (
+                        <ChevronRight className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-transform" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-transform" />
+                      )}
+                      <span
+                        className="text-xs font-mono-code font-bold uppercase tracking-wider"
+                        style={{ color: theme.textHex }}
+                      >
+                        {catName}
+                      </span>
+                    </div>
+                    <span
+                      className="text-2xs font-mono-code opacity-60"
+                      style={{ color: theme.mutedHex }}
+                    >
+                      {catLinks.length} {catLinks.length === 1 ? 'item' : 'items'}
+                    </span>
+                  </button>
+
+                  {!isCollapsed && renderLinksList(catLinks)}
                 </div>
-              </a>
-            ))}
+              );
+            })}
           </div>
+        ) : (
+          renderLinksList(relevantLinks)
         )}
       </section>
     );
@@ -1050,14 +1134,14 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       <section key={cfg.instanceKey || cfg.id} className="space-y-2">
         <div className="flex items-center justify-between">
           <span
-            className="text-[11px] uppercase tracking-widest font-mono-code font-semibold"
+            className="text-xs uppercase tracking-widest font-mono-code font-semibold"
             style={{ color: accentColor }}
           >
             {cfg.customTitle || 'FEATURED HIGHLIGHT'}
           </span>
           {featuredLink.badge && (
             <span
-              className="text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full uppercase"
+              className="text-2xs font-bold tracking-wide px-2 py-0.5 rounded-full uppercase"
               style={{ backgroundColor: accentColor, color: '#FFFFFF' }}
             >
               {featuredLink.badge}
@@ -1124,7 +1208,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.borderHex }}
         >
           <span
-            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            className="text-xs font-mono-code uppercase font-bold flex items-center gap-1.5"
             style={{ color: theme.mutedHex }}
           >
             <Cpu className="w-3.5 h-3.5" /> {cfg.customTitle || 'Skills & Technical Stack'}
@@ -1162,7 +1246,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.borderHex }}
         >
           <span
-            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            className="text-xs font-mono-code uppercase font-bold flex items-center gap-1.5"
             style={{ color: theme.mutedHex }}
           >
             <Briefcase className="w-3.5 h-3.5" /> {cfg.customTitle || 'Work Experience'}
@@ -1179,7 +1263,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm">{exp.title}</span>
                 <span
-                  className="text-[10px] font-mono-code px-2 py-0.5 rounded border"
+                  className="text-2xs font-mono-code px-2 py-0.5 rounded border"
                   style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
                 >
                   {exp.period}
@@ -1212,13 +1296,13 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.borderHex }}
         >
           <span
-            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            className="text-xs font-mono-code uppercase font-bold flex items-center gap-1.5"
             style={{ color: theme.mutedHex }}
           >
             <Clock className="w-3.5 h-3.5" /> {cfg.customTitle || 'Work & Timeline'}
           </span>
           <span
-            className="text-[10px] font-mono-code"
+            className="text-2xs font-mono-code"
             style={{ color: theme.mutedHex }}
           >
             {profile.timeline.length} milestones
@@ -1251,24 +1335,24 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                   <div className="flex flex-wrap items-center justify-between gap-1">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span
-                        className="px-1.5 py-0.2 text-[10px] font-mono-code font-bold rounded"
+                        className="px-1.5 py-0.2 text-2xs font-mono-code font-bold rounded"
                         style={{ backgroundColor: theme.textHex, color: theme.bgHex }}
                       >
                         {tl.year}
                       </span>
                       <span
-                        className="text-[9px] font-mono-code uppercase px-1.5 py-0.2 rounded border"
+                        className="text-2xs font-mono-code uppercase px-1.5 py-0.2 rounded border"
                         style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
                       >
                         {tl.category}
                       </span>
                       {tl.current && (
-                        <span className="text-[9px] font-mono-code font-bold px-1 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <span className="text-2xs font-mono-code font-bold px-1 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
                           Current
                         </span>
                       )}
                       {tl.verified && (
-                        <span className="text-[9px] font-mono-code font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
+                        <span className="text-2xs font-mono-code font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                           ✓
                         </span>
                       )}
@@ -1279,7 +1363,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                         href={tl.linkUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[10px] font-mono-code flex items-center gap-0.5 hover:underline"
+                        className="text-2xs font-mono-code flex items-center gap-0.5 hover:underline"
                         style={{ color: accentColor }}
                       >
                         <span>Link</span>
@@ -1311,7 +1395,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                       {tl.skillsOrTags.map((tag, tIdx) => (
                         <span
                           key={tIdx}
-                          className="px-1.5 py-0.2 rounded text-[9px] font-mono-code border"
+                          className="px-1.5 py-0.2 rounded text-2xs font-mono-code border"
                           style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
                         >
                           {tag}
@@ -1334,24 +1418,24 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span
-                      className="px-1.5 py-0.2 text-[10px] font-mono-code font-bold rounded"
+                      className="px-1.5 py-0.2 text-2xs font-mono-code font-bold rounded"
                       style={{ backgroundColor: theme.textHex, color: theme.bgHex }}
                     >
                       {tl.year}
                     </span>
                     <span
-                      className="text-[9px] font-mono-code uppercase px-1.5 py-0.2 rounded border"
+                      className="text-2xs font-mono-code uppercase px-1.5 py-0.2 rounded border"
                       style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
                     >
                       {tl.category}
                     </span>
                     {tl.current && (
-                      <span className="text-[9px] font-mono-code font-bold px-1 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      <span className="text-2xs font-mono-code font-bold px-1 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
                         Current
                       </span>
                     )}
                     {tl.verified && (
-                      <span className="text-[9px] font-mono-code font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
+                      <span className="text-2xs font-mono-code font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                         ✓ Verified
                       </span>
                     )}
@@ -1362,7 +1446,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                       href={tl.linkUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[10px] font-mono-code flex items-center gap-0.5 hover:underline"
+                      className="text-2xs font-mono-code flex items-center gap-0.5 hover:underline"
                       style={{ color: accentColor }}
                     >
                       <span>Visit</span>
@@ -1394,7 +1478,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                     {tl.skillsOrTags.map((tag, tIdx) => (
                       <span
                         key={tIdx}
-                        className="px-1.5 py-0.2 rounded text-[9px] font-mono-code border"
+                        className="px-1.5 py-0.2 rounded text-2xs font-mono-code border"
                         style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
                       >
                         {tag}
@@ -1424,13 +1508,13 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.borderHex }}
         >
           <span
-            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            className="text-xs font-mono-code uppercase font-bold flex items-center gap-1.5"
             style={{ color: accentColor }}
           >
             <GitBranch className="w-3.5 h-3.5" />{' '}
             {cfg.customTitle || 'Open Source GitHub Activity'}
           </span>
-          <span className="text-[10px] font-mono-code font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+          <span className="text-2xs font-mono-code font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
             Verified ✓
           </span>
         </div>
@@ -1441,7 +1525,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               {profile.openSourceStats.reposCount}
             </div>
             <div
-              className="text-[9px] uppercase font-mono-code"
+              className="text-2xs uppercase font-mono-code"
               style={{ color: theme.mutedHex }}
             >
               Repos
@@ -1455,7 +1539,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               {profile.openSourceStats.mergedPRsCount}
             </div>
             <div
-              className="text-[9px] uppercase font-mono-code"
+              className="text-2xs uppercase font-mono-code"
               style={{ color: theme.mutedHex }}
             >
               PRs Merged
@@ -1466,7 +1550,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               {profile.openSourceStats.totalStarsCount}
             </div>
             <div
-              className="text-[9px] uppercase font-mono-code"
+              className="text-2xs uppercase font-mono-code"
               style={{ color: theme.mutedHex }}
             >
               Stars
@@ -1488,8 +1572,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       socialsOverride?.alignment === 'center'
         ? 'justify-center'
         : socialsOverride?.alignment === 'right'
-        ? 'justify-end'
-        : 'justify-start';
+          ? 'justify-end'
+          : 'justify-start';
 
     return (
       <section
@@ -1533,7 +1617,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <div>
               <div className="font-bold">Available for Collaboration</div>
-              <div className="text-[11px]" style={{ color: theme.mutedHex }}>
+              <div className="text-xs" style={{ color: theme.mutedHex }}>
                 {profile.availability.preferredRole} •{' '}
                 {profile.availability.locationPreference}
               </div>
@@ -1784,7 +1868,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             }}
           />
           {passcodeError && (
-            <p className="text-[11px] text-red-500">
+            <p className="text-xs text-red-500">
               Incorrect passcode. Please try again.
             </p>
           )}
@@ -1811,9 +1895,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
   return (
     <div
-      className={`min-h-full w-full transition-colors duration-300 relative ${
-        theme.showNoiseGrain ? 'paper-grain' : ''
-      }`}
+      className={`min-h-full w-full transition-colors duration-300 relative ${typeScaleClass} ${theme.showNoiseGrain ? 'paper-grain' : ''
+        }`}
       style={{
         background:
           theme.useGradientBg && theme.gradientBgHex
@@ -1832,33 +1915,75 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       {/* Top Floating Header */}
       {!isEmbeddedPreview && (
         <header
-          className="sticky top-0 z-40 w-full px-4 sm:px-8 py-3.5 flex items-center justify-between backdrop-blur-md bg-opacity-80 border-b transition-colors"
+          className="sticky top-0 z-40 w-full px-4 sm:px-8 py-3 flex items-center justify-between backdrop-blur-md bg-opacity-80 border-b transition-colors"
           style={{ borderColor: theme.borderHex }}
         >
-          <div className="flex items-center gap-2.5">
-            {onBack && (
+          <div className="flex items-center gap-2 sm:gap-3">
+            {(onNavigateDashboard || onBack) && (
               <button
-                onClick={onBack}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all hover:scale-105 mr-1"
-                style={{ borderColor: theme.borderHex, color: theme.textHex, backgroundColor: theme.cardBgHex }}
-                title="Return to Workspace / Home"
+                type="button"
+                onClick={onNavigateDashboard || onBack}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border shadow-2xs transition-all hover:scale-105 cursor-pointer shrink-0"
+                style={{
+                  borderColor: theme.borderHex,
+                  backgroundColor: theme.textHex,
+                  color: theme.bgHex,
+                }}
+                title="Return to Creator Dashboard"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Back</span>
+                <span>Back to Dashboard</span>
               </button>
             )}
-            <span className={`text-xl font-normal tracking-tight ${displayFontClass}`}>
-              Conn.
-            </span>
-            <span
-              className="text-[10px] uppercase font-mono-code px-2 py-0.5 rounded-full border opacity-70"
-              style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
-            >
-              @{profile.username}
-            </span>
+
+            <div className="flex items-center gap-2">
+              {onNavigateHome ? (
+                <button
+                  type="button"
+                  onClick={onNavigateHome}
+                  className={`text-xl font-normal tracking-tight hover:opacity-75 transition-opacity cursor-pointer ${displayFontClass}`}
+                  title="Go to Conn Home"
+                >
+                  Conn.
+                </button>
+              ) : (
+                <span className={`text-xl font-normal tracking-tight ${displayFontClass}`}>Conn.</span>
+              )}
+              <span
+                className="text-2xs uppercase font-mono-code px-2 py-0.5 rounded-full border opacity-70"
+                style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
+              >
+                @{profile.username}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* One-click Copy Custom Link button for sharing */}
+            <button
+              type="button"
+              onClick={handleCopyPublicUrl}
+              className="flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-full border transition-all hover:scale-105 cursor-pointer shadow-2xs"
+              style={{
+                borderColor: theme.borderHex,
+                backgroundColor: theme.cardBgHex,
+                color: theme.textHex,
+              }}
+              title="Copy your custom Linktree profile link for sharing"
+            >
+              {copiedPublicLink ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-emerald-600 font-bold">Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Link</span>
+                </>
+              )}
+            </button>
+
             <button
               onClick={handleDownloadVCard}
               className="p-2 rounded-full border transition-transform hover:scale-105"
@@ -1870,7 +1995,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
             <button
               onClick={() => setIsQrModalOpen(true)}
-              className="p-2 rounded-full border transition-transform hover:scale-105"
+              className="p-2 rounded-full border transition-transform hover:scale-105 cursor-pointer"
               style={{ borderColor: theme.borderHex, color: theme.textHex }}
               title="Identity QR Code"
             >
@@ -1879,7 +2004,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
             <button
               onClick={onOpenShare}
-              className="flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-full transition-all hover:scale-105"
+              className="flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-full transition-all hover:scale-105 cursor-pointer"
               style={{
                 backgroundColor: theme.textHex,
                 color: theme.bgHex,
@@ -1893,14 +2018,14 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       )}
 
       {/* Main Profile Canvas */}
-      <main className="max-w-xl mx-auto px-5 sm:px-6 py-8 sm:py-12 font-sans-ui space-y-8">
+      <main className={`max-w-xl mx-auto px-5 sm:px-6 py-8 sm:py-12 space-y-8 ${bodyFontClass}`}>
         {/* AUDIENCE CONTEXT BAR */}
         <div
-          className="p-1.5 rounded-xl border flex items-center gap-1 overflow-x-auto text-[11px]"
+          className="p-1.5 rounded-xl border flex items-center gap-1 overflow-x-auto text-xs"
           style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
         >
           <span
-            className="text-[10px] font-mono-code uppercase px-2 py-1 shrink-0 font-bold"
+            className="text-2xs font-mono-code uppercase px-2 py-1 shrink-0 font-bold"
             style={{ color: theme.mutedHex }}
           >
             👁 Context:
@@ -1935,7 +2060,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
         {/* Footnote */}
         <footer
-          className="mt-16 pt-8 border-t text-center font-mono-code text-[11px]"
+          className="mt-16 pt-8 border-t text-center font-mono-code text-xs"
           style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
         >
           <p>
@@ -1956,19 +2081,10 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             className="w-full max-w-md p-6 bg-white border border-[#E8E4D9] rounded-2xl shadow-xl text-[#1C1B18] space-y-4"
           >
             <div className="flex items-center justify-between pb-3 border-b border-[#E8E4D9]">
-
-              <h3 className="font-serif-display text-lg font-bold">
-                Contact & Intent Router
-              </h3>
-              <button
-                onClick={() => setIsInquiryModalOpen(false)}
-                className="p-1 text-gray-500 hover:text-black"
-
               <h3 className="font-serif-display text-lg font-bold">Contact & Intent Router</h3>
               <button
                 onClick={() => setIsInquiryModalOpen(false)}
                 className="p-1 text-gray-500 hover:text-black rounded-lg transition-colors cursor-pointer"
-
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1985,7 +2101,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             ) : (
               <form onSubmit={handleSendInquiry} className="space-y-3">
                 <div>
-                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">
+                  <label className="text-xs font-mono-code uppercase block mb-1 text-[#6B665E]">
                     Select Inquiry Intent
                   </label>
                   <div className="grid grid-cols-2 gap-1.5">
@@ -2012,7 +2128,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">
+                  <label className="text-xs font-mono-code uppercase block mb-1 text-[#6B665E]">
                     Your Name
                   </label>
                   <input
@@ -2026,7 +2142,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">
+                  <label className="text-xs font-mono-code uppercase block mb-1 text-[#6B665E]">
                     Your Email
                   </label>
                   <input
@@ -2040,7 +2156,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">
+                  <label className="text-xs font-mono-code uppercase block mb-1 text-[#6B665E]">
                     Message
                   </label>
                   <textarea
@@ -2076,18 +2192,11 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             className="w-full max-w-sm p-6 bg-white border border-[#E8E4D9] rounded-2xl text-center space-y-4 text-[#1C1B18]"
           >
             <div className="flex items-center justify-between pb-2 border-b">
-
-              <h3 className="font-serif-display text-base font-bold">
-                Personal QR Identity
-              </h3>
-              <button onClick={() => setIsQrModalOpen(false)} className="p-1">
-
               <h3 className="font-serif-display text-base font-bold">Personal QR Identity</h3>
               <button
                 onClick={() => setIsQrModalOpen(false)}
                 className="p-1 text-gray-500 hover:text-black rounded-lg transition-colors cursor-pointer"
               >
-
                 <X className="w-4 h-4" />
               </button>
             </div>

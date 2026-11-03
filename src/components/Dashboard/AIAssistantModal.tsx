@@ -120,7 +120,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
         {activeTab === 'bio' ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono-code text-[#6B665E] uppercase tracking-wider">
+              <span className="text-xs font-mono-code text-[#6B665E] uppercase tracking-wider">
                 Current: &quot;{profile.bio.slice(0, 60)}...&quot;
               </span>
               <button
@@ -154,7 +154,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                     key={idx}
                     className="p-3.5 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] rounded-xl transition-all flex flex-col justify-between gap-3 group"
                   >
-                    <p className="text-xs text-[#1C1B18] leading-relaxed font-serif-editorial text-[13px]">
+                    <p className="text-xs text-[#1C1B18] leading-relaxed font-serif-editorial text-xs">
                       &quot;{bio}&quot;
                     </p>
                     <div className="flex items-center justify-end">
@@ -178,7 +178,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono-code text-[#6B665E] uppercase tracking-wider">
+              <span className="text-xs font-mono-code text-[#6B665E] uppercase tracking-wider">
                 Pick a live status badge
               </span>
               <button

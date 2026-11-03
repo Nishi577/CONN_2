@@ -352,7 +352,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
               <label className="text-xs font-mono-code uppercase font-bold text-[#1C1B18] block">
                 Profile Elements
               </label>
-              <span className="text-[10px] font-mono-code text-[#6B665E]">
+              <span className="text-2xs font-mono-code text-[#6B665E]">
                 {totalOverriddenCount} customized
               </span>
             </div>
@@ -407,12 +407,12 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                         <div className="text-xs font-bold text-[#1C1B18] flex items-center gap-1.5">
                           <span>{item.label}</span>
                           {hasAppliedOverride && (
-                            <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono-code bg-[#C85A32]/10 text-[#C85A32] border border-[#C85A32]/20 font-bold">
+                            <span className="px-1.5 py-0.2 rounded-full text-2xs font-mono-code bg-[#C85A32]/10 text-[#C85A32] border border-[#C85A32]/20 font-bold">
                               OVERRIDDEN
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] text-[#6B665E] font-light leading-tight mt-0.5">
+                        <p className="text-2xs text-[#6B665E] font-light leading-tight mt-0.5">
                           {item.desc}
                         </p>
                       </div>
@@ -432,11 +432,11 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8E4D9]">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono-code uppercase font-bold text-[#C85A32] px-2 py-0.5 bg-[#C85A32]/10 rounded border border-[#C85A32]/20">
+                    <span className="text-2xs font-mono-code uppercase font-bold text-[#C85A32] px-2 py-0.5 bg-[#C85A32]/10 rounded border border-[#C85A32]/20">
                       {isApplied ? 'Override Active' : 'Default Position'}
                     </span>
                     {hasUnappliedChanges && (
-                      <span className="text-[10px] font-mono-code text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      <span className="text-2xs font-mono-code text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                         ● Staged edits pending
                       </span>
                     )}
@@ -481,7 +481,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                     Coordinate Canvas & Live Sandbox
                   </span>
                   <div className="flex items-center gap-2">
-                    <label className="flex items-center gap-1.5 cursor-pointer select-none text-[11px] text-[#6B665E]">
+                    <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-[#6B665E]">
                       <input
                         type="checkbox"
                         checked={liveSync}
@@ -526,7 +526,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                   </div>
 
                   {/* Telemetry Badges HUD */}
-                  <div className="absolute bottom-2 left-2 right-2 flex flex-wrap items-center justify-between gap-1 text-[10px] font-mono-code text-[#6B665E] pointer-events-none">
+                  <div className="absolute bottom-2 left-2 right-2 flex flex-wrap items-center justify-between gap-1 text-2xs font-mono-code text-[#6B665E] pointer-events-none">
                     <div className="flex gap-1.5 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded border border-[#E8E4D9] shadow-2xs">
                       <span>X: <strong className="text-[#C85A32]">{activeDraft.offsetX || 0}px</strong></span>
                       <span>Y: <strong className="text-[#C85A32]">{activeDraft.offsetY || 0}px</strong></span>
@@ -544,7 +544,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
                   {/* D-Pad Buttons */}
                   <div className="flex items-center gap-1 font-mono-code text-xs">
-                    <span className="text-[10px] text-[#6B665E] mr-1">Nudge:</span>
+                    <span className="text-2xs text-[#6B665E] mr-1">Nudge:</span>
                     <button
                       type="button"
                       onClick={() => handleNudge(-1, 0)}
@@ -564,7 +564,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                     <button
                       type="button"
                       onClick={handleResetCenter}
-                      className="px-2.5 py-1 bg-white border border-[#E8E4D9] hover:border-[#C85A32] text-[#6B665E] hover:text-[#C85A32] rounded-lg shadow-2xs text-[10px]"
+                      className="px-2.5 py-1 bg-white border border-[#E8E4D9] hover:border-[#C85A32] text-[#6B665E] hover:text-[#C85A32] rounded-lg shadow-2xs text-2xs"
                       title="Reset Offset to (0,0)"
                     >
                       (0,0)
@@ -589,7 +589,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
 
                   {/* Quick Presets */}
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[10px] font-mono-code text-[#6B665E]">Presets:</span>
+                    <span className="text-2xs font-mono-code text-[#6B665E]">Presets:</span>
                     {[
                       { label: 'Normal', offsetX: 0, offsetY: 0, scale: 100, rotation: 0, alignment: 'center', zIndex: 1 },
                       { label: 'Left Accent', offsetX: -24, offsetY: 0, scale: 100, rotation: -2, alignment: 'left', zIndex: 1 },
@@ -601,7 +601,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                         key={idx}
                         type="button"
                         onClick={() => applyPreset(p as any)}
-                        className="px-2 py-0.5 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] text-[10px] font-mono-code text-[#1C1B18] rounded-md transition-colors"
+                        className="px-2 py-0.5 bg-white border border-[#E8E4D9] hover:border-[#1C1B18] text-2xs font-mono-code text-[#1C1B18] rounded-md transition-colors"
                       >
                         {p.label}
                       </button>
@@ -640,7 +640,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                     onChange={(e) => updateDraft({ offsetX: Number(e.target.value) })}
                     className="w-full accent-[#C85A32]"
                   />
-                  <div className="flex justify-between text-[10px] font-mono-code text-[#6B665E]">
+                  <div className="flex justify-between text-2xs font-mono-code text-[#6B665E]">
                     <span>-150px (Left)</span>
                     <span>0</span>
                     <span>+150px (Right)</span>
@@ -675,7 +675,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                     onChange={(e) => updateDraft({ offsetY: Number(e.target.value) })}
                     className="w-full accent-[#C85A32]"
                   />
-                  <div className="flex justify-between text-[10px] font-mono-code text-[#6B665E]">
+                  <div className="flex justify-between text-2xs font-mono-code text-[#6B665E]">
                     <span>-150px (Up)</span>
                     <span>0</span>
                     <span>+150px (Down)</span>
@@ -710,7 +710,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                     onChange={(e) => updateDraft({ scale: Number(e.target.value) })}
                     className="w-full accent-[#C85A32]"
                   />
-                  <div className="flex justify-between text-[10px] font-mono-code text-[#6B665E]">
+                  <div className="flex justify-between text-2xs font-mono-code text-[#6B665E]">
                     <span>50% (Compact)</span>
                     <span>100% (Standard)</span>
                     <span>180% (Hero)</span>
@@ -745,7 +745,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                     onChange={(e) => updateDraft({ rotation: Number(e.target.value) })}
                     className="w-full accent-[#C85A32]"
                   />
-                  <div className="flex justify-between text-[10px] font-mono-code text-[#6B665E]">
+                  <div className="flex justify-between text-2xs font-mono-code text-[#6B665E]">
                     <span>-35° (Counter)</span>
                     <span>0°</span>
                     <span>+35° (Clockwise)</span>
@@ -884,7 +884,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                   {/* Content input for badges/labels */}
                   {(d.type === 'badge' || d.type === 'text_label') && (
                     <div>
-                      <label className="text-[10px] font-mono-code text-[#6B665E] block mb-1">Label Text</label>
+                      <label className="text-2xs font-mono-code text-[#6B665E] block mb-1">Label Text</label>
                       <input
                         type="text"
                         value={d.content || ''}
@@ -898,7 +898,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                   {/* Coordinates sliders */}
                   <div className="grid grid-cols-2 gap-3 text-xs font-mono-code">
                     <div>
-                      <div className="flex justify-between text-[10px] text-[#6B665E]">
+                      <div className="flex justify-between text-2xs text-[#6B665E]">
                         <span>X Pos</span>
                         <span>{d.xPercent}%</span>
                       </div>
@@ -913,7 +913,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                     </div>
 
                     <div>
-                      <div className="flex justify-between text-[10px] text-[#6B665E]">
+                      <div className="flex justify-between text-2xs text-[#6B665E]">
                         <span>Y Pos</span>
                         <span>{d.yPercent}%</span>
                       </div>
@@ -931,7 +931,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                   {/* Scale & Opacity */}
                   <div className="grid grid-cols-2 gap-3 text-xs font-mono-code">
                     <div>
-                      <div className="flex justify-between text-[10px] text-[#6B665E]">
+                      <div className="flex justify-between text-2xs text-[#6B665E]">
                         <span>Scale</span>
                         <span>{Math.round((d.scale || 1) * 100)}%</span>
                       </div>
@@ -947,7 +947,7 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                     </div>
 
                     <div>
-                      <div className="flex justify-between text-[10px] text-[#6B665E]">
+                      <div className="flex justify-between text-2xs text-[#6B665E]">
                         <span>Opacity</span>
                         <span>{Math.round((d.opacity ?? 0.7) * 100)}%</span>
                       </div>
@@ -972,13 +972,13 @@ export const ElementPositionStudio: React.FC<ElementPositionStudioProps> = ({
                         onChange={(e) => updateDecorObject(d.id, { colorHex: e.target.value })}
                         className="w-6 h-6 rounded border border-[#E8E4D9] cursor-pointer"
                       />
-                      <span className="text-[10px] font-mono-code text-[#6B665E]">{d.colorHex}</span>
+                      <span className="text-2xs font-mono-code text-[#6B665E]">{d.colorHex}</span>
                     </div>
 
                     <select
                       value={d.animation || 'float'}
                       onChange={(e) => updateDecorObject(d.id, { animation: e.target.value as any })}
-                      className="p-1 text-[10px] border border-[#E8E4D9] rounded bg-white font-mono-code"
+                      className="p-1 text-2xs border border-[#E8E4D9] rounded bg-white font-mono-code"
                     >
                       <option value="none">Static</option>
                       <option value="float">Subtle Float</option>

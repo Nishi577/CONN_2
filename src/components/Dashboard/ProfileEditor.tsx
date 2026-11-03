@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ConnProfile, SocialProfile } from '../../types';
+import { checkUsernameAvailability } from '../../lib/supabase';
 import { AIAssistantModal } from './AIAssistantModal';
 import {
   User,
@@ -16,12 +17,22 @@ import {
   Linkedin,
   Globe,
   Radio,
+  Upload,
+  Camera,
+  AlertCircle,
+  Copy,
+  ExternalLink,
+  CheckCircle2,
+  RefreshCw,
+  Share2,
+  Eye,
+  Lock,
 } from 'lucide-react';
 
 interface ProfileEditorProps {
   profile: ConnProfile;
   onChangeProfile: (updated: ConnProfile) => void;
-  onShowToast: (msg: string) => void;
+  onShowToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
 const AVATAR_PRESETS = [
@@ -43,6 +54,18 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
   const [newsletterEnabled, setNewsletterEnabled] = useState(profile.newsletterEnabled || false);
   const [newsletterHeadline, setNewsletterHeadline] = useState(profile.newsletterHeadline || '');
   const [newsletterSubtext, setNewsletterSubtext] = useState(profile.newsletterSubtext || '');
+  const [isPublic, setIsPublic] = useState(profile.isPublic ?? true);
+
+  // Custom URL & Username Availability State
+  const [copiedUrl, setCopiedUrl] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<{
+    isChecking: boolean;
+    isAvailable: boolean | null;
+    reason?: string;
+  }>({
+    isChecking: false,
+    isAvailable: true,
+  });
 
   // Social profiles state
   const [socials, setSocials] = useState<SocialProfile[]>(profile.socials || []);
@@ -62,8 +85,93 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
     setNewsletterEnabled(profile.newsletterEnabled || false);
     setNewsletterHeadline(profile.newsletterHeadline || '');
     setNewsletterSubtext(profile.newsletterSubtext || '');
+    setIsPublic(profile.isPublic ?? true);
     setSocials(profile.socials || []);
-  }, [profile.id, profile.username]);
+  }, [profile.id, profile.isPublic, profile.username]);
+
+  // Check username availability with 350ms debounce
+  useEffect(() => {
+    const clean = username.trim().toLowerCase();
+
+    // If unchanged from current profile's username, it's valid and belongs to user
+    if (clean === profile.username.toLowerCase()) {
+      setUsernameStatus({ isChecking: false, isAvailable: true });
+      return;
+    }
+
+    if (!clean || clean.length < 3) {
+      setUsernameStatus({
+        isChecking: false,
+        isAvailable: false,
+        reason: 'Username must be at least 3 characters.',
+      });
+      return;
+    }
+
+    if (!/^[a-z0-9_-]+$/.test(clean)) {
+      setUsernameStatus({
+        isChecking: false,
+        isAvailable: false,
+        reason: 'Only lowercase letters, numbers, hyphens, and underscores are allowed.',
+      });
+      return;
+    }
+
+    setUsernameStatus({ isChecking: true, isAvailable: null });
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await checkUsernameAvailability(clean, profile.id);
+        setUsernameStatus({
+          isChecking: false,
+          isAvailable: res.available,
+          reason: res.reason,
+        });
+      } catch {
+        setUsernameStatus({ isChecking: false, isAvailable: true });
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [username, profile.username, profile.id]);
+
+  const publicUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/${username.trim() || profile.username}`
+    : `https://conn.bio/${username.trim() || profile.username}`;
+
+  const handleCopyUrl = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(publicUrl);
+      } else {
+        const el = document.createElement('textarea');
+        el.value = publicUrl;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
+      setCopiedUrl(true);
+      onShowToast(`Public profile URL copied: ${publicUrl}`);
+      setTimeout(() => setCopiedUrl(false), 2000);
+    } catch {
+      onShowToast('Failed to copy URL to clipboard', 'error');
+    }
+  };
+
+  const handleTogglePublish = (publishState: boolean) => {
+    setIsPublic(publishState);
+    const updated = {
+      ...profile,
+      isPublic: publishState,
+    };
+    onChangeProfile(updated);
+    onShowToast(
+      publishState
+        ? `Profile published! It is now live at ${publicUrl}`
+        : 'Profile unpublished. It is now private and hidden from public visitors.'
+    );
+  };
 
   const handleAddSocial = () => {
     if (!newSocialUrl.trim()) return;
@@ -89,30 +197,148 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
       return;
     }
 
+    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+
+    if (cleanUsername !== profile.username && usernameStatus.isAvailable === false) {
+      onShowToast(usernameStatus.reason || 'Username is already taken or unavailable.', 'error');
+      return;
+    }
+
     const updatedProfile: ConnProfile = {
       ...profile,
       name: name.trim(),
-      username: username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, ''),
+      username: cleanUsername,
       bio: bio.trim(),
       avatarUrl: avatarUrl.trim(),
       location: location.trim() || undefined,
       pronouns: pronouns.trim() || undefined,
       statusBadge: statusBadge.trim() || undefined,
       socials,
+      isPublic,
       newsletterEnabled,
       newsletterHeadline: newsletterHeadline.trim() || undefined,
       newsletterSubtext: newsletterSubtext.trim() || undefined,
     };
 
     onChangeProfile(updatedProfile);
-    onShowToast('Profile information saved!');
+    onShowToast('Profile information saved and synchronized!');
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 font-sans-ui text-[#1C1B18]">
-      <div className="pb-4 border-b border-[#E8E4D9]">
-        <h2 className="font-serif-display text-2xl font-normal text-[#1C1B18]">Profile & Identity</h2>
-        <p className="text-xs text-[#6B665E]">Customize how your personal space presents itself to the world.</p>
+      {/* Header & Explainer */}
+      <div className="pb-4 border-b border-[#E8E4D9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 bg-[#1C1B18] text-[#FAF8F5] rounded-lg">
+              <User className="w-4 h-4 text-[#D49A3E]" />
+            </span>
+            <h2 className="font-serif-display text-2xl font-normal text-[#1C1B18]">Profile Identity &amp; Header</h2>
+          </div>
+          <p className="text-xs text-[#6B665E] mt-1">
+            Configure your avatar, bio summary, handle, location, and social media handles.
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          className="px-5 py-2.5 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] text-xs font-medium rounded-xl transition-all shadow-xs shrink-0 flex items-center gap-1.5"
+        >
+          <Check className="w-3.5 h-3.5 text-[#D49A3E]" />
+          <span>Save Profile</span>
+        </button>
+      </div>
+
+      {/* PUBLISH PROFILE & LIVE STATUS CARD */}
+      <div
+        className={`p-5 rounded-2xl border transition-all ${
+          isPublic
+            ? 'bg-emerald-50/40 border-emerald-200/80 shadow-xs'
+            : 'bg-amber-50/40 border-amber-200/80 shadow-xs'
+        }`}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold uppercase tracking-wider ${
+                  isPublic
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                    : 'bg-amber-100 text-amber-800 border border-amber-300'
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isPublic ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                  }`}
+                />
+                {isPublic ? 'Public Profile Live' : 'Unpublished (Draft / Private)'}
+              </span>
+            </div>
+
+            <p className="text-xs text-[#6B665E]">
+              {isPublic
+                ? 'Your Conn profile is live on the internet. Anyone with your link can view it without logging in.'
+                : 'Your profile is currently private. Visitors navigating to your URL will see an unpublished notice.'}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-xs font-mono-code text-[#1C1B18] font-semibold bg-white/80 px-2.5 py-1 rounded-lg border border-[#E8E4D9]">
+                {publicUrl}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyUrl}
+                className="p-1.5 bg-white hover:bg-[#FAF8F5] border border-[#E8E4D9] hover:border-[#1C1B18] rounded-lg text-[#1C1B18] transition-colors cursor-pointer flex items-center gap-1 text-xs"
+                title="Copy full public URL"
+              >
+                {copiedUrl ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="text-emerald-700 text-xs">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span className="text-xs">Copy Link</span>
+                  </>
+                )}
+              </button>
+              <a
+                href={publicUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="p-1.5 bg-white hover:bg-[#FAF8F5] border border-[#E8E4D9] hover:border-[#1C1B18] rounded-lg text-[#1C1B18] transition-colors flex items-center gap-1 text-xs"
+                title="Open public profile in new tab"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span className="text-xs">Open Link</span>
+              </a>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {isPublic ? (
+              <button
+                type="button"
+                onClick={() => handleTogglePublish(false)}
+                className="px-4 py-2 border border-amber-300 bg-white hover:bg-amber-50 text-amber-900 text-xs font-medium rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Unpublish Profile</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleTogglePublish(true)}
+                className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-medium rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span>Publish Profile Live</span>
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Avatar Section */}
@@ -136,7 +362,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
               className="w-full px-3.5 py-2 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18]"
             />
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-[#6B665E]">Or select preset:</span>
+              <span className="text-xs text-[#6B665E]">Or select preset:</span>
               <div className="flex items-center gap-1.5">
                 {AVATAR_PRESETS.map((preset, idx) => (
                   <button
@@ -172,18 +398,86 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1.5">
-            Username Handle *
-          </label>
-          <div className="flex items-center bg-white border border-[#E8E4D9] rounded-xl px-3 focus-within:border-[#1C1B18]">
-            <span className="text-xs text-[#6B665E] font-mono-code">conn.bio/</span>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider">
+              USERNAME HANDLE *
+            </label>
+            {usernameStatus.isChecking ? (
+              <span className="text-2xs text-[#6B665E] flex items-center gap-1 font-mono-code">
+                <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Checking...
+              </span>
+            ) : usernameStatus.isAvailable ? (
+              <span className="text-2xs text-emerald-700 flex items-center gap-1 font-mono-code font-bold">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Available
+              </span>
+            ) : (
+              <span className="text-2xs text-rose-700 flex items-center gap-1 font-mono-code font-bold">
+                <AlertCircle className="w-3 h-3 text-rose-600" /> Unavailable
+              </span>
+            )}
+          </div>
+          <div className="flex items-center bg-white border border-[#E8E4D9] rounded-xl px-3 py-1 focus-within:border-[#1C1B18] transition-colors gap-2">
+            <span className="text-xs text-[#6B665E] font-mono-code shrink-0 select-none">conn.bio/</span>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-              className="w-full py-2.5 pl-1 text-sm bg-transparent font-mono-code focus:outline-hidden"
+              placeholder="username-slug"
+              className="w-full py-1.5 pl-0.5 text-sm bg-transparent font-mono-code focus:outline-hidden"
             />
+            <button
+              type="button"
+              onClick={handleCopyUrl}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
+                copiedUrl
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] shadow-2xs'
+              }`}
+              title="Copy your custom profile link for sharing"
+            >
+              {copiedUrl ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-white" />
+                  <span className="font-bold">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Link</span>
+                </>
+              )}
+            </button>
+          </div>
+          {usernameStatus.reason && !usernameStatus.isAvailable && (
+            <p className="text-xs text-rose-600 mt-1.5 font-mono-code flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              <span>{usernameStatus.reason}</span>
+            </p>
+          )}
+          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono-code">
+            <span className="text-[#6B665E] truncate">
+              Shareable link: <strong className="text-[#1C1B18]">{publicUrl}</strong>
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCopyUrl}
+                className="text-[#C85A32] hover:underline font-bold cursor-pointer"
+              >
+                {copiedUrl ? '✓ Link Copied' : 'Copy Custom Link'}
+              </button>
+              <span className="text-[#E8E4D9]">|</span>
+              <a
+                href={publicUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[#6B665E] hover:text-[#1C1B18] flex items-center gap-0.5"
+              >
+                <span>Preview</span>
+                <ExternalLink className="w-2.5 h-2.5" />
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -198,12 +492,12 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
             <button
               type="button"
               onClick={() => setIsAIOpen(true)}
-              className="text-[11px] font-medium text-[#C85A32] hover:underline flex items-center gap-1 font-mono-code"
+              className="text-xs font-medium text-[#C85A32] hover:underline flex items-center gap-1 font-mono-code"
             >
               <Sparkles className="w-3 h-3 text-[#D49A3E]" />
               <span>AI Enhance</span>
             </button>
-            <span className="text-[11px] font-mono-code text-[#6B665E]">
+            <span className="text-xs font-mono-code text-[#6B665E]">
               {bio.length} / 220 chars
             </span>
           </div>
@@ -254,7 +548,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
             <button
               type="button"
               onClick={() => setIsAIOpen(true)}
-              className="text-[10px] font-mono-code text-[#D49A3E] hover:underline flex items-center gap-0.5"
+              className="text-2xs font-mono-code text-[#D49A3E] hover:underline flex items-center gap-0.5"
             >
               <Sparkles className="w-2.5 h-2.5" />
               <span>AI Ideas</span>
@@ -343,7 +637,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
             <span className="text-xs font-bold uppercase tracking-wider text-[#1C1B18]">
               Newsletter Capture Widget
             </span>
-            <p className="text-[11px] text-[#6B665E]">
+            <p className="text-xs text-[#6B665E]">
               Allow readers to subscribe to your field notes directly on your profile.
             </p>
           </div>
@@ -358,7 +652,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
         {newsletterEnabled && (
           <div className="space-y-3 pt-3 border-t border-[#E8E4D9]">
             <div>
-              <label className="block text-[11px] text-[#6B665E] uppercase mb-1">Headline</label>
+              <label className="block text-xs text-[#6B665E] uppercase mb-1">Headline</label>
               <input
                 type="text"
                 placeholder="Receive my field notes directly."
@@ -368,7 +662,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
               />
             </div>
             <div>
-              <label className="block text-[11px] text-[#6B665E] uppercase mb-1">Subtext</label>
+              <label className="block text-xs text-[#6B665E] uppercase mb-1">Subtext</label>
               <input
                 type="text"
                 placeholder="A periodic letter on visual culture and code."

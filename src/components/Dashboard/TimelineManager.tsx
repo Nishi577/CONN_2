@@ -408,14 +408,14 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
               )}
             </button>
 
-            <span className="text-[11px] text-[#6B665E] hidden sm:inline">
+            <span className="text-xs text-[#6B665E] hidden sm:inline">
               {timeline.length} {timeline.length === 1 ? 'milestone' : 'milestones'} recorded
             </span>
           </div>
 
           {/* Treatment & Layout Switcher */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-mono-code text-[#6B665E]">Layout:</span>
+            <span className="text-xs font-mono-code text-[#6B665E]">Layout:</span>
             {[
               { id: 'roadmap', label: 'Roadmap Line' },
               { id: 'cards', label: 'Modular Cards' },
@@ -425,7 +425,7 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
                 key={st.id}
                 type="button"
                 onClick={() => handleChangeTimelineStyle(st.id as any)}
-                className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono-code transition-all ${
+                className={`px-2.5 py-1 rounded-lg border text-xs font-mono-code transition-all ${
                   activeStyle === st.id
                     ? 'bg-[#1C1B18] text-white border-[#1C1B18] font-bold shadow-2xs'
                     : 'bg-[#FAF8F5] text-[#6B665E] border-[#E8E4D9] hover:border-[#1C1B18]'
@@ -589,13 +589,13 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       {/* Year badge */}
-                      <span className="px-2 py-0.5 bg-[#1C1B18] text-[#FAF8F5] text-[10px] font-mono-code font-bold rounded-md">
+                      <span className="px-2 py-0.5 bg-[#1C1B18] text-[#FAF8F5] text-2xs font-mono-code font-bold rounded-md">
                         {item.year}
                       </span>
 
                       {/* Category tag */}
                       <span
-                        className={`px-2 py-0.5 text-[10px] font-mono-code font-bold rounded-md border flex items-center gap-1 ${catConfig.bg} ${catConfig.color} ${catConfig.border}`}
+                        className={`px-2 py-0.5 text-2xs font-mono-code font-bold rounded-md border flex items-center gap-1 ${catConfig.bg} ${catConfig.color} ${catConfig.border}`}
                       >
                         <CategoryIcon className="w-3 h-3" />
                         <span>{catConfig.label}</span>
@@ -603,14 +603,14 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
 
                       {/* Current role pill */}
                       {item.current && (
-                        <span className="px-1.5 py-0.2 text-[9px] font-mono-code font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 rounded">
+                        <span className="px-1.5 py-0.2 text-2xs font-mono-code font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 rounded">
                           CURRENT
                         </span>
                       )}
 
                       {/* Verified badge */}
                       {item.verified && (
-                        <span className="text-[10px] font-mono-code text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 font-bold flex items-center gap-1">
+                        <span className="text-2xs font-mono-code text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 font-bold flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" />
                           <span>Verified</span>
                         </span>
@@ -642,7 +642,7 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
                         {item.skillsOrTags.map((tag, tIdx) => (
                           <span
                             key={tIdx}
-                            className="px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded-md text-[10px] font-mono-code text-[#1C1B18]"
+                            className="px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded-md text-2xs font-mono-code text-[#1C1B18]"
                           >
                             {tag}
                           </span>
@@ -657,7 +657,7 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
                           href={item.linkUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-mono-code text-[#C85A32] hover:underline"
+                          className="inline-flex items-center gap-1 text-xs font-mono-code text-[#C85A32] hover:underline"
                         >
                           <LinkIcon className="w-3 h-3" />
                           <span>{item.linkUrl.replace(/^https?:\/\//, '')}</span>
@@ -818,7 +818,7 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
                   <label className="text-xs font-mono-code font-bold text-[#1C1B18]">
                     Time Period / Year
                   </label>
-                  <div className="flex items-center gap-1 text-[10px] font-mono-code text-[#6B665E]">
+                  <div className="flex items-center gap-1 text-2xs font-mono-code text-[#6B665E]">
                     <span>Suggestions:</span>
                     {['Present', '2026', '2025', '2024', '2022 — 2024'].map((sug) => (
                       <button
