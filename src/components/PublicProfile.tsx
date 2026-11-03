@@ -93,6 +93,19 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     recordProfileView();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsInquiryModalOpen(false);
+        setIsQrModalOpen(false);
+      }
+    };
+    if (isInquiryModalOpen || isQrModalOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isInquiryModalOpen, isQrModalOpen]);
+
   // Category collapse states
   const [collapsedCats, setCollapsedCats] = useState<Record<string, boolean>>(() => {
     const initialMap: Record<string, boolean> = {};
@@ -1323,11 +1336,20 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
       {/* SMART CONTACT ROUTER MODAL */}
       {isInquiryModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-md p-6 bg-white border border-[#E8E4D9] rounded-2xl shadow-xl text-[#1C1B18] space-y-4">
+        <div
+          onClick={() => setIsInquiryModalOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md p-6 bg-white border border-[#E8E4D9] rounded-2xl shadow-xl text-[#1C1B18] space-y-4"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-[#E8E4D9]">
               <h3 className="font-serif-display text-lg font-bold">Contact & Intent Router</h3>
-              <button onClick={() => setIsInquiryModalOpen(false)} className="p-1 text-gray-500 hover:text-black">
+              <button
+                onClick={() => setIsInquiryModalOpen(false)}
+                className="p-1 text-gray-500 hover:text-black rounded-lg transition-colors cursor-pointer"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1413,11 +1435,20 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
       {/* QR CODE MODAL */}
       {isQrModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-sm p-6 bg-white border border-[#E8E4D9] rounded-2xl text-center space-y-4 text-[#1C1B18]">
+        <div
+          onClick={() => setIsQrModalOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm p-6 bg-white border border-[#E8E4D9] rounded-2xl text-center space-y-4 text-[#1C1B18]"
+          >
             <div className="flex items-center justify-between pb-2 border-b">
               <h3 className="font-serif-display text-base font-bold">Personal QR Identity</h3>
-              <button onClick={() => setIsQrModalOpen(false)} className="p-1">
+              <button
+                onClick={() => setIsQrModalOpen(false)}
+                className="p-1 text-gray-500 hover:text-black rounded-lg transition-colors cursor-pointer"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserAccount } from '../types';
 import { MOCK_USER } from '../data/mockData';
-import { X, Mail, Lock, User, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
+import { X, Mail, Lock, User, ArrowRight, CheckCircle2, Sparkles, Eye, EyeOff } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -21,14 +21,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>(initialMode);
   const [email, setEmail] = useState('elena@rosto.va');
   const [password, setPassword] = useState('password123');
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('Elena Rostova');
   const [username, setUsername] = useState('elenarostova');
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setMode(initialMode);
+      setShowPassword(false);
     }
   }, [isOpen, initialMode]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -61,14 +76,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs font-sans-ui animate-in fade-in">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs font-sans-ui animate-in fade-in"
+    >
       <div
         className="w-full max-w-md bg-[#FAF8F5] text-[#1C1B18] rounded-2xl border border-[#E8E4D9] shadow-2xl p-6 sm:p-8 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-[#6B665E] hover:text-[#1C1B18] rounded-full transition-colors"
+          className="absolute top-5 right-5 p-2 text-[#6B665E] hover:text-[#1C1B18] rounded-full transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -142,14 +160,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <label className="block text-[11px] font-medium text-[#6B665E] uppercase mb-1">
                   Desired Username
                 </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="elenarostova"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18]"
-                />
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono-code text-[#6B665E]">
+                    @
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    placeholder="elenarostova"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    className="w-full pl-7 pr-3.5 py-2.5 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18]"
+                  />
+                </div>
               </div>
             </>
           )}
@@ -178,20 +201,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setMode('forgot')}
-                    className="text-[11px] text-[#6B665E] hover:underline"
+                    className="text-[11px] text-[#6B665E] hover:underline cursor-pointer"
                   >
                     Forgot?
                   </button>
                 )}
               </div>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18]"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-3.5 pr-10 py-2.5 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B665E] hover:text-[#1C1B18] transition-colors p-0.5 cursor-pointer"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
           )}
 

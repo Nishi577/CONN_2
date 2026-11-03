@@ -1,27 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ConnProfile } from '../types';
-import { X, Copy, Check, QrCode, Share2, ExternalLink } from 'lucide-react';
+import { X, Copy, Check, QrCode, Share2, ExternalLink, Send } from 'lucide-react';
 
 interface ShareModalProps {
   profile: ConnProfile;
   isOpen: boolean;
   onClose: () => void;
-  onShowToast: (msg: string) => void;
+  onShowToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
 export const ShareModal: React.FC<ShareModalProps> = ({ profile, isOpen, onClose, onShowToast }) => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'link' | 'qr'>('link');
 
+  const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const profileUrl = `${window.location.origin}/#${profile.username}`;
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(profileUrl);
-    setCopied(true);
-    onShowToast('Profile URL copied to clipboard!');
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(profileUrl);
+      } else {
+        const el = document.createElement('textarea');
+        el.value = profileUrl;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
+      setCopied(true);
+      onShowToast('Profile URL copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      onShowToast('Failed to copy to clipboard', 'error');
+    }
+  };
+
+  const handleNativeShare = async () => {
+    if (canNativeShare) {
+      try {
+        await navigator.share({
+          title: `${profile.name} on Conn`,
+          text: `Check out ${profile.name}'s editorial profile:`,
+          url: profileUrl,
+        });
+        onShowToast('Shared successfully!');
+      } catch (err: unknown) {
+        if ((err as { name?: string })?.name !== 'AbortError') {
+          handleCopy();
+        }
+      }
+    }
   };
 
   const handleShareTwitter = () => {
@@ -30,14 +75,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({ profile, isOpen, onClose
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200"
+    >
       <div
         className="w-full max-w-md bg-[#FAF8F5] text-[#1C1B18] rounded-2xl border border-[#E8E4D9] shadow-2xl p-6 sm:p-7 relative font-sans-ui"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-[#6B665E] hover:text-[#1C1B18] hover:bg-[#E8E4D9]/50 rounded-full transition-colors"
+          className="absolute top-5 right-5 p-2 text-[#6B665E] hover:text-[#1C1B18] hover:bg-[#E8E4D9]/50 rounded-full transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -112,10 +160,18 @@ export const ShareModal: React.FC<ShareModalProps> = ({ profile, isOpen, onClose
               <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-3">
                 Quick Share
               </label>
+              {canNativeShare && (
+                <button
+                  onClick={handleNativeShare}
+                  className="w-full mb-2.5 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] rounded-xl text-xs font-medium transition-all shadow-xs cursor-pointer"
+                >
+                  <Share2 className="w-3.5 h-3.5" /> Share via Device Sheet...
+                </button>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleShareTwitter}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 border border-[#E8E4D9] hover:border-[#1C1B18] rounded-xl text-xs font-medium text-[#1C1B18] hover:bg-[#E8E4D9]/30 transition-all"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 border border-[#E8E4D9] hover:border-[#1C1B18] rounded-xl text-xs font-medium text-[#1C1B18] hover:bg-[#E8E4D9]/30 transition-all cursor-pointer"
                 >
                   <span className="font-bold">X</span> Share on Twitter
                 </button>
