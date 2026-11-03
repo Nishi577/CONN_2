@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ConnProfile, ThemeOption, LinkShape } from '../../types';
+import { getSurfaceForMode } from '../../lib/themeModeUtils';
 import {
   Palette,
   Eye,
@@ -185,22 +186,14 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
   const contrastStatus = getContrastStatus(contrastRatio);
 
   const handleModeSwitch = (newMode: 'light' | 'dark') => {
+    const surface = getSurfaceForMode(newMode);
     setMode(newMode);
-    if (newMode === 'dark') {
-      setBgHex('#121110');
-      setTextHex('#FAF8F5');
-      setMutedHex('#9C978E');
-      setBorderHex('#2B2824');
-      setCardBgHex('#1A1917');
-      setGradientBgHex('#1E1C1A');
-    } else {
-      setBgHex('#FAF8F5');
-      setTextHex('#1C1B18');
-      setMutedHex('#6B665E');
-      setBorderHex('#E8E4D9');
-      setCardBgHex('#FFFFFF');
-      setGradientBgHex('#E8E4D9');
-    }
+    setBgHex(surface.bgHex);
+    setTextHex(surface.textHex);
+    setMutedHex(surface.mutedHex);
+    setBorderHex(surface.borderHex);
+    setCardBgHex(surface.cardBgHex);
+    setGradientBgHex(surface.gradientBgHex);
   };
 
   const buildCurrentThemeObj = (): ThemeOption => ({
@@ -422,7 +415,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
           {/* Theme Title & Mode Toggle */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2">
-              <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                 Theme Name
               </label>
               <input
@@ -435,7 +428,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
             </div>
 
             <div>
-              <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                 Base Atmosphere
               </label>
               <div className="flex bg-[#FAF8F5] border border-[#E8E4D9] p-1 rounded-xl">
@@ -477,7 +470,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                 <button
                   type="button"
                   onClick={() => setUseGradientBg(!useGradientBg)}
-                  className={`px-2.5 py-1 text-[11px] font-medium rounded-lg border transition-all ${
+                  className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
                     useGradientBg ? 'bg-[#1C1B18] text-[#FAF8F5] border-[#1C1B18]' : 'bg-white border-[#E8E4D9] text-[#6B665E]'
                   }`}
                 >
@@ -487,7 +480,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <div>
-                  <label className="text-[10px] font-mono-code uppercase text-[#6B665E] block mb-1">
+                  <label className="text-2xs font-mono-code uppercase text-[#6B665E] block mb-1">
                     Primary Canvas Color
                   </label>
                   <div className="flex items-center gap-1.5">
@@ -501,14 +494,14 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       type="text"
                       value={bgHex}
                       onChange={(e) => setBgHex(e.target.value)}
-                      className="w-full px-2 py-1 text-[11px] font-mono-code uppercase bg-white border border-[#E8E4D9] rounded-lg"
+                      className="w-full px-2 py-1 text-xs font-mono-code uppercase bg-white border border-[#E8E4D9] rounded-lg"
                     />
                   </div>
                 </div>
 
                 {useGradientBg && (
                   <div>
-                    <label className="text-[10px] font-mono-code uppercase text-[#6B665E] block mb-1">
+                    <label className="text-2xs font-mono-code uppercase text-[#6B665E] block mb-1">
                       Secondary Gradient Color
                     </label>
                     <div className="flex items-center gap-1.5">
@@ -522,7 +515,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                         type="text"
                         value={gradientBgHex}
                         onChange={(e) => setGradientBgHex(e.target.value)}
-                        className="w-full px-2 py-1 text-[11px] font-mono-code uppercase bg-white border border-[#E8E4D9] rounded-lg"
+                        className="w-full px-2 py-1 text-xs font-mono-code uppercase bg-white border border-[#E8E4D9] rounded-lg"
                       />
                     </div>
                   </div>
@@ -547,7 +540,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
             {/* Primary & Secondary Text / Accent Colors */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="text-[11px] font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
+                <label className="text-xs font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
                   Primary Text / Headings
                 </label>
                 <div className="flex items-center gap-1.5">
@@ -561,13 +554,13 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                     type="text"
                     value={textHex}
                     onChange={(e) => setTextHex(e.target.value)}
-                    className="w-full px-2 py-1 text-[11px] font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
+                    className="w-full px-2 py-1 text-xs font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[11px] font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
+                <label className="text-xs font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
                   Secondary / Muted Text
                 </label>
                 <div className="flex items-center gap-1.5">
@@ -581,13 +574,13 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                     type="text"
                     value={mutedHex}
                     onChange={(e) => setMutedHex(e.target.value)}
-                    className="w-full px-2 py-1 text-[11px] font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
+                    className="w-full px-2 py-1 text-xs font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[11px] font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
+                <label className="text-xs font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
                   Accent Highlight Hue
                 </label>
                 <div className="flex items-center gap-1.5">
@@ -601,7 +594,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                     type="text"
                     value={accentHex}
                     onChange={(e) => setAccentHex(e.target.value)}
-                    className="w-full px-2 py-1 text-[11px] font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
+                    className="w-full px-2 py-1 text-xs font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
                   />
                 </div>
               </div>
@@ -610,7 +603,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
             {/* Card Bg & Border Color */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-[11px] font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
+                <label className="text-xs font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
                   Card Background Color
                 </label>
                 <div className="flex items-center gap-1.5">
@@ -624,13 +617,13 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                     type="text"
                     value={cardBgHex}
                     onChange={(e) => setCardBgHex(e.target.value)}
-                    className="w-full px-2 py-1 text-[11px] font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
+                    className="w-full px-2 py-1 text-xs font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[11px] font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
+                <label className="text-xs font-medium text-[#6B665E] uppercase tracking-wider block mb-1">
                   Border Rule Color
                 </label>
                 <div className="flex items-center gap-1.5">
@@ -644,7 +637,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                     type="text"
                     value={borderHex}
                     onChange={(e) => setBorderHex(e.target.value)}
-                    className="w-full px-2 py-1 text-[11px] font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
+                    className="w-full px-2 py-1 text-xs font-mono-code uppercase bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg"
                   />
                 </div>
               </div>
@@ -660,7 +653,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                   Display Heading Font
                 </label>
                 <select
@@ -676,7 +669,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                   Base Font Scale
                 </label>
                 <div className="flex bg-[#FAF8F5] border border-[#E8E4D9] p-1 rounded-xl">
@@ -706,7 +699,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                   Border Radius ({borderRadius}px)
                 </label>
                 <input
@@ -721,7 +714,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                   Card Style Treatment
                 </label>
                 <select
@@ -737,7 +730,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                   Shadow Intensity
                 </label>
                 <select
@@ -753,7 +746,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                   Profile Layout Structure
                 </label>
                 <select
@@ -800,10 +793,10 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
           {/* WCAG Score */}
           <div className="p-4 border rounded-xl bg-[#FAF8F5] space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase font-mono-code text-[#6B665E] font-semibold flex items-center gap-1">
+              <span className="text-xs uppercase font-mono-code text-[#6B665E] font-semibold flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" /> Accessibility Score
               </span>
-              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${contrastStatus.color}`}>
+              <span className={`text-2xs font-medium px-2 py-0.5 rounded-full border ${contrastStatus.color}`}>
                 {contrastStatus.label}
               </span>
             </div>
@@ -825,7 +818,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
 
           {/* Interactive Live Profile Preview Card */}
           <div className="space-y-2">
-            <label className="block text-[11px] uppercase font-mono-code text-[#6B665E] font-semibold flex items-center gap-1">
+            <label className="block text-xs uppercase font-mono-code text-[#6B665E] font-semibold flex items-center gap-1">
               <Eye className="w-3.5 h-3.5 text-[#C85A32]" /> Live Real-Time Profile Preview
             </label>
 
@@ -862,7 +855,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                   <h4 className={`text-base font-medium tracking-tight truncate ${displayFontClass}`}>
                     {profile.name}
                   </h4>
-                  <p className="text-[11px] truncate opacity-80" style={{ color: mutedHex }}>
+                  <p className="text-xs truncate opacity-80" style={{ color: mutedHex }}>
                     @{profile.username}
                   </p>
                 </div>
@@ -871,7 +864,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
               {/* Status Badge */}
               <div className="text-center mb-4">
                 <span
-                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[10px]"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-2xs"
                   style={{ borderColor: borderHex, backgroundColor: cardBgHex }}
                 >
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: accentHex }} />
@@ -905,13 +898,13 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
                     <div className="text-xs font-medium flex items-center gap-1.5">
                       <span>On Digital Quietude Essay</span>
                       <span
-                        className="text-[9px] px-1.5 py-0.2 rounded font-bold uppercase"
+                        className="text-2xs px-1.5 py-0.2 rounded font-bold uppercase"
                         style={{ backgroundColor: accentHex, color: '#FFFFFF' }}
                       >
                         NEW
                       </span>
                     </div>
-                    <p className="text-[10px] opacity-75" style={{ color: mutedHex }}>
+                    <p className="text-2xs opacity-75" style={{ color: mutedHex }}>
                       Sample link card rendered with your theme parameters.
                     </p>
                   </div>
@@ -920,7 +913,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
               </div>
 
               {/* Footer */}
-              <div className="mt-4 pt-3 border-t text-[9px] font-mono-code text-center opacity-60" style={{ borderColor: borderHex }}>
+              <div className="mt-4 pt-3 border-t text-2xs font-mono-code text-center opacity-60" style={{ borderColor: borderHex }}>
                 {themeName} &bull; {displayFont} &bull; {mode}
               </div>
             </div>

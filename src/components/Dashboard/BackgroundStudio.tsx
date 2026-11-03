@@ -209,7 +209,7 @@ export const BackgroundStudio: React.FC<BackgroundStudioProps> = ({
             <span className="flex items-center gap-1.5">
               <Wand2 className="w-4 h-4 text-[#C85A32]" /> Generative Variation Generator:
             </span>
-            <span className="text-[10px] text-[#6B665E] font-normal">Click to auto-synthesize style</span>
+            <span className="text-2xs text-[#6B665E] font-normal">Click to auto-synthesize style</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {(['Minimal', 'Editorial', 'Organic', 'Technical', 'Playful', 'Abstract'] as const).map((dir) => (
@@ -242,12 +242,12 @@ export const BackgroundStudio: React.FC<BackgroundStudioProps> = ({
             >
               <div className="flex items-center justify-between">
                 <span className="text-xl">{p.icon}</span>
-                <span className="text-[9px] font-mono-code uppercase text-[#C85A32] font-bold">Preset</span>
+                <span className="text-2xs font-mono-code uppercase text-[#C85A32] font-bold">Preset</span>
               </div>
               <div className="font-serif-display text-xs font-bold text-[#1C1B18] group-hover:text-[#C85A32]">
                 {p.name}
               </div>
-              <p className="text-[10px] text-[#6B665E] line-clamp-2 leading-tight font-light">{p.desc}</p>
+              <p className="text-2xs text-[#6B665E] line-clamp-2 leading-tight font-light">{p.desc}</p>
             </button>
           ))}
         </div>
@@ -282,7 +282,7 @@ export const BackgroundStudio: React.FC<BackgroundStudioProps> = ({
                 }`}
               >
                 <div className="text-xl">{tab.icon}</div>
-                <div className="text-[11px] font-mono-code leading-tight">{tab.label}</div>
+                <div className="text-xs font-mono-code leading-tight">{tab.label}</div>
               </button>
             );
           })}
@@ -380,7 +380,7 @@ export const BackgroundStudio: React.FC<BackgroundStudioProps> = ({
                         }}
                         className="w-8 h-8 rounded border border-[#E8E4D9] cursor-pointer"
                       />
-                      <span className="text-[10px] font-mono-code text-[#6B665E]">Stop {idx + 1}</span>
+                      <span className="text-2xs font-mono-code text-[#6B665E]">Stop {idx + 1}</span>
                     </div>
                   ))}
                   {(bgConfig.gradient?.colors || []).length < 4 && (

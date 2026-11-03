@@ -310,7 +310,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {mode === 'signup' && (
             <>
               <div>
-                <label className="block text-[11px] font-medium text-[#6B665E] uppercase mb-1">
+                <label className="block text-xs font-medium text-[#6B665E] uppercase mb-1">
                   Full Name
                 </label>
                 <input
@@ -324,7 +324,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-[#6B665E] uppercase mb-1">
+                <label className="block text-xs font-medium text-[#6B665E] uppercase mb-1">
                   Username
                 </label>
                 <input
@@ -335,7 +335,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_\-]/g, ''))}
                   className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18] outline-none"
                 />
-                <p className="mt-1 text-[10px] text-[#6B665E]">
+                <p className="mt-1 text-2xs text-[#6B665E]">
                   Only lowercase letters, numbers, - and _ are allowed.
                 </p>
               </div>
@@ -343,7 +343,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           <div>
-            <label className="block text-[11px] font-medium text-[#6B665E] uppercase mb-1">
+            <label className="block text-xs font-medium text-[#6B665E] uppercase mb-1">
               Email Address
             </label>
             <input
@@ -359,14 +359,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {mode !== 'forgot' && (
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-[11px] font-medium text-[#6B665E] uppercase">
+                <label className="block text-xs font-medium text-[#6B665E] uppercase">
                   Password
                 </label>
                 {mode === 'login' && (
                   <button
                     type="button"
                     onClick={() => { setMode('forgot'); setError(''); }}
-                    className="text-[11px] text-[#6B665E] hover:underline"
+                    className="text-xs text-[#6B665E] hover:underline"
                   >
                     Forgot?
                   </button>
@@ -381,7 +381,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18] outline-none"
               />
               {mode === 'signup' && (
-                <p className="mt-1 text-[10px] text-[#6B665E]">Minimum 6 characters.</p>
+                <p className="mt-1 text-2xs text-[#6B665E]">Minimum 6 characters.</p>
               )}
             </div>
           )}

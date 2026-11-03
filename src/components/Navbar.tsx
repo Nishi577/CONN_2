@@ -100,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Sample Profile Selector Dropdown */}
           <div className="hidden sm:flex items-center gap-2 border border-[#E8E4D9] bg-white rounded-xl px-2.5 py-1 text-xs">
-            <span className="text-[10px] uppercase font-mono-code text-[#6B665E]">Active:</span>
+            <span className="text-2xs uppercase font-mono-code text-[#6B665E]">Active:</span>
             <select
               value={activeProfile.username}
               onChange={(e) => {

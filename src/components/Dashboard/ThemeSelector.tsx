@@ -212,7 +212,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                   <label className="block text-xs font-mono-code uppercase font-bold text-[#1C1B18]">
                     Design Families & Aesthetics
                   </label>
-                  <p className="text-[11px] text-[#6B665E]">
+                  <p className="text-xs text-[#6B665E]">
                     Filter presets by typography and structural philosophy, or create your own bespoke family.
                   </p>
                 </div>
@@ -301,7 +301,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                         <h4 className="font-serif-display text-lg font-bold text-[#1C1B18]">{cf.name}</h4>
                       </div>
                       <p className="text-xs text-[#6B665E] mt-0.5">{cf.description}</p>
-                      <div className="flex items-center gap-3 text-[11px] font-mono-code text-[#6B665E] mt-2">
+                      <div className="flex items-center gap-3 text-xs font-mono-code text-[#6B665E] mt-2">
                         <span>Font: <strong>{cf.fontFamilyDisplay}</strong></span>
                         <span>•</span>
                         <span>Border: <strong>{cf.borderStyle}</strong></span>
@@ -378,13 +378,13 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                       style={{ backgroundColor: theme.cardBgHex, borderColor: theme.borderHex }}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-[11px]">On Digital Quietude</span>
+                        <span className="font-medium text-xs">On Digital Quietude</span>
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: theme.accentHex }} />
                       </div>
                       <div className="h-1.5 w-3/4 rounded opacity-20 bg-current" />
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between text-[10px] font-mono-code opacity-60 pt-3 border-t border-current/10">
+                    <div className="mt-4 flex items-center justify-between text-2xs font-mono-code opacity-60 pt-3 border-t border-current/10">
                       <span className="capitalize">{theme.linkShape} Links</span>
                       <span>{theme.fontFamilyDisplay}</span>
                     </div>
@@ -412,7 +412,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                     }`}
                   >
                     <div className="text-xs font-medium mb-1">{shape.label}</div>
-                    <div className={`text-[10px] ${active ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>{shape.desc}</div>
+                    <div className={`text-2xs ${active ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>{shape.desc}</div>
                   </button>
                 );
               })}
@@ -479,7 +479,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
 
             <form onSubmit={handleCreateDesignFamily} className="space-y-4 text-xs font-sans-ui">
               <div>
-                <label className="block font-mono-code font-bold uppercase text-[10px] text-[#1C1B18] mb-1">
+                <label className="block font-mono-code font-bold uppercase text-2xs text-[#1C1B18] mb-1">
                   Family Name *
                 </label>
                 <input
@@ -493,7 +493,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
               </div>
 
               <div>
-                <label className="block font-mono-code font-bold uppercase text-[10px] text-[#1C1B18] mb-1">
+                <label className="block font-mono-code font-bold uppercase text-2xs text-[#1C1B18] mb-1">
                   Aesthetic Philosophy & Description
                 </label>
                 <textarea
@@ -507,7 +507,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-mono-code font-bold uppercase text-[10px] text-[#1C1B18] mb-1">
+                  <label className="block font-mono-code font-bold uppercase text-2xs text-[#1C1B18] mb-1">
                     Display Typography
                   </label>
                   <select
@@ -523,7 +523,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                 </div>
 
                 <div>
-                  <label className="block font-mono-code font-bold uppercase text-[10px] text-[#1C1B18] mb-1">
+                  <label className="block font-mono-code font-bold uppercase text-2xs text-[#1C1B18] mb-1">
                     Geometry & Corners
                   </label>
                   <select
@@ -542,7 +542,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-mono-code font-bold uppercase text-[10px] text-[#1C1B18] mb-1">
+                  <label className="block font-mono-code font-bold uppercase text-2xs text-[#1C1B18] mb-1">
                     Accent Color
                   </label>
                   <div className="flex items-center gap-2">
@@ -562,7 +562,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                 </div>
 
                 <div>
-                  <label className="block font-mono-code font-bold uppercase text-[10px] text-[#1C1B18] mb-1">
+                  <label className="block font-mono-code font-bold uppercase text-2xs text-[#1C1B18] mb-1">
                     Canvas Background
                   </label>
                   <div className="flex items-center gap-2">
@@ -591,9 +591,9 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ profile, onChangeP
                   borderRadius: newFamilyBorder === 'sharp' ? '0px' : newFamilyBorder === 'brutalist' ? '2px' : '12px',
                 }}
               >
-                <div className="flex items-center justify-between text-[11px] font-bold">
+                <div className="flex items-center justify-between text-xs font-bold">
                   <span style={{ color: newFamilyAccent }}>Preview Component</span>
-                  <span className="text-[10px] font-mono-code opacity-70">Design Family Spec</span>
+                  <span className="text-2xs font-mono-code opacity-70">Design Family Spec</span>
                 </div>
                 <div className="text-xs text-black/80 font-serif-display">
                   {newFamilyName || 'Sample Title for This Design Family'}

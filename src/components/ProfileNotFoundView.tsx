@@ -20,7 +20,7 @@ export const ProfileNotFoundView: React.FC<ProfileNotFoundViewProps> = ({
         </div>
 
         <div className="space-y-2">
-          <span className="text-[11px] font-mono-code font-bold uppercase tracking-widest text-[#C85A32] bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200 inline-block">
+          <span className="text-xs font-mono-code font-bold uppercase tracking-widest text-[#C85A32] bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200 inline-block">
             404 • Not Found
           </span>
           <h2 className="font-serif-display text-2xl sm:text-3xl font-normal text-[#1C1B18]">
@@ -36,7 +36,7 @@ export const ProfileNotFoundView: React.FC<ProfileNotFoundViewProps> = ({
             <Sparkles className="w-3.5 h-3.5 text-[#D49A3E]" />
             <span>This handle may be available!</span>
           </div>
-          <p className="text-[11px] text-[#6B665E]">
+          <p className="text-xs text-[#6B665E]">
             Create your personalized Conn Linktree profile now and claim this username for yourself.
           </p>
         </div>
@@ -61,7 +61,7 @@ export const ProfileNotFoundView: React.FC<ProfileNotFoundViewProps> = ({
           </button>
         </div>
 
-        <div className="pt-4 border-t border-[#E8E4D9] text-[11px] text-[#6B665E] font-mono-code">
+        <div className="pt-4 border-t border-[#E8E4D9] text-xs text-[#6B665E] font-mono-code">
           Conn. — Living Personal Identity System
         </div>
       </div>

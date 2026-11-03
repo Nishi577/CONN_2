@@ -37,7 +37,15 @@ import {
   Lock,
   Copy,
   Check,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import {
+  resolveActiveTheme,
+  getThemeMode,
+  applyProfileThemeMode,
+} from '../../lib/themeModeUtils';
+import type { ThemeMode } from '../../lib/themeModeUtils';
 
 interface WorkspaceProps {
   profile: ConnProfile;
@@ -154,6 +162,19 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
   };
 
+  // Light / dark mode of the theme currently rendered in the preview
+  const activeThemeMode = getThemeMode(resolveActiveTheme(profile));
+
+  const handleSetThemeMode = (mode: ThemeMode) => {
+    if (mode === activeThemeMode) return;
+    onChangeProfile(applyProfileThemeMode(profile, mode));
+    onShowToast(
+      profile.customBackground
+        ? `${mode === 'dark' ? 'Dark' : 'Light'} mode applied — your custom background still paints the page canvas.`
+        : `${mode === 'dark' ? 'Dark' : 'Light'} mode applied to your public profile.`
+    );
+  };
+
   // Compute profile completion rate safely
   const completionTasks = [
     { label: 'Avatar set', done: !!profile.avatarUrl },
@@ -204,7 +225,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   : 'Profile unpublished. It is now private.'
               );
             }}
-            className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-2xs font-bold uppercase transition-all cursor-pointer ${
               (profile.isPublic ?? true)
                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
                 : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
@@ -223,7 +244,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setIsAIOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-[#2C2A24] text-[#D49A3E] hover:bg-[#3C3A34] rounded-lg font-medium text-[11px] transition-all border border-[#D49A3E]/30"
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-[#2C2A24] text-[#D49A3E] hover:bg-[#3C3A34] rounded-lg font-medium text-xs transition-all border border-[#D49A3E]/30"
             title="Editorial AI Copilot"
           >
             <Sparkles className="w-3.5 h-3.5" /> <span className="hidden sm:inline">AI Copilot</span><span className="sm:hidden">AI</span>
@@ -236,7 +257,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           </button>
           <button
             onClick={onViewPublicProfile}
-            className="flex items-center gap-1.5 px-3 py-1 bg-[#FAF8F5] text-[#1C1B18] hover:bg-[#E8E4D9] rounded-lg font-medium text-[11px] transition-all"
+            className="flex items-center gap-1.5 px-3 py-1 bg-[#FAF8F5] text-[#1C1B18] hover:bg-[#E8E4D9] rounded-lg font-medium text-xs transition-all"
           >
             <Eye className="w-3.5 h-3.5" /> Public View
           </button>
@@ -250,7 +271,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           <div className="space-y-5">
             {/* GROUP 1: CONTENT & IDENTITY */}
             <div className="space-y-1">
-              <span className="text-[10px] uppercase tracking-widest font-mono-code text-[#6B665E] block px-2 mb-1.5 font-bold">
+              <span className="text-2xs uppercase tracking-widest font-mono-code text-[#6B665E] block px-2 mb-1.5 font-bold">
                 Content & Identity
               </span>
               <nav className="space-y-1">
@@ -267,7 +288,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     <LinkIcon className="w-4 h-4 shrink-0 text-[#C85A32]" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-semibold">Links & Items</div>
-                      <div className={`text-[10px] truncate ${activeTab === 'links' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
+                      <div className={`text-2xs truncate ${activeTab === 'links' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
                         Projects, essays & URLs
                       </div>
                     </div>
@@ -275,13 +296,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   {(profile.links || []).length > 0 && (
                     <div className="flex items-center gap-1 shrink-0 ml-1">
                       {categoriesCount > 1 && (
-                        <span className={`text-[9px] font-mono-code font-bold px-1.5 py-0.2 rounded ${
+                        <span className={`text-2xs font-mono-code font-bold px-1.5 py-0.2 rounded ${
                           activeTab === 'links' ? 'bg-white/20 text-white' : 'bg-[#C85A32]/10 text-[#C85A32]'
                         }`}>
                           {categoriesCount} cats
                         </span>
                       )}
-                      <span className={`text-[10px] font-mono-code font-bold px-1.5 py-0.2 rounded-full ${
+                      <span className={`text-2xs font-mono-code font-bold px-1.5 py-0.2 rounded-full ${
                         activeTab === 'links' ? 'bg-white/20 text-white' : 'bg-[#E8E4D9] text-[#1C1B18]'
                       }`}>
                         {(profile.links || []).length}
@@ -302,7 +323,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   <User className="w-4 h-4 shrink-0 text-[#D49A3E]" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-semibold">Profile Identity</div>
-                    <div className={`text-[10px] truncate ${activeTab === 'profile' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
+                    <div className={`text-2xs truncate ${activeTab === 'profile' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
                       Bio, avatar & socials
                     </div>
                   </div>
@@ -321,13 +342,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     <Clock className="w-4 h-4 shrink-0 text-[#C85A32]" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-semibold">Work Timeline</div>
-                      <div className={`text-[10px] truncate ${activeTab === 'timeline' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
+                      <div className={`text-2xs truncate ${activeTab === 'timeline' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
                         Career & milestones
                       </div>
                     </div>
                   </div>
                   {(profile.timeline || []).length > 0 && (
-                    <span className={`text-[10px] font-mono-code font-bold px-1.5 py-0.2 rounded-full shrink-0 ml-1 ${
+                    <span className={`text-2xs font-mono-code font-bold px-1.5 py-0.2 rounded-full shrink-0 ml-1 ${
                       activeTab === 'timeline' ? 'bg-white/20 text-white' : 'bg-[#E8E4D9] text-[#1C1B18]'
                     }`}>
                       {(profile.timeline || []).length}
@@ -348,12 +369,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     <Sparkles className="w-4 h-4 shrink-0 text-[#D49A3E]" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-semibold">Living Hub ("Now")</div>
-                      <div className={`text-[10px] truncate ${activeTab === 'identity_hub' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
+                      <div className={`text-2xs truncate ${activeTab === 'identity_hub' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
                         Current focus & status
                       </div>
                     </div>
                   </div>
-                  <span className="text-[9px] font-bold px-1.5 py-0.2 bg-[#C85A32] text-white rounded shrink-0 ml-1">
+                  <span className="text-2xs font-bold px-1.5 py-0.2 bg-[#C85A32] text-white rounded shrink-0 ml-1">
                     HUB
                   </span>
                 </button>
@@ -362,7 +383,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
             {/* GROUP 2: DESIGN & APPEARANCE */}
             <div className="space-y-1 pt-2 border-t border-[#E8E4D9]/80">
-              <span className="text-[10px] uppercase tracking-widest font-mono-code text-[#6B665E] block px-2 mb-1.5 font-bold">
+              <span className="text-2xs uppercase tracking-widest font-mono-code text-[#6B665E] block px-2 mb-1.5 font-bold">
                 Design & Appearance
               </span>
               <nav className="space-y-1">
@@ -378,7 +399,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   <Palette className="w-4 h-4 shrink-0 text-[#385842]" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-semibold">Themes & Design</div>
-                    <div className={`text-[10px] truncate ${activeTab === 'themes' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
+                    <div className={`text-2xs truncate ${activeTab === 'themes' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
                       Palettes, fonts & shapes
                     </div>
                   </div>
@@ -397,12 +418,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     <Sliders className="w-4 h-4 shrink-0 text-[#C85A32]" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-semibold">Visual Page Builder</div>
-                      <div className={`text-[10px] truncate ${activeTab === 'visual_builder' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
+                      <div className={`text-2xs truncate ${activeTab === 'visual_builder' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
                         Section ordering & grid
                       </div>
                     </div>
                   </div>
-                  <span className="text-[9px] font-bold px-1.5 py-0.2 bg-[#1C1B18] text-white border border-white/20 rounded shrink-0 ml-1">
+                  <span className="text-2xs font-bold px-1.5 py-0.2 bg-[#1C1B18] text-white border border-white/20 rounded shrink-0 ml-1">
                     BUILDER
                   </span>
                 </button>
@@ -411,7 +432,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
             {/* GROUP 3: GROWTH & SETTINGS */}
             <div className="space-y-1 pt-2 border-t border-[#E8E4D9]/80">
-              <span className="text-[10px] uppercase tracking-widest font-mono-code text-[#6B665E] block px-2 mb-1.5 font-bold">
+              <span className="text-2xs uppercase tracking-widest font-mono-code text-[#6B665E] block px-2 mb-1.5 font-bold">
                 Growth & Settings
               </span>
               <nav className="space-y-1">
@@ -427,7 +448,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   <BarChart2 className="w-4 h-4 shrink-0 text-[#4E78E6]" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-semibold">Traffic & Analytics</div>
-                    <div className={`text-[10px] truncate ${activeTab === 'analytics' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
+                    <div className={`text-2xs truncate ${activeTab === 'analytics' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
                       Visitor views & link clicks
                     </div>
                   </div>
@@ -445,7 +466,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   <Settings className="w-4 h-4 shrink-0 text-[#6B665E]" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-semibold">Workspace Settings</div>
-                    <div className={`text-[10px] truncate ${activeTab === 'settings' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
+                    <div className={`text-2xs truncate ${activeTab === 'settings' ? 'text-[#FAF8F5]/70' : 'text-[#6B665E]'}`}>
                       SEO, privacy & backups
                     </div>
                   </div>
@@ -477,7 +498,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 />
               </div>
 
-              <p className="text-[10px] text-[#6B665E] leading-tight pt-0.5">
+              <p className="text-2xs text-[#6B665E] leading-tight pt-0.5">
                 {completionPercentage === 100
                   ? 'Your profile is fully curated and live!'
                   : 'Add links or status badge to reach 100% strength.'}
@@ -490,7 +511,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               <img src={profile.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'} alt="" className="w-7 h-7 rounded-full object-cover border border-[#E8E4D9]" />
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-medium truncate">{profile.name}</div>
-                <div className="text-[10px] text-[#6B665E] truncate font-mono-code">@{profile.username}</div>
+                <div className="text-2xs text-[#6B665E] truncate font-mono-code">@{profile.username}</div>
               </div>
             </div>
             <button
@@ -585,7 +606,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       title="Mobile View"
                     >
                       <Smartphone className="w-3.5 h-3.5" />
-                      <span className="text-[11px]">Mobile</span>
+                      <span className="text-xs">Mobile</span>
                     </button>
 
                     <button
@@ -596,13 +617,50 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       title="Desktop View"
                     >
                       <Monitor className="w-3.5 h-3.5" />
-                      <span className="text-[11px]">Full</span>
+                      <span className="text-xs">Full</span>
+                    </button>
+                  </div>
+
+                  {/* Light / Dark mode switch for the simulated device */}
+                  <div
+                    className="flex items-center gap-0.5 p-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded-xl"
+                    role="group"
+                    aria-label="Profile appearance mode"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSetThemeMode('light')}
+                      aria-pressed={activeThemeMode === 'light'}
+                      title="Light appearance"
+                      className={`p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer ${
+                        activeThemeMode === 'light'
+                          ? 'bg-white text-[#1C1B18] shadow-2xs'
+                          : 'text-[#6B665E] hover:text-[#1C1B18]'
+                      }`}
+                    >
+                      <Sun className="w-3.5 h-3.5 text-[#D49A3E]" />
+                      <span className="text-xs hidden xl:inline">Light</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSetThemeMode('dark')}
+                      aria-pressed={activeThemeMode === 'dark'}
+                      title="Dark appearance"
+                      className={`p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer ${
+                        activeThemeMode === 'dark'
+                          ? 'bg-[#1C1B18] text-[#FAF8F5] shadow-2xs'
+                          : 'text-[#6B665E] hover:text-[#1C1B18]'
+                      }`}
+                    >
+                      <Moon className="w-3.5 h-3.5 text-[#7B52AB]" />
+                      <span className="text-xs hidden xl:inline">Dark</span>
                     </button>
                   </div>
 
                   <button
                     onClick={onViewPublicProfile}
-                    className="text-[11px] font-medium text-[#6B665E] hover:text-[#1C1B18] flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[#E8E4D9]/50 transition-colors cursor-pointer"
+                    className="text-xs font-medium text-[#6B665E] hover:text-[#1C1B18] flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[#E8E4D9]/50 transition-colors cursor-pointer"
                   >
                     Open Live <ExternalLink className="w-3 h-3" />
                   </button>
@@ -680,18 +738,18 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                           {item.title}
                         </h4>
                       </div>
-                      <span className="text-[9px] uppercase font-mono-code font-bold px-2 py-0.5 rounded-full bg-white border border-[#E8E4D9] text-[#6B665E]">
+                      <span className="text-2xs uppercase font-mono-code font-bold px-2 py-0.5 rounded-full bg-white border border-[#E8E4D9] text-[#6B665E]">
                         {item.category}
                       </span>
                     </div>
 
                     <div className="space-y-1.5 text-xs">
                       <div>
-                        <span className="font-bold text-[#1C1B18] block text-[11px]">What it does:</span>
+                        <span className="font-bold text-[#1C1B18] block text-xs">What it does:</span>
                         <p className="text-[#6B665E] leading-relaxed">{item.whatItDoes}</p>
                       </div>
                       <div className="pt-1">
-                        <span className="font-bold text-[#C85A32] block text-[11px]">Public Page Output:</span>
+                        <span className="font-bold text-[#C85A32] block text-xs">Public Page Output:</span>
                         <p className="text-[#6B665E] leading-relaxed">{item.publicOutput}</p>
                       </div>
                     </div>

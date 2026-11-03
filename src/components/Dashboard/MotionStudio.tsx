@@ -360,13 +360,13 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
         {/* ACTIVE STATUS BAR & PENDING CHANGES CALLOUT */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#E8E4D9]/80 text-xs">
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium text-[11px]">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>
                 Active: {activeHoverCount} hover effects • {activeElemAnimCount} entrance motions
               </span>
             </span>
-            <span className="text-[11px] font-mono-code text-[#6B665E]">
+            <span className="text-xs font-mono-code text-[#6B665E]">
               Intensity: <strong className="text-[#1C1B18] uppercase">{appliedMotion.globalIntensity}</strong>
             </span>
           </div>
@@ -374,18 +374,18 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
           {hasPendingChanges && (
             <div className="flex items-center gap-2 bg-amber-50 text-amber-900 border border-amber-200 px-3 py-1 rounded-xl animate-in fade-in">
               <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span className="text-[11px] font-medium">You have unapplied selections.</span>
+              <span className="text-xs font-medium">You have unapplied selections.</span>
               <button
                 type="button"
                 onClick={handleApplyAllChanges}
-                className="px-2 py-0.5 bg-[#1C1B18] text-white rounded-md text-[10px] font-bold hover:bg-[#33312B] transition-colors"
+                className="px-2 py-0.5 bg-[#1C1B18] text-white rounded-md text-2xs font-bold hover:bg-[#33312B] transition-colors"
               >
                 Apply All
               </button>
               <button
                 type="button"
                 onClick={handleDiscardChanges}
-                className="text-[10px] text-zinc-600 hover:text-black underline ml-1"
+                className="text-2xs text-zinc-600 hover:text-black underline ml-1"
               >
                 Discard
               </button>
@@ -406,12 +406,12 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
           <button
             type="button"
             onClick={handleReplayEntrance}
-            className="text-[11px] font-mono-code text-[#C85A32] hover:underline flex items-center gap-1 font-bold"
+            className="text-xs font-mono-code text-[#C85A32] hover:underline flex items-center gap-1 font-bold"
           >
             <RefreshCw className="w-3 h-3" /> Replay Entrance
           </button>
         </div>
-        <p className="text-[11px] text-[#6B665E]">
+        <p className="text-xs text-[#6B665E]">
           Hover your cursor over the components below to test the active or draft micro-interactions.
         </p>
 
@@ -422,9 +422,9 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
               draftMotion.microInteractions?.linkHoverEffect
             )}`}
           >
-            <div className="text-[10px] uppercase font-mono-code text-[#6B665E] mb-1">Link Component</div>
+            <div className="text-2xs uppercase font-mono-code text-[#6B665E] mb-1">Link Component</div>
             <div className="text-xs font-bold text-[#1C1B18]">Read Essay →</div>
-            <div className="text-[9px] text-emerald-600 mt-1 font-mono-code font-bold">
+            <div className="text-2xs text-emerald-600 mt-1 font-mono-code font-bold">
               Hover: {draftMotion.microInteractions?.linkHoverEffect || 'none'}
             </div>
           </div>
@@ -438,8 +438,8 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
             <div className="w-8 h-8 rounded-full bg-[#1C1B18] text-white flex items-center justify-center text-xs font-bold mb-1">
               CP
             </div>
-            <div className="text-[10px] font-mono-code font-bold text-[#1C1B18]">Avatar Pulse</div>
-            <div className="text-[9px] text-emerald-600 font-mono-code font-bold">
+            <div className="text-2xs font-mono-code font-bold text-[#1C1B18]">Avatar Pulse</div>
+            <div className="text-2xs text-emerald-600 font-mono-code font-bold">
               Hover: {draftMotion.microInteractions?.avatarHoverEffect || 'none'}
             </div>
           </div>
@@ -450,9 +450,9 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
               draftMotion.microInteractions?.cardHoverEffect
             )}`}
           >
-            <div className="text-[10px] uppercase font-mono-code text-[#6B665E] mb-0.5">Project Card</div>
+            <div className="text-2xs uppercase font-mono-code text-[#6B665E] mb-0.5">Project Card</div>
             <div className="text-xs font-bold text-[#1C1B18] truncate">Studio Architecture</div>
-            <div className="text-[9px] text-emerald-600 mt-1 font-mono-code font-bold">
+            <div className="text-2xs text-emerald-600 mt-1 font-mono-code font-bold">
               Hover: {draftMotion.microInteractions?.cardHoverEffect || 'none'}
             </div>
           </div>
@@ -463,10 +463,10 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
               draftMotion.microInteractions?.socialsHoverEffect
             )}`}
           >
-            <div className="px-3 py-1 bg-black text-white rounded-full text-[10px] font-mono-code font-bold">
+            <div className="px-3 py-1 bg-black text-white rounded-full text-2xs font-mono-code font-bold">
               @handle
             </div>
-            <div className="text-[9px] text-emerald-600 mt-1 font-mono-code font-bold">
+            <div className="text-2xs text-emerald-600 mt-1 font-mono-code font-bold">
               Hover: {draftMotion.microInteractions?.socialsHoverEffect || 'none'}
             </div>
           </div>
@@ -479,7 +479,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
           <label className="text-xs font-mono-code uppercase font-bold text-[#1C1B18] flex items-center gap-1.5">
             <MousePointer className="w-4 h-4 text-[#C85A32]" /> 1. Hover Micro-Interactions (Apply & Remove)
           </label>
-          <span className="text-[10px] text-[#6B665E]">
+          <span className="text-2xs text-[#6B665E]">
             {activeHoverCount} of 4 hover effects active
           </span>
         </div>
@@ -498,11 +498,11 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono-code font-bold text-[#1C1B18]">Link Hover</span>
                     {isApplied ? (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
                         <Check className="w-2.5 h-2.5" /> Applied
                       </span>
                     ) : (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono-code bg-zinc-200 text-zinc-600">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-mono-code bg-zinc-200 text-zinc-600">
                         None
                       </span>
                     )}
@@ -520,7 +520,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                     ))}
                   </select>
 
-                  <div className="text-[10px] text-[#6B665E] font-mono-code">
+                  <div className="text-2xs text-[#6B665E] font-mono-code">
                     Active: <strong className="text-[#1C1B18]">{appliedVal}</strong>
                   </div>
                 </div>
@@ -570,11 +570,11 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono-code font-bold text-[#1C1B18]">Avatar Physics</span>
                     {isApplied ? (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
                         <Check className="w-2.5 h-2.5" /> Applied
                       </span>
                     ) : (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono-code bg-zinc-200 text-zinc-600">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-mono-code bg-zinc-200 text-zinc-600">
                         None
                       </span>
                     )}
@@ -592,7 +592,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                     ))}
                   </select>
 
-                  <div className="text-[10px] text-[#6B665E] font-mono-code">
+                  <div className="text-2xs text-[#6B665E] font-mono-code">
                     Active: <strong className="text-[#1C1B18]">{appliedVal}</strong>
                   </div>
                 </div>
@@ -640,11 +640,11 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono-code font-bold text-[#1C1B18]">Project Card</span>
                     {isApplied ? (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
                         <Check className="w-2.5 h-2.5" /> Applied
                       </span>
                     ) : (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono-code bg-zinc-200 text-zinc-600">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-mono-code bg-zinc-200 text-zinc-600">
                         None
                       </span>
                     )}
@@ -662,7 +662,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                     ))}
                   </select>
 
-                  <div className="text-[10px] text-[#6B665E] font-mono-code">
+                  <div className="text-2xs text-[#6B665E] font-mono-code">
                     Active: <strong className="text-[#1C1B18]">{appliedVal}</strong>
                   </div>
                 </div>
@@ -710,11 +710,11 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono-code font-bold text-[#1C1B18]">Social Icons</span>
                     {isApplied ? (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
                         <Check className="w-2.5 h-2.5" /> Applied
                       </span>
                     ) : (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono-code bg-zinc-200 text-zinc-600">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-mono-code bg-zinc-200 text-zinc-600">
                         None
                       </span>
                     )}
@@ -732,7 +732,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                     ))}
                   </select>
 
-                  <div className="text-[10px] text-[#6B665E] font-mono-code">
+                  <div className="text-2xs text-[#6B665E] font-mono-code">
                     Active: <strong className="text-[#1C1B18]">{appliedVal}</strong>
                   </div>
                 </div>
@@ -775,7 +775,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
           <label className="text-xs font-mono-code uppercase font-bold text-[#1C1B18] flex items-center gap-1.5">
             <Clock className="w-4 h-4 text-[#C85A32]" /> 2. Element Entrance Motion & Cascade (Apply & Remove)
           </label>
-          <span className="text-[10px] text-[#6B665E]">
+          <span className="text-2xs text-[#6B665E]">
             {activeElemAnimCount} of 6 element entrance animations active
           </span>
         </div>
@@ -789,7 +789,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
             <button
               type="button"
               onClick={handleReplayEntrance}
-              className="text-[10px] font-mono-code text-[#C85A32] font-bold hover:underline flex items-center gap-1"
+              className="text-2xs font-mono-code text-[#C85A32] font-bold hover:underline flex items-center gap-1"
             >
               <Play className="w-3 h-3" /> Test Cascade
             </button>
@@ -815,14 +815,14 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                   }`}
                 >
                   <span
-                    className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center ${
+                    className={`w-4 h-4 rounded-full text-2xs font-bold flex items-center justify-center ${
                       isAnimApplied ? 'bg-[#1C1B18] text-white' : 'bg-zinc-300 text-zinc-700'
                     }`}
                   >
                     {step.delay > 0 ? '+' : '0'}
                   </span>
                   <span className="font-bold">{step.label}</span>
-                  <span className="text-[10px] text-[#C85A32] font-bold">
+                  <span className="text-2xs text-[#C85A32] font-bold">
                     {isAnimApplied ? anim?.type : 'none'}
                   </span>
                 </div>
@@ -864,11 +864,11 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                       {item.label}
                     </span>
                     {isApplied ? (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 shrink-0 flex items-center gap-1">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-bold bg-emerald-100 text-emerald-800 shrink-0 flex items-center gap-1">
                         <Check className="w-2.5 h-2.5" /> Applied
                       </span>
                     ) : (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono-code bg-zinc-200 text-zinc-600 shrink-0">
+                      <span className="px-1.5 py-0.5 rounded text-2xs font-mono-code bg-zinc-200 text-zinc-600 shrink-0">
                         None
                       </span>
                     )}
@@ -876,7 +876,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[9px] uppercase font-mono-code text-[#6B665E] block mb-0.5">
+                      <label className="text-2xs uppercase font-mono-code text-[#6B665E] block mb-0.5">
                         Animation Type
                       </label>
                       <select
@@ -896,7 +896,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-[9px] uppercase font-mono-code text-[#6B665E] block mb-0.5">
+                      <label className="text-2xs uppercase font-mono-code text-[#6B665E] block mb-0.5">
                         Direction
                       </label>
                       <select
@@ -914,7 +914,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                     </div>
                   </div>
 
-                  <div className="text-[10px] text-[#6B665E] font-mono-code flex items-center justify-between">
+                  <div className="text-2xs text-[#6B665E] font-mono-code flex items-center justify-between">
                     <span>
                       Active: <strong className="text-[#1C1B18]">{appliedAnim.type}</strong> ({appliedAnim.direction || 'up'})
                     </span>
@@ -1032,7 +1032,7 @@ export const MotionStudio: React.FC<MotionStudioProps> = ({
                     }`}
                   >
                     <div className="text-xs font-bold">{opt.label}</div>
-                    <div className="text-[9px] opacity-70 font-mono-code">{opt.desc}</div>
+                    <div className="text-2xs opacity-70 font-mono-code">{opt.desc}</div>
                   </button>
                 );
               })}

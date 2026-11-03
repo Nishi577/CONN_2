@@ -646,11 +646,11 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                     <div className="flex items-center gap-2">
                       <Folder className="w-4 h-4 text-[#C85A32]" />
                       <h3 className="font-serif-display text-base font-normal text-[#1C1B18]">{categoryName}</h3>
-                      <span className="text-[10px] font-mono-code px-2 py-0.5 bg-[#E8E4D9]/60 text-[#6B665E] rounded-full">
+                      <span className="text-2xs font-mono-code px-2 py-0.5 bg-[#E8E4D9]/60 text-[#6B665E] rounded-full">
                         {categoryLinks.length} {categoryLinks.length === 1 ? 'item' : 'items'}
                       </span>
                       {meta?.isCollapsedByDefault && (
-                        <span className="text-[9px] font-mono-code px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md">
+                        <span className="text-2xs font-mono-code px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md">
                           Collapsed by default
                         </span>
                       )}
@@ -724,17 +724,17 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                               <div className="flex items-center gap-2">
                                 <h4 className="text-sm font-medium text-[#1C1B18] truncate">{link.title}</h4>
                                 {link.linkType === 'project' && (
-                                  <span className="text-[9px] font-bold px-1.5 py-0.5 bg-[#C85A32] text-white rounded uppercase tracking-wider shrink-0">
+                                  <span className="text-2xs font-bold px-1.5 py-0.5 bg-[#C85A32] text-white rounded uppercase tracking-wider shrink-0">
                                     Project
                                   </span>
                                 )}
                                 {link.badge && (
-                                  <span className="text-[9px] font-bold px-1.5 py-0.5 bg-[#1C1B18] text-[#FAF8F5] rounded uppercase tracking-wider shrink-0">
+                                  <span className="text-2xs font-bold px-1.5 py-0.5 bg-[#1C1B18] text-[#FAF8F5] rounded uppercase tracking-wider shrink-0">
                                     {link.badge}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-[#6B665E] truncate font-mono-code mt-0.5">
+                              <p className="text-xs text-[#6B665E] truncate font-mono-code mt-0.5">
                                 {link.url}
                               </p>
                             </div>
@@ -742,7 +742,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
 
                           {/* Actions */}
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className="hidden sm:flex items-center gap-1 text-[10px] font-mono-code px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded-md text-[#6B665E]">
+                            <span className="hidden sm:flex items-center gap-1 text-2xs font-mono-code px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded-md text-[#6B665E]">
                               <BarChart2 className="w-3 h-3 text-[#1C1B18]" />
                               {link.clicks}
                             </span>
@@ -889,7 +889,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                 <div className="min-w-0 flex-1 pr-2">
                   <div className="flex items-center gap-2">
                     <h4 className="text-sm font-medium text-[#1C1B18] truncate">{link.title}</h4>
-                    <span className="text-[10px] font-mono-code px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded text-[#6B665E]">
+                    <span className="text-2xs font-mono-code px-2 py-0.5 bg-[#FAF8F5] border border-[#E8E4D9] rounded text-[#6B665E]">
                       {link.category}
                     </span>
                   </div>
@@ -1009,7 +1009,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                       <div className="flex items-center gap-2 min-w-0">
                         <Folder className="w-4 h-4 text-[#C85A32] shrink-0" />
                         <span className="font-medium truncate">{catName}</span>
-                        <span className="text-[10px] text-[#6B665E] font-mono-code">({count})</span>
+                        <span className="text-2xs text-[#6B665E] font-mono-code">({count})</span>
                       </div>
                     )}
 
@@ -1018,7 +1018,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                         <button
                           type="button"
                           onClick={() => handleToggleCategoryCollapseDefault(catName)}
-                          className={`px-2 py-1 text-[10px] font-mono-code rounded-lg border transition-colors ${
+                          className={`px-2 py-1 text-2xs font-mono-code rounded-lg border transition-colors ${
                             meta?.isCollapsedByDefault
                               ? 'bg-amber-50 border-amber-200 text-amber-700'
                               : 'bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-700'
@@ -1218,7 +1218,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                       Tech Stack (Comma Separated)
                     </label>
                     <input
@@ -1232,7 +1232,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                         GitHub Repo URL (Optional)
                       </label>
                       <input
@@ -1244,7 +1244,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium text-[#6B665E] uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-medium text-[#6B665E] uppercase tracking-wider mb-1">
                         Live Demo URL (Optional)
                       </label>
                       <input
@@ -1270,7 +1270,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                   />
                   <div>
                     <span className="text-xs font-medium text-[#1C1B18]">Highlight as Featured Link</span>
-                    <p className="text-[11px] text-[#6B665E]">
+                    <p className="text-xs text-[#6B665E]">
                       Featured links are prominently rendered at the top with a hero card layout.
                     </p>
                   </div>

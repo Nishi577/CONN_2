@@ -1,25 +1,77 @@
 @import "tailwindcss";
 
-@layer utilities {
-  .font-serif-display {
-    font-family: 'Instrument Serif', Georgia, serif;
+/* ---------------------------------------------------------------------------
+   Design tokens
+   - Font families are registered in the `--font-*` namespace so Tailwind
+     generates the `font-serif-display` / `font-sans-ui` / `font-mono-code` /
+     `font-serif-editorial` utilities itself. They must NOT carry a font-size:
+     earlier these classes hardcoded `font-size: 14px`, which overrode every
+     `text-xs` / `text-[10px]` utility placed on the same element.
+   - The type scale is deliberately one notch larger than Tailwind's default
+     and has a 12px floor (`text-2xs`) so no UI label is unreadable.
+--------------------------------------------------------------------------- */
+@theme {
+  --font-serif-display: 'Instrument Serif', Georgia, serif;
+  --font-serif-editorial: 'Newsreader', Georgia, serif;
+  --font-sans-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono-code: 'Space Grotesk', ui-monospace, monospace;
+
+  /* 12px — micro labels, badges, meta rows (smallest allowed size) */
+  --text-2xs: 0.75rem;
+  --text-2xs--line-height: 1.0625rem;
+  /* 13px */
+  --text-xs: 0.9125rem;
+  --text-xs--line-height: 1.1875rem;
+  /* 15px */
+  --text-sm: 0.9275rem;
+  --text-sm--line-height: 1.4375rem;
+  /* 17px */
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.625rem;
+  /* 19px */
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.75rem;
+}
+
+@layer base {
+  body {
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Per-profile type scale (ThemeOption.fontSize = 'sm' | 'md' | 'lg').
+   Tailwind v4 font-size utilities resolve `var(--text-*)` at use time, so
+   re-declaring the tokens on a container rescales every text utility inside
+   it without touching a single markup class.
+--------------------------------------------------------------------------- */
+@layer components {
+  .type-scale-sm {
+    --text-2xs: 0.6875rem;
+    --text-2xs--line-height: 1rem;
+    --text-xs: 1.75rem;
+    --text-xs--line-height: 1.125rem;
+    --text-sm: 0.875rem;
+    --text-sm--line-height: 1.375rem;
+    --text-base: 1rem;
+    --text-base--line-height: 1.5rem;
+    --text-lg: 1.125rem;
+    --text-lg--line-height: 1.6875rem;
   }
 
-  .font-serif-editorial {
-    font-family: 'Newsreader', Georgia, serif;
-    font-size: 14px;
+  .type-scale-lg {
+    --text-2xs: 0.8125rem;
+    --text-2xs--line-height: 1.125rem;
+    --text-xs: 2.9375rem;
+    --text-xs--line-height: 1.375rem;
+    --text-sm: 1.0625rem;
+    --text-sm--line-height: 1.625rem;
+    --text-base: 1.1875rem;
+    --text-base--line-height: 1.8125rem;
+    --text-lg: 1.375rem;
+    --text-lg--line-height: 1.9375rem;
   }
-
-  .font-sans-ui {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: 14px;
-  }
-
-  .font-mono-code {
-    font-family: 'Space Grotesk', monospace;
-    font-size: 14px;
-  }
-
 }
 
 /* Custom subtle scrollbar */

@@ -125,7 +125,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ profile, isOpen, onClose
             <h3 className="font-serif-display text-2xl font-normal tracking-tight text-[#1C1B18]">Share Profile</h3>
             <p className="text-xs text-[#6B665E] truncate">conn.bio/{profile.username}</p>
           </div>
-          <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono-code font-bold uppercase tracking-wider ${
+          <span className={`px-2 py-0.5 rounded-full text-2xs font-mono-code font-bold uppercase tracking-wider ${
             (profile.isPublic ?? true)
               ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
               : 'bg-amber-100 text-amber-800 border border-amber-300'

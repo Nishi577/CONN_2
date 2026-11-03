@@ -422,7 +422,7 @@ export const renderDecorativeObjects = (
             )}
             {obj.type === 'badge' && (
               <div
-                className="px-3 py-1 rounded-full text-[10px] font-mono-code uppercase font-bold text-white shadow-md border border-white/20"
+                className="px-3 py-1 rounded-full text-2xs font-mono-code uppercase font-bold text-white shadow-md border border-white/20"
                 style={{ backgroundColor: obj.colorHex }}
               >
                 {obj.content || 'Conn Verified'}
@@ -430,7 +430,7 @@ export const renderDecorativeObjects = (
             )}
             {obj.type === 'text_label' && (
               <div
-                className="px-2.5 py-0.5 rounded text-[11px] font-mono-code font-bold uppercase tracking-wider"
+                className="px-2.5 py-0.5 rounded text-xs font-mono-code font-bold uppercase tracking-wider"
                 style={{ color: obj.colorHex }}
               >
                 {obj.content || '• IDENTITY ARCHIVE'}

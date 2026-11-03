@@ -261,7 +261,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-code font-bold uppercase tracking-wider ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold uppercase tracking-wider ${
                   isPublic
                     ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                     : 'bg-amber-100 text-amber-800 border border-amber-300'
@@ -295,12 +295,12 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
                 {copiedUrl ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="text-emerald-700 text-[11px]">Copied</span>
+                    <span className="text-emerald-700 text-xs">Copied</span>
                   </>
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5" />
-                    <span className="text-[11px]">Copy Link</span>
+                    <span className="text-xs">Copy Link</span>
                   </>
                 )}
               </button>
@@ -312,7 +312,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
                 title="Open public profile in new tab"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
-                <span className="text-[11px]">Open Link</span>
+                <span className="text-xs">Open Link</span>
               </a>
             </div>
           </div>
@@ -362,7 +362,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
               className="w-full px-3.5 py-2 text-xs bg-white border border-[#E8E4D9] rounded-xl font-mono-code focus:border-[#1C1B18]"
             />
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-[#6B665E]">Or select preset:</span>
+              <span className="text-xs text-[#6B665E]">Or select preset:</span>
               <div className="flex items-center gap-1.5">
                 {AVATAR_PRESETS.map((preset, idx) => (
                   <button
@@ -403,15 +403,15 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
               USERNAME HANDLE *
             </label>
             {usernameStatus.isChecking ? (
-              <span className="text-[10px] text-[#6B665E] flex items-center gap-1 font-mono-code">
+              <span className="text-2xs text-[#6B665E] flex items-center gap-1 font-mono-code">
                 <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Checking...
               </span>
             ) : usernameStatus.isAvailable ? (
-              <span className="text-[10px] text-emerald-700 flex items-center gap-1 font-mono-code font-bold">
+              <span className="text-2xs text-emerald-700 flex items-center gap-1 font-mono-code font-bold">
                 <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Available
               </span>
             ) : (
-              <span className="text-[10px] text-rose-700 flex items-center gap-1 font-mono-code font-bold">
+              <span className="text-2xs text-rose-700 flex items-center gap-1 font-mono-code font-bold">
                 <AlertCircle className="w-3 h-3 text-rose-600" /> Unavailable
               </span>
             )}
@@ -450,12 +450,12 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
             </button>
           </div>
           {usernameStatus.reason && !usernameStatus.isAvailable && (
-            <p className="text-[11px] text-rose-600 mt-1.5 font-mono-code flex items-center gap-1">
+            <p className="text-xs text-rose-600 mt-1.5 font-mono-code flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{usernameStatus.reason}</span>
             </p>
           )}
-          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-code">
+          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono-code">
             <span className="text-[#6B665E] truncate">
               Shareable link: <strong className="text-[#1C1B18]">{publicUrl}</strong>
             </span>
@@ -492,12 +492,12 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
             <button
               type="button"
               onClick={() => setIsAIOpen(true)}
-              className="text-[11px] font-medium text-[#C85A32] hover:underline flex items-center gap-1 font-mono-code"
+              className="text-xs font-medium text-[#C85A32] hover:underline flex items-center gap-1 font-mono-code"
             >
               <Sparkles className="w-3 h-3 text-[#D49A3E]" />
               <span>AI Enhance</span>
             </button>
-            <span className="text-[11px] font-mono-code text-[#6B665E]">
+            <span className="text-xs font-mono-code text-[#6B665E]">
               {bio.length} / 220 chars
             </span>
           </div>
@@ -548,7 +548,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
             <button
               type="button"
               onClick={() => setIsAIOpen(true)}
-              className="text-[10px] font-mono-code text-[#D49A3E] hover:underline flex items-center gap-0.5"
+              className="text-2xs font-mono-code text-[#D49A3E] hover:underline flex items-center gap-0.5"
             >
               <Sparkles className="w-2.5 h-2.5" />
               <span>AI Ideas</span>
@@ -637,7 +637,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
             <span className="text-xs font-bold uppercase tracking-wider text-[#1C1B18]">
               Newsletter Capture Widget
             </span>
-            <p className="text-[11px] text-[#6B665E]">
+            <p className="text-xs text-[#6B665E]">
               Allow readers to subscribe to your field notes directly on your profile.
             </p>
           </div>
@@ -652,7 +652,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
         {newsletterEnabled && (
           <div className="space-y-3 pt-3 border-t border-[#E8E4D9]">
             <div>
-              <label className="block text-[11px] text-[#6B665E] uppercase mb-1">Headline</label>
+              <label className="block text-xs text-[#6B665E] uppercase mb-1">Headline</label>
               <input
                 type="text"
                 placeholder="Receive my field notes directly."
@@ -662,7 +662,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
               />
             </div>
             <div>
-              <label className="block text-[11px] text-[#6B665E] uppercase mb-1">Subtext</label>
+              <label className="block text-xs text-[#6B665E] uppercase mb-1">Subtext</label>
               <input
                 type="text"
                 placeholder="A periodic letter on visual culture and code."

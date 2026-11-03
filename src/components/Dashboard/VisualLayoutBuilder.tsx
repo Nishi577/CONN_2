@@ -593,7 +593,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
               <Sliders className="w-5 h-5 text-[#C85A32]" />
               Visual Identity & Spatial Composition Builder
             </h2>
-            <span className="text-[10px] font-mono-code uppercase font-bold px-2 py-0.5 rounded bg-[#FAF8F5] border border-[#E8E4D9] text-[#6B665E]">
+            <span className="text-2xs font-mono-code uppercase font-bold px-2 py-0.5 rounded bg-[#FAF8F5] border border-[#E8E4D9] text-[#6B665E]">
               {layout.themeFamily.toUpperCase()} FAMILY
             </span>
           </div>
@@ -680,7 +680,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
         >
           <Layers className="w-4 h-4" />
           <span>1. Layout Composition Mode</span>
-          <span className="text-[10px] bg-[#FAF8F5] border px-1.5 py-0.2 rounded font-normal">
+          <span className="text-2xs bg-[#FAF8F5] border px-1.5 py-0.2 rounded font-normal">
             Drag & Drop
           </span>
         </button>
@@ -696,7 +696,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
           <Palette className="w-4 h-4" />
           <span>2. Design Families ({allFamiliesList.length})</span>
           {customFamiliesList.length > 0 && (
-            <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-300 px-1.5 py-0.2 rounded font-bold">
+            <span className="text-2xs bg-emerald-50 text-emerald-800 border border-emerald-300 px-1.5 py-0.2 rounded font-bold">
               {customFamiliesList.length} Custom
             </span>
           )}
@@ -739,7 +739,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
                 <div className="font-mono-code text-xs font-bold text-[#1C1B18] group-hover:text-[#C85A32]">
                   + Add Design Family
                 </div>
-                <p className="text-[11px] text-[#6B665E] leading-tight mt-1">
+                <p className="text-xs text-[#6B665E] leading-tight mt-1">
                   Build custom grid architectures, font pairings & card rules
                 </p>
               </div>
@@ -765,7 +765,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="text-2xl">{fam.icon}</span>
                       {isCustom && (
-                        <span className="text-[9px] font-mono-code font-bold uppercase px-1.5 py-0.2 rounded bg-emerald-100 border border-emerald-300 text-emerald-800">
+                        <span className="text-2xs font-mono-code font-bold uppercase px-1.5 py-0.2 rounded bg-emerald-100 border border-emerald-300 text-emerald-800">
                           BESPOKE
                         </span>
                       )}
@@ -775,13 +775,13 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
                       <span>{fam.name}</span>
                     </div>
 
-                    <p className="text-[11px] text-[#6B665E] leading-relaxed font-light line-clamp-3">
+                    <p className="text-xs text-[#6B665E] leading-relaxed font-light line-clamp-3">
                       {fam.description}
                     </p>
                   </div>
 
                   {/* BOTTOM ACTIONS AND STATUS */}
-                  <div className="pt-2 border-t border-[#E8E4D9] flex items-center justify-between text-[10px]">
+                  <div className="pt-2 border-t border-[#E8E4D9] flex items-center justify-between text-2xs">
                     {isSelected ? (
                       <span className="font-mono-code font-bold text-[#C85A32] flex items-center gap-1">
                         <Check className="w-3 h-3" /> ACTIVE FAMILY
@@ -837,7 +837,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
               <span className="text-xs font-mono-code uppercase font-bold text-[#1C1B18] flex items-center gap-1.5">
                 <Layout className="w-4 h-4 text-[#C85A32]" /> Profile Section Sequence
               </span>
-              <span className="text-[11px] font-mono-code text-[#6B665E]">
+              <span className="text-xs font-mono-code text-[#6B665E]">
                 {layout.sections.filter((s) => s.visible).length} of {layout.sections.length} Visible
               </span>
             </div>
@@ -908,15 +908,15 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
 
                     {/* SIZING & CONTROLS TOOLBAR */}
                     {section.visible && (
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#E8E4D9]/60 text-[11px]">
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#E8E4D9]/60 text-xs">
                         <div className="flex items-center gap-1">
-                          <span className="text-[#6B665E] font-mono-code text-[10px] uppercase">Density:</span>
+                          <span className="text-[#6B665E] font-mono-code text-2xs uppercase">Density:</span>
                           {(['small', 'medium', 'large', 'full'] as SectionSizeVariant[]).map((sz) => (
                             <button
                               key={sz}
                               type="button"
                               onClick={() => handleChangeSize(idx, sz)}
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-mono-code transition-all ${
+                              className={`px-1.5 py-0.5 rounded text-2xs font-mono-code transition-all ${
                                 section.sizeVariant === sz
                                   ? 'bg-[#1C1B18] text-white font-bold'
                                   : 'bg-[#FAF8F5] text-[#6B665E] hover:text-[#1C1B18]'
@@ -966,7 +966,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
                   Live Identity Preview ({layout.themeFamily.toUpperCase()})
                 </span>
               </div>
-              <span className="text-[10px] font-mono-code text-[#6B665E]">
+              <span className="text-2xs font-mono-code text-[#6B665E]">
                 conn.bio/{profile.username}
               </span>
             </div>
@@ -1021,7 +1021,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-[#C85A32]" /> Quick Start Preset Templates:
                   </span>
-                  <span className="text-[10px] text-[#6B665E]">Click to load archetype</span>
+                  <span className="text-2xs text-[#6B665E]">Click to load archetype</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                   {PRESET_DESIGN_TEMPLATES.map((preset) => (
@@ -1032,7 +1032,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
                       className="p-2.5 rounded-lg border border-[#E8E4D9] bg-white hover:border-[#C85A32] text-left transition-all space-y-1 hover:shadow-xs group"
                     >
                       <div className="text-lg">{preset.icon}</div>
-                      <div className="font-mono-code text-[11px] font-bold group-hover:text-[#C85A32] truncate">
+                      <div className="font-mono-code text-xs font-bold group-hover:text-[#C85A32] truncate">
                         {preset.name}
                       </div>
                     </button>
@@ -1142,7 +1142,7 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
                       }`}
                     >
                       <div className="text-xs text-[#1C1B18]">{b.label}</div>
-                      <div className="text-[10px] text-[#6B665E] leading-snug">{b.desc}</div>
+                      <div className="text-2xs text-[#6B665E] leading-snug">{b.desc}</div>
                     </button>
                   ))}
                 </div>

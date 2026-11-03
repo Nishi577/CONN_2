@@ -22,7 +22,7 @@ export const UnpublishedProfileView: React.FC<UnpublishedProfileViewProps> = ({
         </div>
 
         <div className="space-y-2">
-          <span className="text-[11px] font-mono-code font-bold uppercase tracking-widest text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 inline-block">
+          <span className="text-xs font-mono-code font-bold uppercase tracking-widest text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 inline-block">
             Private Profile
           </span>
           <h2 className="font-serif-display text-2xl sm:text-3xl font-normal text-[#1C1B18]">
@@ -53,7 +53,7 @@ export const UnpublishedProfileView: React.FC<UnpublishedProfileViewProps> = ({
           </button>
         </div>
 
-        <div className="pt-4 border-t border-[#E8E4D9] text-[11px] text-[#6B665E] font-mono-code">
+        <div className="pt-4 border-t border-[#E8E4D9] text-xs text-[#6B665E] font-mono-code">
           Conn. — Living Personal Identity System
         </div>
       </div>
