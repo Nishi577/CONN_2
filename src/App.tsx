@@ -562,6 +562,7 @@ export default function App() {
                 onOpenShare={() => setIsShareOpen(true)}
                 onShowToast={showToast}
                 onNavigateHome={() => handleNavigate('landing')}
+                onNavigateDashboard={isLoggedIn ? () => handleNavigate('dashboard') : () => handleNavigate('landing')}
               />
             )}
           </>

@@ -24,6 +24,7 @@ import {
   Move,
   Settings,
   Search,
+  Copy,
 } from 'lucide-react';
 
 interface LinksManagerProps {
@@ -51,6 +52,18 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
+  const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null);
+
+  const handleCopyIndividualLink = (url: string, id: string, title?: string) => {
+    try {
+      navigator.clipboard.writeText(url);
+      setCopiedLinkId(id);
+      onShowToast(`Copied link for sharing: ${title || url}`);
+      setTimeout(() => setCopiedLinkId(null), 2000);
+    } catch {
+      onShowToast('Failed to copy link URL');
+    }
+  };
 
   // Category Collapsed states in Workspace
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
@@ -766,6 +779,18 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                             </button>
 
                             <button
+                              onClick={() => handleCopyIndividualLink(link.url, link.id, link.title)}
+                              className="p-1.5 border border-[#E8E4D9] hover:border-[#1C1B18] text-[#6B665E] hover:text-[#1C1B18] rounded-lg transition-colors cursor-pointer"
+                              title="Copy this link for sharing"
+                            >
+                              {copiedLinkId === link.id ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+
+                            <button
                               onClick={() => openEditModal(link)}
                               className="p-1.5 border border-[#E8E4D9] hover:border-[#1C1B18] text-[#6B665E] hover:text-[#1C1B18] rounded-lg transition-colors"
                             >
@@ -902,6 +927,18 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ profile, onChangePro
                   }`}
                 >
                   {link.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                </button>
+
+                <button
+                  onClick={() => handleCopyIndividualLink(link.url, link.id, link.title)}
+                  className="p-2 border border-[#E8E4D9] hover:border-[#1C1B18] text-[#6B665E] hover:text-[#1C1B18] rounded-lg transition-colors cursor-pointer"
+                  title="Copy this link for sharing"
+                >
+                  {copiedLinkId === link.id ? (
+                    <Check className="w-4 h-4 text-emerald-600" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </button>
 
                 <button

@@ -604,34 +604,69 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onChangeP
               </span>
             )}
           </div>
-          <div className="flex items-center bg-white border border-[#E8E4D9] rounded-xl px-3 focus-within:border-[#1C1B18] transition-colors">
-            <span className="text-xs text-[#6B665E] font-mono-code shrink-0">conn.bio/</span>
+          <div className="flex items-center bg-white border border-[#E8E4D9] rounded-xl px-3 py-1 focus-within:border-[#1C1B18] transition-colors gap-2">
+            <span className="text-xs text-[#6B665E] font-mono-code shrink-0 select-none">conn.bio/</span>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
               placeholder="username-slug"
-              className="w-full py-2.5 pl-1 text-sm bg-transparent font-mono-code focus:outline-hidden"
+              className="w-full py-1.5 pl-0.5 text-sm bg-transparent font-mono-code focus:outline-hidden"
             />
             <button
               type="button"
               onClick={handleCopyUrl}
-              className="p-1 text-[#6B665E] hover:text-[#1C1B18] transition-colors"
-              title="Copy complete URL"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
+                copiedUrl
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] shadow-2xs'
+              }`}
+              title="Copy your custom profile link for sharing"
             >
-              {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedUrl ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-white" />
+                  <span className="font-bold">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Link</span>
+                </>
+              )}
             </button>
           </div>
           {usernameStatus.reason && !usernameStatus.isAvailable && (
-            <p className="text-[11px] text-rose-600 mt-1 font-mono-code flex items-center gap-1">
-              <AlertCircle className="w-3 h-3 shrink-0" />
+            <p className="text-[11px] text-rose-600 mt-1.5 font-mono-code flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{usernameStatus.reason}</span>
             </p>
           )}
-          <p className="text-[10px] text-[#6B665E] mt-1 font-mono-code">
-            Direct public link: {publicUrl}
-          </p>
+          <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-code">
+            <span className="text-[#6B665E] truncate">
+              Shareable link: <strong className="text-[#1C1B18]">{publicUrl}</strong>
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCopyUrl}
+                className="text-[#C85A32] hover:underline font-bold cursor-pointer"
+              >
+                {copiedUrl ? '✓ Link Copied' : 'Copy Custom Link'}
+              </button>
+              <span className="text-[#E8E4D9]">|</span>
+              <a
+                href={publicUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[#6B665E] hover:text-[#1C1B18] flex items-center gap-0.5"
+              >
+                <span>Preview</span>
+                <ExternalLink className="w-2.5 h-2.5" />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 

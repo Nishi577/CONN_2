@@ -100,7 +100,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       onShowToast(`Copied profile link: ${url}`);
       setTimeout(() => setCopiedPublicLink(false), 2000);
     } catch {
-      onShowToast('Failed to copy profile link', 'error');
+      onShowToast('Failed to copy profile link');
     }
   };
 
@@ -262,18 +262,18 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     activeCustomFamily?.fontFamilyDisplay === 'mono-code'
       ? 'font-mono-code'
       : activeCustomFamily?.fontFamilyDisplay === 'serif-editorial'
-      ? 'font-serif-editorial'
-      : activeCustomFamily?.fontFamilyDisplay === 'sans-ui'
-      ? 'font-sans-ui'
-      : activeCustomFamily?.fontFamilyDisplay === 'serif-display'
-      ? 'font-serif-display'
-      : themeFamily === 'terminal'
-      ? 'font-mono-code'
-      : themeFamily === 'paper' || themeFamily === 'editorial'
-      ? 'font-serif-editorial'
-      : theme.fontFamilyDisplay === 'mono-code'
-      ? 'font-mono-code'
-      : 'font-serif-display';
+        ? 'font-serif-editorial'
+        : activeCustomFamily?.fontFamilyDisplay === 'sans-ui'
+          ? 'font-sans-ui'
+          : activeCustomFamily?.fontFamilyDisplay === 'serif-display'
+            ? 'font-serif-display'
+            : themeFamily === 'terminal'
+              ? 'font-mono-code'
+              : themeFamily === 'paper' || themeFamily === 'editorial'
+                ? 'font-serif-editorial'
+                : theme.fontFamilyDisplay === 'mono-code'
+                  ? 'font-mono-code'
+                  : 'font-serif-display';
 
   // Sections configuration
   const defaultSectionsList: ProfileSectionConfig[] = (
@@ -794,9 +794,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           {profile.skills.map((skill, sIdx) => (
             <span
               key={sIdx}
-              className={`text-xs font-mono-code px-3 py-1.5 border ${
-                themeFamily === 'modernist' ? 'rounded-none border-2' : 'rounded-lg'
-              }`}
+              className={`text-xs font-mono-code px-3 py-1.5 border ${themeFamily === 'modernist' ? 'rounded-none border-2' : 'rounded-lg'
+                }`}
               style={{ borderColor: theme.borderHex, color: theme.textHex, backgroundColor: theme.cardBgHex }}
             >
               {skill}
@@ -1072,8 +1071,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       socialsOverride?.alignment === 'center'
         ? 'justify-center'
         : socialsOverride?.alignment === 'right'
-        ? 'justify-end'
-        : 'justify-start';
+          ? 'justify-end'
+          : 'justify-start';
 
     return (
       <section key={cfg.instanceKey || cfg.id} className="pt-2 border-t" style={{ borderColor: theme.borderHex }}>
@@ -1266,9 +1265,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
   return (
     <div
-      className={`min-h-full w-full transition-colors duration-300 relative ${
-        theme.showNoiseGrain ? 'paper-grain' : ''
-      }`}
+      className={`min-h-full w-full transition-colors duration-300 relative ${theme.showNoiseGrain ? 'paper-grain' : ''
+        }`}
       style={{
         background: theme.useGradientBg && theme.gradientBgHex
           ? `linear-gradient(135deg, ${theme.bgHex} 0%, ${theme.gradientBgHex} 100%)`
@@ -1285,34 +1283,78 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       {/* Top Floating Header */}
       {!isEmbeddedPreview && (
         <header
-          className="sticky top-0 z-40 w-full px-4 sm:px-8 py-3.5 flex items-center justify-between backdrop-blur-md bg-opacity-80 border-b transition-colors"
+          className="sticky top-0 z-40 w-full px-4 sm:px-8 py-3 flex items-center justify-between backdrop-blur-md bg-opacity-80 border-b transition-colors"
           style={{ borderColor: theme.borderHex }}
         >
-          <div className="flex items-center gap-2">
-            {onNavigateHome ? (
+          <div className="flex items-center gap-2 sm:gap-3">
+            {onNavigateDashboard && (
               <button
                 type="button"
-                onClick={onNavigateHome}
-                className={`text-xl font-normal tracking-tight hover:opacity-75 transition-opacity cursor-pointer ${displayFontClass}`}
-                title="Go to Conn Home"
+                onClick={onNavigateDashboard}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border shadow-2xs transition-all hover:scale-105 cursor-pointer shrink-0"
+                style={{
+                  borderColor: theme.borderHex,
+                  backgroundColor: theme.textHex,
+                  color: theme.bgHex,
+                }}
+                title="Return to Creator Dashboard"
               >
-                Conn.
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Dashboard</span>
               </button>
-            ) : (
-              <span className={`text-xl font-normal tracking-tight ${displayFontClass}`}>Conn.</span>
             )}
-            <span
-              className="text-[10px] uppercase font-mono-code px-2 py-0.5 rounded-full border opacity-70"
-              style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
-            >
-              @{profile.username}
-            </span>
+
+            <div className="flex items-center gap-2">
+              {onNavigateHome ? (
+                <button
+                  type="button"
+                  onClick={onNavigateHome}
+                  className={`text-xl font-normal tracking-tight hover:opacity-75 transition-opacity cursor-pointer ${displayFontClass}`}
+                  title="Go to Conn Home"
+                >
+                  Conn.
+                </button>
+              ) : (
+                <span className={`text-xl font-normal tracking-tight ${displayFontClass}`}>Conn.</span>
+              )}
+              <span
+                className="text-[10px] uppercase font-mono-code px-2 py-0.5 rounded-full border opacity-70"
+                style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
+              >
+                @{profile.username}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* One-click Copy Custom Link button for sharing */}
+            <button
+              type="button"
+              onClick={handleCopyPublicUrl}
+              className="flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-full border transition-all hover:scale-105 cursor-pointer shadow-2xs"
+              style={{
+                borderColor: theme.borderHex,
+                backgroundColor: theme.cardBgHex,
+                color: theme.textHex,
+              }}
+              title="Copy your custom Linktree profile link for sharing"
+            >
+              {copiedPublicLink ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-emerald-600 font-bold">Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Link</span>
+                </>
+              )}
+            </button>
+
             <button
               onClick={() => setIsQrModalOpen(true)}
-              className="p-2 rounded-full border transition-transform hover:scale-105"
+              className="p-2 rounded-full border transition-transform hover:scale-105 cursor-pointer"
               style={{ borderColor: theme.borderHex, color: theme.textHex }}
               title="Identity QR Code"
             >
@@ -1320,7 +1362,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             </button>
             <button
               onClick={onOpenShare}
-              className="flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-full transition-all hover:scale-105"
+              className="flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-full transition-all hover:scale-105 cursor-pointer"
               style={{
                 backgroundColor: theme.textHex,
                 color: theme.bgHex,
@@ -1335,7 +1377,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
       {/* Main Profile Canvas */}
       <main className="max-w-xl mx-auto px-5 sm:px-6 py-8 sm:py-12 font-sans-ui space-y-8">
-        
+
         {/* AUDIENCE CONTEXT BAR */}
         <div className="p-1.5 rounded-xl border flex items-center gap-1 overflow-x-auto text-[11px]" style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}>
           <span className="text-[10px] font-mono-code uppercase px-2 py-1 shrink-0 font-bold" style={{ color: theme.mutedHex }}>
@@ -1350,9 +1392,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             <button
               key={ctx.id}
               onClick={() => setActiveContext(ctx.id as any)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ${
-                activeContext === ctx.id ? 'font-bold underline' : 'opacity-70 hover:opacity-100'
-              }`}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ${activeContext === ctx.id ? 'font-bold underline' : 'opacity-70 hover:opacity-100'
+                }`}
               style={{
                 backgroundColor: activeContext === ctx.id ? theme.textHex : 'transparent',
                 color: activeContext === ctx.id ? theme.bgHex : theme.textHex,
@@ -1415,9 +1456,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                         type="button"
                         key={opt.id}
                         onClick={() => setInquiryIntent(opt.id as any)}
-                        className={`p-2 rounded-lg border text-xs text-left ${
-                          inquiryIntent === opt.id ? 'bg-[#1C1B18] text-[#FAF8F5] font-bold' : 'bg-[#FAF8F5] text-[#1C1B18]'
-                        }`}
+                        className={`p-2 rounded-lg border text-xs text-left ${inquiryIntent === opt.id ? 'bg-[#1C1B18] text-[#FAF8F5] font-bold' : 'bg-[#FAF8F5] text-[#1C1B18]'
+                          }`}
                       >
                         {opt.label}
                       </button>
