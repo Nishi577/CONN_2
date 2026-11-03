@@ -65,11 +65,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <nav className="hidden md:flex items-center gap-1 text-xs font-medium">
             <button
               onClick={() => onNavigate('landing')}
-              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
-                currentView === 'landing'
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${currentView === 'landing'
                   ? 'bg-[#E8E4D9]/60 text-[#1C1B18]'
                   : 'text-[#6B665E] hover:text-[#1C1B18]'
-              }`}
+                }`}
             >
               <Home className="w-3.5 h-3.5" />
               <span>Home</span>
@@ -78,11 +77,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isLoggedIn && (
               <button
                 onClick={() => onNavigate('dashboard')}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
-                  currentView === 'dashboard'
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${currentView === 'dashboard'
                     ? 'bg-[#1C1B18] text-[#FAF8F5]'
                     : 'text-[#6B665E] hover:text-[#1C1B18]'
-                }`}
+                  }`}
               >
                 <Layout className="w-3.5 h-3.5" />
                 <span>Dashboard Workspace</span>
@@ -157,11 +155,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="md:hidden pt-3 pb-2 mt-3 border-t border-[#E8E4D9] flex flex-col gap-1.5 animate-in slide-in-from-top-2 duration-150">
           <button
             onClick={() => handleMobileNav('landing')}
-            className={`w-full px-3 py-2.5 rounded-xl text-xs font-medium flex items-center gap-2 text-left transition-colors ${
-              currentView === 'landing'
+            className={`w-full px-3 py-2.5 rounded-xl text-xs font-medium flex items-center gap-2 text-left transition-colors ${currentView === 'landing'
                 ? 'bg-[#E8E4D9]/70 text-[#1C1B18]'
                 : 'text-[#6B665E] hover:bg-[#E8E4D9]/30 hover:text-[#1C1B18]'
-            }`}
+              }`}
           >
             <Home className="w-4 h-4" />
             <span>Home</span>
@@ -170,11 +167,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           {isLoggedIn && (
             <button
               onClick={() => handleMobileNav('dashboard')}
-              className={`w-full px-3 py-2.5 rounded-xl text-xs font-medium flex items-center gap-2 text-left transition-colors ${
-                currentView === 'dashboard'
+              className={`w-full px-3 py-2.5 rounded-xl text-xs font-medium flex items-center gap-2 text-left transition-colors ${currentView === 'dashboard'
                   ? 'bg-[#1C1B18] text-[#FAF8F5]'
                   : 'text-[#6B665E] hover:bg-[#E8E4D9]/30 hover:text-[#1C1B18]'
-              }`}
+                }`}
             >
               <Layout className="w-4 h-4" />
               <span>Dashboard Workspace</span>
