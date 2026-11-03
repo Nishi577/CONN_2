@@ -14,6 +14,10 @@ import {
   loadCurrentUserId,
   clearCurrentUserId,
   createBlankProfileForUser,
+  loadCurrentUser,
+  loadUserAccount,
+  loadProfileForUser,
+  saveProfileForUser,
 } from './lib/storage';
 import {
   supabase,
@@ -213,7 +217,22 @@ export default function App() {
     let isMounted = true;
 
     const restoreSession = async () => {
-      if (!isSupabaseConfigured) return;
+      if (!isSupabaseConfigured) {
+        const localUsername = loadCurrentUser();
+        if (localUsername && isMounted) {
+          const localAccount = loadUserAccount(localUsername);
+          if (localAccount) {
+            setCurrentUser(localAccount);
+            setLoggedIn(true);
+            setIsLoggedInState(true);
+            const userProf = loadProfileForUser(localUsername);
+            if (userProf) {
+              setActiveProfile(userProf);
+            }
+          }
+        }
+        return;
+      }
 
       try {
         const {
@@ -412,7 +431,13 @@ export default function App() {
         await upsertProfileToSupabase(blank, user.id);
       }
     } else {
-      setActiveProfile(loadActiveProfile());
+      let userProf = loadProfileForUser(user.username);
+      if (!userProf) {
+        userProf = createBlankProfileForUser(user);
+        saveProfileForUser(userProf);
+      }
+      setActiveProfile(userProf);
+      saveActiveProfile(userProf);
     }
 
     setCurrentView('dashboard');
@@ -467,7 +492,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1C1B18] font-sans-ui flex flex-col antialiased">
+    <div
+      className={`min-h-screen ${currentView === 'dashboard' ? 'lg:h-screen lg:overflow-hidden' : ''
+        } bg-[#FAF8F5] text-[#1C1B18] font-sans-ui flex flex-col antialiased`}
+    >
       {/* Navigation header bar */}
       <Navbar
         currentView={currentView}
@@ -484,7 +512,10 @@ export default function App() {
       />
 
       {/* Main View Switcher */}
-      <div className="flex-1">
+      <div
+        className={`flex-1 min-h-0 ${currentView === 'dashboard' ? 'lg:overflow-hidden lg:flex lg:flex-col' : ''
+          }`}
+      >
         {currentView === 'landing' && (
           <LandingPage
             onSignUp={() => {
@@ -525,7 +556,7 @@ export default function App() {
             {publicProfileState === 'loading' && (
               <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] gap-3">
                 <Loader2 className="w-8 h-8 text-[#1C1B18] animate-spin" />
-                <p className="font-mono-code text-xs text-[#6B665E]">
+                <p className="font-mono-code text-base text-[#6B665E]">
                   Loading @{publicSlug}&apos;s profile...
                 </p>
               </div>

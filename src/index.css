@@ -4,15 +4,22 @@
   .font-serif-display {
     font-family: 'Instrument Serif', Georgia, serif;
   }
+
   .font-serif-editorial {
     font-family: 'Newsreader', Georgia, serif;
+    font-size: 14px;
   }
+
   .font-sans-ui {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 14px;
   }
+
   .font-mono-code {
     font-family: 'Space Grotesk', monospace;
+    font-size: 14px;
   }
+
 }
 
 /* Custom subtle scrollbar */
@@ -20,19 +27,24 @@
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: rgba(120, 115, 105, 0.2);
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(120, 115, 105, 0.35);
 }
 
 /* Smooth active focus rings for input controls */
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
   outline: none;
 }
 
@@ -49,18 +61,24 @@ input:focus, textarea:focus, select:focus {
 
 /* Motion studio keyframes and animation utility classes */
 @keyframes floatSubtle {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-8px);
   }
 }
 
 @keyframes bounceSubtle {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-6px);
   }
@@ -70,6 +88,7 @@ input:focus, textarea:focus, select:focus {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -80,6 +99,7 @@ input:focus, textarea:focus, select:focus {
     opacity: 0;
     transform: translateY(18px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -91,6 +111,7 @@ input:focus, textarea:focus, select:focus {
     opacity: 0;
     transform: translateY(22px) scale(0.97);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -101,9 +122,11 @@ input:focus, textarea:focus, select:focus {
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -128,4 +151,3 @@ input:focus, textarea:focus, select:focus {
 .animate-reveal-up {
   animation: revealUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-

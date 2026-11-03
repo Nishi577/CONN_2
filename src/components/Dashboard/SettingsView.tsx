@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ConnProfile } from '../../types';
 import { SAMPLE_PROFILES } from '../../data/mockData';
+import { createBlankProfileForUser, loadCurrentUser } from '../../lib/storage';
 import {
   Download,
   Upload,
@@ -117,13 +118,29 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   const handleResetDefaults = () => {
-    if (confirm('Reset profile to default sample data (Elena Rostova)?')) {
-      const resetProfile = SAMPLE_PROFILES[0];
-      onChangeProfile(resetProfile);
-      setIsPublic(resetProfile.isPublic);
-      setPasswordProtected(resetProfile.isPasswordProtected || false);
-      setPasswordCode(resetProfile.passwordCode || '');
-      onShowToast('Reset to default sample profile');
+    const currentUser = loadCurrentUser();
+    if (confirm('Clear profile content and reset workspace? This cannot be undone.')) {
+      if (currentUser && currentUser === profile.username) {
+        const blank = createBlankProfileForUser({
+          id: profile.id,
+          email: profile.contactEmail || '',
+          name: profile.name,
+          username: profile.username,
+          createdAt: new Date().toISOString().split('T')[0],
+        });
+        onChangeProfile(blank);
+        setIsPublic(true);
+        setPasswordProtected(false);
+        setPasswordCode('');
+        onShowToast('Profile cleared. Start fresh with a blank workspace!');
+      } else {
+        const resetProfile = SAMPLE_PROFILES[0];
+        onChangeProfile(resetProfile);
+        setIsPublic(resetProfile.isPublic);
+        setPasswordProtected(resetProfile.isPasswordProtected || false);
+        setPasswordCode(resetProfile.passwordCode || '');
+        onShowToast('Reset to default sample profile');
+      }
     }
   };
 
@@ -132,6 +149,27 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       <div className="pb-4 border-b border-[#E8E4D9]">
         <h2 className="font-serif-display text-2xl font-normal text-[#1C1B18]">Workspace & Account Settings</h2>
         <p className="text-xs text-[#6B665E]">Manage profile visibility, security, SEO metadata, and data portability.</p>
+      </div>
+
+      {/* ACCOUNT & IDENTITY OVERVIEW */}
+      <div className="p-6 bg-white border border-[#E8E4D9] rounded-2xl space-y-3">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C1B18]">
+          Connected Account Information
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          <div className="p-3 bg-[#FAF8F5] border border-[#E8E4D9] rounded-xl">
+            <span className="text-[10px] font-mono-code uppercase text-[#6B665E] block">Creator Name</span>
+            <span className="text-xs font-medium text-[#1C1B18] font-mono-code truncate block">{profile.name}</span>
+          </div>
+          <div className="p-3 bg-[#FAF8F5] border border-[#E8E4D9] rounded-xl">
+            <span className="text-[10px] font-mono-code uppercase text-[#6B665E] block">Profile Handle</span>
+            <span className="text-xs font-medium text-[#1C1B18] font-mono-code truncate block">@{profile.username}</span>
+          </div>
+          <div className="p-3 bg-[#FAF8F5] border border-[#E8E4D9] rounded-xl">
+            <span className="text-[10px] font-mono-code uppercase text-[#6B665E] block">Public URL</span>
+            <span className="text-xs font-medium text-[#C85A32] font-mono-code truncate block">conn.bio/{profile.username}</span>
+          </div>
+        </div>
       </div>
 
       {/* VISIBILITY & PRIVACY */}
