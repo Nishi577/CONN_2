@@ -32,6 +32,7 @@ import {
   MapPin,
   Check,
   ArrowUpRight,
+  ArrowLeft,
   Send,
   Globe,
   Mail,
@@ -64,6 +65,8 @@ interface PublicProfileProps {
   onOpenShare: () => void;
   onShowToast: (msg: string) => void;
   isEmbeddedPreview?: boolean;
+  onNavigateHome?: () => void;
+  onNavigateDashboard?: () => void;
 }
 
 export const PublicProfile: React.FC<PublicProfileProps> = ({
@@ -71,9 +74,35 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   onOpenShare,
   onShowToast,
   isEmbeddedPreview = false,
+  onNavigateHome,
+  onNavigateDashboard,
 }) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [copiedPublicLink, setCopiedPublicLink] = useState(false);
+
+  const handleCopyPublicUrl = async () => {
+    const url = typeof window !== 'undefined'
+      ? `${window.location.origin}/${profile.username}`
+      : `https://conn.bio/${profile.username}`;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const el = document.createElement('textarea');
+        el.value = url;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
+      setCopiedPublicLink(true);
+      onShowToast(`Copied profile link: ${url}`);
+      setTimeout(() => setCopiedPublicLink(false), 2000);
+    } catch {
+      onShowToast('Failed to copy profile link', 'error');
+    }
+  };
 
   // Audience Context Filter (All, Recruiter, Developer, Client, Academic)
   const [activeContext, setActiveContext] = useState<AudienceContext>('public');
@@ -1260,7 +1289,18 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.borderHex }}
         >
           <div className="flex items-center gap-2">
-            <span className={`text-xl font-normal tracking-tight ${displayFontClass}`}>Conn.</span>
+            {onNavigateHome ? (
+              <button
+                type="button"
+                onClick={onNavigateHome}
+                className={`text-xl font-normal tracking-tight hover:opacity-75 transition-opacity cursor-pointer ${displayFontClass}`}
+                title="Go to Conn Home"
+              >
+                Conn.
+              </button>
+            ) : (
+              <span className={`text-xl font-normal tracking-tight ${displayFontClass}`}>Conn.</span>
+            )}
             <span
               className="text-[10px] uppercase font-mono-code px-2 py-0.5 rounded-full border opacity-70"
               style={{ borderColor: theme.borderHex, color: theme.mutedHex }}

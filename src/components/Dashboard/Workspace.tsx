@@ -32,12 +32,16 @@ import {
   BookOpen,
   MousePointer,
   Compass,
+  Globe,
+  Lock,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 interface WorkspaceProps {
   profile: ConnProfile;
   onChangeProfile: (updated: ConnProfile) => void;
-  onShowToast: (msg: string) => void;
+  onShowToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
   onOpenShare: () => void;
   onViewPublicProfile: () => void;
   onLogout: () => void;
@@ -130,6 +134,23 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const [activeTab, setActiveTab] = useState<DashboardTab>('links');
   const [previewDevice, setPreviewDevice] = useState<'mobile' | 'desktop'>('mobile');
   const [isHelpGuideOpen, setIsHelpGuideOpen] = useState(false);
+  const [copiedHeaderUrl, setCopiedHeaderUrl] = useState(false);
+
+  const handleCopyHeaderUrl = async () => {
+    const url = typeof window !== 'undefined'
+      ? `${window.location.origin}/${profile.username}`
+      : `https://conn.bio/${profile.username}`;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      }
+      setCopiedHeaderUrl(true);
+      onShowToast(`Public profile URL copied: ${url}`);
+      setTimeout(() => setCopiedHeaderUrl(false), 2000);
+    } catch {
+      onShowToast('Failed to copy URL', 'error');
+    }
+  };
 
   // Compute profile completion rate
   const completionTasks = [
@@ -147,12 +168,53 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     <div className="h-full flex-1 flex flex-col min-h-0 bg-[#FAF8F5] text-[#1C1B18] font-sans-ui overflow-hidden">
       {/* Sub-header status bar */}
       <div className="shrink-0 bg-[#1C1B18] text-[#FAF8F5] px-4 sm:px-8 py-2.5 flex items-center justify-between text-xs font-mono-code z-10 shadow-xs">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
           <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Workspace
           </span>
           <span className="hidden sm:inline text-[#9C978E]">|</span>
-          <span className="hidden sm:inline text-[#FAF8F5]/80">conn.bio/{profile.username}</span>
+          <div className="hidden sm:flex items-center gap-1.5">
+            <span className="text-[#FAF8F5]/80">conn.bio/{profile.username}</span>
+            <button
+              type="button"
+              onClick={handleCopyHeaderUrl}
+              className="p-1 hover:text-white transition-colors cursor-pointer"
+              title="Copy complete public URL"
+            >
+              {copiedHeaderUrl ? (
+                <Check className="w-3 h-3 text-emerald-400" />
+              ) : (
+                <Copy className="w-3 h-3 text-[#9C978E] hover:text-[#FAF8F5]" />
+              )}
+            </button>
+          </div>
+
+          {/* Publication Status Pill & Quick Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              const nextStatus = !(profile.isPublic ?? true);
+              onChangeProfile({ ...profile, isPublic: nextStatus });
+              onShowToast(
+                nextStatus
+                  ? `Profile published! It is now live at conn.bio/${profile.username}`
+                  : 'Profile unpublished. It is now private.'
+              );
+            }}
+            className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase transition-all cursor-pointer ${
+              (profile.isPublic ?? true)
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
+                : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
+            }`}
+            title="Click to toggle Public / Draft status"
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                (profile.isPublic ?? true) ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+              }`}
+            />
+            <span>{(profile.isPublic ?? true) ? 'Published' : 'Draft / Private'}</span>
+          </button>
         </div>
 
         <div className="flex items-center gap-2.5">
