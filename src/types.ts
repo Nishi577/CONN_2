@@ -338,6 +338,10 @@ export interface ConnProfile {
   customLinkShape?: LinkShape;
   isPublic: boolean;
   isPasswordProtected?: boolean;
+  passwordCode?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImageUrl?: string;
   links: LinkItem[];
   socials: SocialProfile[];
   newsletterEnabled?: boolean;

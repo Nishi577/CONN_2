@@ -64,6 +64,61 @@ export default function App() {
   const handleLoginSuccess = (user: UserAccount) => {
     setLoggedIn(true);
     setIsLoggedInState(true);
+
+    // Look for matching profile or generate new one
+    const cleanUsername = user.username.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    const currentList = loadAllProfiles();
+    const existing = currentList.find(
+      (p) => p.username.toLowerCase() === cleanUsername
+    );
+
+    if (existing) {
+      setActiveProfile(existing);
+      saveActiveProfile(existing);
+    } else {
+      const newProfile: ConnProfile = {
+        id: `profile-${cleanUsername}-${Date.now()}`,
+        username: cleanUsername,
+        name: user.name || cleanUsername,
+        role: 'Creator & Technologist',
+        organization: 'Independent',
+        bio: 'Welcome to my space. Curating projects, notes, and links.',
+        avatarUrl: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400`,
+        themeId: 'warm-paper',
+        isPublic: true,
+        contactEmail: user.email,
+        links: [
+          {
+            id: `link-${Date.now()}-1`,
+            title: 'Welcome to My Conn Space',
+            url: 'https://conn.bio',
+            description: 'My newly created personal link page.',
+            category: 'Writing & Essays',
+            isActive: true,
+            clicks: 0,
+            order: 1,
+            isFeatured: true,
+          },
+          {
+            id: `link-${Date.now()}-2`,
+            title: 'Projects & Repositories',
+            url: `https://github.com/${cleanUsername}`,
+            category: 'Projects & Work',
+            isActive: true,
+            clicks: 0,
+            order: 2,
+            iconName: 'Folder',
+          },
+        ],
+        socials: [
+          { platform: 'website', url: 'https://conn.bio' },
+          { platform: 'email', url: `mailto:${user.email}` },
+        ],
+      };
+      setActiveProfile(newProfile);
+      saveActiveProfile(newProfile);
+      setAllProfiles(loadAllProfiles());
+    }
     setCurrentView('dashboard');
   };
 
@@ -73,6 +128,16 @@ export default function App() {
     setCurrentView('landing');
     showToast('Signed out of workspace', 'info');
   };
+
+  // Sync profile when updated externally (e.g. from background clicks or storage)
+  useEffect(() => {
+    const handleProfileSync = () => {
+      setActiveProfile(loadActiveProfile());
+      setAllProfiles(loadAllProfiles());
+    };
+    window.addEventListener('conn_profile_updated', handleProfileSync);
+    return () => window.removeEventListener('conn_profile_updated', handleProfileSync);
+  }, []);
 
   // Listen to hash routes e.g. #elenarostova to view public profiles
   useEffect(() => {
@@ -96,11 +161,7 @@ export default function App() {
   }, [allProfiles]);
 
   return (
-    <div
-      className={`min-h-screen ${
-        currentView === 'dashboard' ? 'lg:h-screen lg:overflow-hidden' : ''
-      } bg-[#FAF8F5] text-[#1C1B18] font-sans-ui flex flex-col antialiased`}
-    >
+    <div className="min-h-screen bg-[#FAF8F5] text-[#1C1B18] font-sans-ui flex flex-col antialiased">
       {/* Navigation header bar */}
       <Navbar
         currentView={currentView}
@@ -117,11 +178,7 @@ export default function App() {
       />
 
       {/* Main View Switcher */}
-      <div
-        className={`flex-1 min-h-0 ${
-          currentView === 'dashboard' ? 'lg:overflow-hidden lg:flex lg:flex-col' : ''
-        }`}
-      >
+      <div className="flex-1">
         {currentView === 'landing' && (
           <LandingPage
             onSignUp={() => {
@@ -162,6 +219,7 @@ export default function App() {
             profile={activeProfile}
             onOpenShare={() => setIsShareOpen(true)}
             onShowToast={showToast}
+            onBack={() => setCurrentView(isLoggedIn ? 'dashboard' : 'landing')}
           />
         )}
       </div>
