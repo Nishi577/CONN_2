@@ -286,11 +286,13 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
   };
 
   // Move item up / down
-  const handleMove = (index: number, direction: 'up' | 'down') => {
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+  const handleMove = (itemId: string, direction: 'up' | 'down') => {
+    const currentIndex = timeline.findIndex((t) => t.id === itemId);
+    if (currentIndex < 0) return;
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (targetIndex < 0 || targetIndex >= timeline.length) return;
     const updated = [...timeline];
-    const [moved] = updated.splice(index, 1);
+    const [moved] = updated.splice(currentIndex, 1);
     updated.splice(targetIndex, 0, moved);
     onChangeProfile({
       ...profile,
@@ -372,26 +374,11 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
             <button
               type="button"
               onClick={() => handleOpenAdd()}
-              className="px-4 py-2 bg-[#1C1B18] hover:bg-[#33312B] text-[#FAF8F5] rounded-xl text-xs font-mono-code font-bold flex items-center gap-1.5 shadow-xs transition-all active:scale-98"
+              className="px-4 py-2 bg-[#C85A32] hover:bg-[#B34D28] text-white rounded-xl text-xs font-mono-code font-bold flex items-center gap-1.5 shadow-xs transition-all active:scale-98"
             >
-              <Plus className="w-4 h-4 text-[#D49A3E]" />
-              <span>Add Milestone</span>
+              <Plus className="w-4 h-4" />
+              <span>Add Work Milestone</span>
             </button>
-          </div>
-        </div>
-
-        {/* Feature Output Explainer Card */}
-        <div className="p-4 bg-white border border-[#E8E4D9] rounded-2xl flex items-start gap-3 shadow-2xs">
-          <span className="p-2 bg-[#FAF8F5] border border-[#E8E4D9] rounded-xl text-[#C85A32] shrink-0 mt-0.5">
-            <Sparkles className="w-4 h-4" />
-          </span>
-          <div className="space-y-1 text-xs">
-            <span className="font-bold text-[#1C1B18] uppercase tracking-wider text-[10px] font-mono-code block">
-              Public Profile Output & How It Works
-            </span>
-            <p className="text-[#6B665E] leading-relaxed">
-              Your career milestones and projects render as an editorial chronological stream with company badges, date ranges, and achievement bullet points. Visitors can expand items to read detailed contributions.
-            </p>
           </div>
         </div>
 
@@ -686,8 +673,8 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
                     <div className="flex items-center bg-[#FAF8F5] border border-[#E8E4D9] rounded-lg p-0.5">
                       <button
                         type="button"
-                        onClick={() => handleMove(index, 'up')}
-                        disabled={index === 0}
+                        onClick={() => handleMove(item.id, 'up')}
+                        disabled={timeline.findIndex((t) => t.id === item.id) === 0}
                         className="p-1 text-[#6B665E] hover:text-[#1C1B18] disabled:opacity-30 disabled:pointer-events-none rounded"
                         title="Move Up"
                       >
@@ -695,8 +682,8 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleMove(index, 'down')}
-                        disabled={index === timeline.length - 1}
+                        onClick={() => handleMove(item.id, 'down')}
+                        disabled={timeline.findIndex((t) => t.id === item.id) === timeline.length - 1}
                         className="p-1 text-[#6B665E] hover:text-[#1C1B18] disabled:opacity-30 disabled:pointer-events-none rounded"
                         title="Move Down"
                       >

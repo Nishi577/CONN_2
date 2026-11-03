@@ -23,7 +23,7 @@ export const getBackgroundStyleAndElements = (
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
-    overflow: 'hidden',
+    overflowX: 'hidden',
   };
 
   let overlayElements: React.ReactNode = null;
