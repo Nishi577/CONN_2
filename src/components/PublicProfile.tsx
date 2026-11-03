@@ -58,15 +58,19 @@ import {
   Cpu,
   FileText,
   BookmarkCheck,
+  Lock,
+  UserPlus,
+  Download,
 } from 'lucide-react';
 
 interface PublicProfileProps {
   profile: ConnProfile;
   onOpenShare: () => void;
-  onShowToast: (msg: string) => void;
+  onShowToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
   isEmbeddedPreview?: boolean;
   onNavigateHome?: () => void;
   onNavigateDashboard?: () => void;
+  onBack?: () => void;
 }
 
 export const PublicProfile: React.FC<PublicProfileProps> = ({
@@ -76,6 +80,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   isEmbeddedPreview = false,
   onNavigateHome,
   onNavigateDashboard,
+  onBack,
 }) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -109,7 +114,9 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
   // Smart Contact Router Modal
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
-  const [inquiryIntent, setInquiryIntent] = useState<'hiring' | 'collaboration' | 'freelance' | 'speaking' | 'networking'>('collaboration');
+  const [inquiryIntent, setInquiryIntent] = useState<
+    'hiring' | 'collaboration' | 'freelance' | 'speaking' | 'networking'
+  >('collaboration');
   const [inquiryName, setInquiryName] = useState('');
   const [inquiryEmail, setInquiryEmail] = useState('');
   const [inquiryMessage, setInquiryMessage] = useState('');
@@ -121,6 +128,55 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   useEffect(() => {
     recordProfileView();
   }, []);
+
+
+  // Passcode Lock Screen State
+  const [isUnlocked, setIsUnlocked] = useState(!profile.isPasswordProtected);
+  const [passcodeAttempt, setPasscodeAttempt] = useState('');
+  const [passcodeError, setPasscodeError] = useState(false);
+
+  useEffect(() => {
+    setIsUnlocked(!profile.isPasswordProtected);
+  }, [profile.isPasswordProtected]);
+
+  // Dynamic SEO Document Title Update
+  useEffect(() => {
+    if (!isEmbeddedPreview) {
+      document.title = profile.seoTitle || `${profile.name} (@${profile.username}) — Conn`;
+    }
+  }, [profile.seoTitle, profile.name, profile.username, isEmbeddedPreview]);
+
+  // vCard (.vcf) Contact Download Generator
+  const handleDownloadVCard = () => {
+    const websiteUrl = profile.customDomain
+      ? `https://${profile.customDomain}`
+      : `https://conn.bio/${profile.username}`;
+    const vcardLines = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `FN:${profile.name}`,
+      `N:${profile.name.split(' ').reverse().join(';')};;;`,
+      profile.organization ? `ORG:${profile.organization}` : '',
+      profile.role ? `TITLE:${profile.role}` : '',
+      profile.contactEmail ? `EMAIL;TYPE=INTERNET:${profile.contactEmail}` : '',
+      `URL:${websiteUrl}`,
+      profile.bio ? `NOTE:${profile.bio.replace(/\n/g, ' ')}` : '',
+      'END:VCARD',
+    ]
+      .filter(Boolean)
+      .join('\r\n');
+
+    const blob = new Blob([vcardLines], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${profile.username}.vcf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    onShowToast(`Saved ${profile.name}'s contact card (.vcf)`);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -134,6 +190,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     }
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isInquiryModalOpen, isQrModalOpen]);
+
 
   // Category collapse states
   const [collapsedCats, setCollapsedCats] = useState<Record<string, boolean>>(() => {
@@ -159,21 +216,30 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   const theme =
     profile.themeId === 'custom' && profile.customTheme
       ? profile.customTheme
-      : EDITORIAL_THEMES.find((t) => t.id === profile.themeId) || profile.customTheme || EDITORIAL_THEMES[0];
+      : EDITORIAL_THEMES.find((t) => t.id === profile.themeId) ||
+        profile.customTheme ||
+        EDITORIAL_THEMES[0];
 
   const themeFamily: ThemeFamily =
     profile.layoutConfig?.themeFamily || theme.themeFamily || 'editorial';
 
-  const activeCustomFamily = (profile.customDesignFamilies || []).find((f) => f.id === themeFamily);
+  const activeCustomFamily = (profile.customDesignFamilies || []).find(
+    (f) => f.id === themeFamily
+  );
 
   const linkShape = profile.customLinkShape || theme.linkShape;
-  const accentColor = activeCustomFamily?.accentHex || profile.customAccentColor || theme.accentHex;
+  const accentColor =
+    activeCustomFamily?.accentHex || profile.customAccentColor || theme.accentHex;
 
   // Active sorted links
-  const activeLinks = profile.links.filter((l) => l.isActive).sort((a, b) => a.order - b.order);
+  const activeLinks = profile.links
+    .filter((l) => l.isActive)
+    .sort((a, b) => a.order - b.order);
   const featuredLink = activeLinks.find((l) => l.isFeatured);
   const regularLinks = activeLinks.filter((l) => !l.isFeatured);
-  const categories: LinkCategory[] = Array.from(new Set(regularLinks.map((l) => l.category)));
+  const categories: LinkCategory[] = Array.from(
+    new Set(regularLinks.map((l) => l.category))
+  );
 
   const handleLinkClick = (link: LinkItem, e: React.MouseEvent) => {
     recordLinkClick(link.id);
@@ -205,27 +271,43 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
   const renderIcon = (iconName?: string) => {
     switch (iconName) {
-      case 'BookOpen': return <BookOpen className="w-4 h-4" />;
-      case 'Folder': return <Folder className="w-4 h-4" />;
-      case 'Sparkles': return <Sparkles className="w-4 h-4" />;
-      case 'Music': return <Music className="w-4 h-4" />;
-      case 'Bookmark': return <Bookmark className="w-4 h-4" />;
-      case 'Terminal': return <Terminal className="w-4 h-4" />;
-      case 'GitBranch': return <GitBranch className="w-4 h-4" />;
-      case 'Mic': return <Mic className="w-4 h-4" />;
-      default: return <ArrowUpRight className="w-4 h-4" />;
+      case 'BookOpen':
+        return <BookOpen className="w-4 h-4" />;
+      case 'Folder':
+        return <Folder className="w-4 h-4" />;
+      case 'Sparkles':
+        return <Sparkles className="w-4 h-4" />;
+      case 'Music':
+        return <Music className="w-4 h-4" />;
+      case 'Bookmark':
+        return <Bookmark className="w-4 h-4" />;
+      case 'Terminal':
+        return <Terminal className="w-4 h-4" />;
+      case 'GitBranch':
+        return <GitBranch className="w-4 h-4" />;
+      case 'Mic':
+        return <Mic className="w-4 h-4" />;
+      default:
+        return <ArrowUpRight className="w-4 h-4" />;
     }
   };
 
   const renderSocialIcon = (platform: string) => {
     switch (platform) {
-      case 'twitter': return <Twitter className="w-4 h-4" />;
-      case 'github': return <Github className="w-4 h-4" />;
-      case 'instagram': return <Instagram className="w-4 h-4" />;
-      case 'linkedin': return <Linkedin className="w-4 h-4" />;
-      case 'email': return <Mail className="w-4 h-4" />;
-      case 'spotify': return <Radio className="w-4 h-4" />;
-      default: return <Globe className="w-4 h-4" />;
+      case 'twitter':
+        return <Twitter className="w-4 h-4" />;
+      case 'github':
+        return <Github className="w-4 h-4" />;
+      case 'instagram':
+        return <Instagram className="w-4 h-4" />;
+      case 'linkedin':
+        return <Linkedin className="w-4 h-4" />;
+      case 'email':
+        return <Mail className="w-4 h-4" />;
+      case 'spotify':
+        return <Radio className="w-4 h-4" />;
+      default:
+        return <Globe className="w-4 h-4" />;
     }
   };
 
@@ -250,11 +332,17 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     if (themeFamily === 'modernist') return 'rounded-none border-2';
     if (themeFamily === 'paper') return 'rounded-xl border shadow-xs bg-[#FAF8F5] relative';
     switch (linkShape) {
-      case 'sharp': return 'rounded-none';
-      case 'pill': return 'rounded-full px-6';
-      case 'underline': return 'rounded-none border-b border-t-0 border-x-0 bg-transparent px-2 shadow-none';
-      case 'ghost': return 'rounded-xl border-dashed bg-transparent';
-      case 'rounded': default: return 'rounded-xl';
+      case 'sharp':
+        return 'rounded-none';
+      case 'pill':
+        return 'rounded-full px-6';
+      case 'underline':
+        return 'rounded-none border-b border-t-0 border-x-0 bg-transparent px-2 shadow-none';
+      case 'ghost':
+        return 'rounded-xl border-dashed bg-transparent';
+      case 'rounded':
+      default:
+        return 'rounded-xl';
     }
   };
 
@@ -306,12 +394,22 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   const renderHeaderSection = (cfg: ProfileSectionConfig) => {
     const avatarOverride = profile.elementOverrides?.['avatar'];
     const avatarTransform = getElementTransformStyle(avatarOverride);
-    const avatarAnim = getElementAnimationStyle(profile.motionConfig?.elementAnimations?.['avatar'], profile.motionConfig, 0);
-    const avatarHover = getMicroHoverClass(profile.motionConfig?.microInteractions?.avatarHoverEffect);
+    const avatarAnim = getElementAnimationStyle(
+      profile.motionConfig?.elementAnimations?.['avatar'],
+      profile.motionConfig,
+      0
+    );
+    const avatarHover = getMicroHoverClass(
+      profile.motionConfig?.microInteractions?.avatarHoverEffect
+    );
 
     const nameOverride = profile.elementOverrides?.['name'];
     const nameTransform = getElementTransformStyle(nameOverride);
-    const headerAnim = getElementAnimationStyle(profile.motionConfig?.elementAnimations?.['header'], profile.motionConfig, 1);
+    const headerAnim = getElementAnimationStyle(
+      profile.motionConfig?.elementAnimations?.['header'],
+      profile.motionConfig,
+      1
+    );
 
     const bioOverride = profile.elementOverrides?.['bio'];
     const bioTransform = getElementTransformStyle(bioOverride);
@@ -324,20 +422,41 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
     if (themeFamily === 'terminal') {
       headerContent = (
-        <section key={cfg.instanceKey || cfg.id} className="p-4 border font-mono-code rounded-xl space-y-3" style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}>
-          <div className="flex items-center justify-between pb-2 border-b text-[10px]" style={{ borderColor: theme.borderHex, color: theme.mutedHex }}>
+        <section
+          key={cfg.instanceKey || cfg.id}
+          className="p-4 border font-mono-code rounded-xl space-y-3"
+          style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+        >
+          <div
+            className="flex items-center justify-between pb-2 border-b text-[10px]"
+            style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
+          >
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-green-500/80 inline-block" />
-              <span className="ml-2 font-bold text-xs" style={{ color: theme.textHex }}>bash - conn-identity-v2.sh</span>
+              <span className="ml-2 font-bold text-xs" style={{ color: theme.textHex }}>
+                bash - conn-identity-v2.sh
+              </span>
             </div>
             <span>PID: 4092</span>
           </div>
 
           <div className="flex items-start gap-4 pt-1">
-            <div style={avatarTransform} className={`shrink-0 transition-transform ${avatarOverride?.alignment === 'center' ? 'mx-auto' : avatarOverride?.alignment === 'right' ? 'ml-auto' : ''}`}>
-              <div style={avatarAnim.style} className={`${avatarAnim.className} ${avatarHover}`}>
+            <div
+              style={avatarTransform}
+              className={`shrink-0 transition-transform ${
+                avatarOverride?.alignment === 'center'
+                  ? 'mx-auto'
+                  : avatarOverride?.alignment === 'right'
+                  ? 'ml-auto'
+                  : ''
+              }`}
+            >
+              <div
+                style={avatarAnim.style}
+                className={`${avatarAnim.className} ${avatarHover}`}
+              >
                 <img
                   src={profile.avatarUrl}
                   alt={profile.name}
@@ -346,10 +465,21 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 />
               </div>
             </div>
-            <div style={nameTransform} className={`space-y-1 transition-transform ${nameOverride?.alignment === 'center' ? 'text-center' : nameOverride?.alignment === 'right' ? 'text-right' : 'text-left'}`}>
+            <div
+              style={nameTransform}
+              className={`space-y-1 transition-transform ${
+                nameOverride?.alignment === 'center'
+                  ? 'text-center'
+                  : nameOverride?.alignment === 'right'
+                  ? 'text-right'
+                  : 'text-left'
+              }`}
+            >
               <div style={headerAnim.style} className={headerAnim.className}>
                 <div className="text-xs text-emerald-400 font-bold">$ whoami --verbose</div>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{profile.name}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+                  {profile.name}
+                </h1>
                 {(profile.role || profile.organization) && (
                   <div className="text-xs" style={{ color: accentColor }}>
                     {profile.role} {profile.organization && `@ ${profile.organization}`}
@@ -359,8 +489,20 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             </div>
           </div>
 
-          <div style={bioTransform} className={`transition-transform ${bioOverride?.alignment === 'center' ? 'text-center mx-auto' : bioOverride?.alignment === 'right' ? 'text-right ml-auto' : 'text-left'}`}>
-            <p className="text-xs leading-relaxed font-mono-code" style={{ color: theme.mutedHex }}>
+          <div
+            style={bioTransform}
+            className={`transition-transform ${
+              bioOverride?.alignment === 'center'
+                ? 'text-center mx-auto'
+                : bioOverride?.alignment === 'right'
+                ? 'text-right ml-auto'
+                : 'text-left'
+            }`}
+          >
+            <p
+              className="text-xs leading-relaxed font-mono-code"
+              style={{ color: theme.mutedHex }}
+            >
               {profile.bio}
             </p>
           </div>
@@ -368,7 +510,11 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       );
     } else if (themeFamily === 'paper') {
       headerContent = (
-        <section key={cfg.instanceKey || cfg.id} className="p-6 border rounded-2xl relative space-y-4 shadow-sm" style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}>
+        <section
+          key={cfg.instanceKey || cfg.id}
+          className="p-6 border rounded-2xl relative space-y-4 shadow-sm"
+          style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+        >
           {/* Paper tape accent */}
           <div className="absolute -top-3 left-8 px-4 py-0.5 bg-amber-100/80 text-amber-900 text-[9px] font-mono-code uppercase font-bold tracking-wider border border-amber-200/60 shadow-xs rotate-1">
             PARCHMENT RECORD
@@ -376,8 +522,20 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
             <div className="flex items-center gap-4">
-              <div style={avatarTransform} className={`shrink-0 transition-transform ${avatarOverride?.alignment === 'center' ? 'mx-auto' : avatarOverride?.alignment === 'right' ? 'ml-auto' : ''}`}>
-                <div style={avatarAnim.style} className={`${avatarAnim.className} ${avatarHover}`}>
+              <div
+                style={avatarTransform}
+                className={`shrink-0 transition-transform ${
+                  avatarOverride?.alignment === 'center'
+                    ? 'mx-auto'
+                    : avatarOverride?.alignment === 'right'
+                    ? 'ml-auto'
+                    : ''
+                }`}
+              >
+                <div
+                  style={avatarAnim.style}
+                  className={`${avatarAnim.className} ${avatarHover}`}
+                >
                   <img
                     src={profile.avatarUrl}
                     alt={profile.name}
@@ -386,11 +544,25 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                   />
                 </div>
               </div>
-              <div style={nameTransform} className={`transition-transform ${nameOverride?.alignment === 'center' ? 'text-center' : nameOverride?.alignment === 'right' ? 'text-right' : 'text-left'}`}>
+              <div
+                style={nameTransform}
+                className={`transition-transform ${
+                  nameOverride?.alignment === 'center'
+                    ? 'text-center'
+                    : nameOverride?.alignment === 'right'
+                    ? 'text-right'
+                    : 'text-left'
+                }`}
+              >
                 <div style={headerAnim.style} className={headerAnim.className}>
-                  <h1 className="text-3xl sm:text-4xl font-serif-editorial tracking-tight">{profile.name}</h1>
+                  <h1 className="text-3xl sm:text-4xl font-serif-editorial tracking-tight">
+                    {profile.name}
+                  </h1>
                   {(profile.role || profile.organization) && (
-                    <div className="text-xs font-serif-editorial italic mt-0.5" style={{ color: accentColor }}>
+                    <div
+                      className="text-xs font-serif-editorial italic mt-0.5"
+                      style={{ color: accentColor }}
+                    >
                       {profile.role} {profile.organization && `@ ${profile.organization}`}
                     </div>
                   )}
@@ -399,14 +571,29 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             </div>
 
             {profile.location && (
-              <span className="text-xs font-mono-code px-3 py-1 rounded-full border flex items-center gap-1.5" style={{ borderColor: theme.borderHex }}>
+              <span
+                className="text-xs font-mono-code px-3 py-1 rounded-full border flex items-center gap-1.5"
+                style={{ borderColor: theme.borderHex }}
+              >
                 <MapPin className="w-3.5 h-3.5" /> {profile.location}
               </span>
             )}
           </div>
 
-          <div style={bioTransform} className={`transition-transform ${bioOverride?.alignment === 'center' ? 'text-center mx-auto' : bioOverride?.alignment === 'right' ? 'text-right ml-auto' : 'text-left'}`}>
-            <p className="text-sm sm:text-base font-serif-editorial leading-relaxed max-w-xl font-light" style={{ color: theme.mutedHex }}>
+          <div
+            style={bioTransform}
+            className={`transition-transform ${
+              bioOverride?.alignment === 'center'
+                ? 'text-center mx-auto'
+                : bioOverride?.alignment === 'right'
+                ? 'text-right ml-auto'
+                : 'text-left'
+            }`}
+          >
+            <p
+              className="text-sm sm:text-base font-serif-editorial leading-relaxed max-w-xl font-light"
+              style={{ color: theme.mutedHex }}
+            >
               {profile.bio}
             </p>
           </div>
@@ -414,28 +601,59 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       );
     } else if (themeFamily === 'modernist') {
       headerContent = (
-        <section key={cfg.instanceKey || cfg.id} className="p-6 border-2 rounded-none space-y-4" style={{ borderColor: theme.textHex, backgroundColor: theme.cardBgHex }}>
-          <div className="flex items-center justify-between text-[10px] font-mono-code font-bold uppercase border-b-2 pb-2" style={{ borderColor: theme.textHex }}>
+        <section
+          key={cfg.instanceKey || cfg.id}
+          className="p-6 border-2 rounded-none space-y-4"
+          style={{ borderColor: theme.textHex, backgroundColor: theme.cardBgHex }}
+        >
+          <div
+            className="flex items-center justify-between text-[10px] font-mono-code font-bold uppercase border-b-2 pb-2"
+            style={{ borderColor: theme.textHex }}
+          >
             <span>INDEX // 01</span>
             <span>SWISS TYPOGRAPHIC MATRIX</span>
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-            <div style={nameTransform} className={`space-y-2 transition-transform ${nameOverride?.alignment === 'center' ? 'text-center' : nameOverride?.alignment === 'right' ? 'text-right' : 'text-left'}`}>
+            <div
+              style={nameTransform}
+              className={`space-y-2 transition-transform ${
+                nameOverride?.alignment === 'center'
+                  ? 'text-center'
+                  : nameOverride?.alignment === 'right'
+                  ? 'text-right'
+                  : 'text-left'
+              }`}
+            >
               <div style={headerAnim.style} className={headerAnim.className}>
                 <h1 className="text-3xl sm:text-5xl font-mono-code font-extrabold uppercase tracking-tighter">
                   {profile.name}
                 </h1>
                 {(profile.role || profile.organization) && (
-                  <div className="text-xs font-mono-code font-bold uppercase tracking-wide px-2 py-1 inline-block text-white" style={{ backgroundColor: theme.textHex }}>
+                  <div
+                    className="text-xs font-mono-code font-bold uppercase tracking-wide px-2 py-1 inline-block text-white"
+                    style={{ backgroundColor: theme.textHex }}
+                  >
                     {profile.role} {profile.organization && `[${profile.organization}]`}
                   </div>
                 )}
               </div>
             </div>
 
-            <div style={avatarTransform} className={`shrink-0 transition-transform ${avatarOverride?.alignment === 'center' ? 'mx-auto' : avatarOverride?.alignment === 'right' ? 'ml-auto' : ''}`}>
-              <div style={avatarAnim.style} className={`${avatarAnim.className} ${avatarHover}`}>
+            <div
+              style={avatarTransform}
+              className={`shrink-0 transition-transform ${
+                avatarOverride?.alignment === 'center'
+                  ? 'mx-auto'
+                  : avatarOverride?.alignment === 'right'
+                  ? 'ml-auto'
+                  : ''
+              }`}
+            >
+              <div
+                style={avatarAnim.style}
+                className={`${avatarAnim.className} ${avatarHover}`}
+              >
                 <img
                   src={profile.avatarUrl}
                   alt={profile.name}
@@ -446,8 +664,20 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             </div>
           </div>
 
-          <div style={bioTransform} className={`transition-transform ${bioOverride?.alignment === 'center' ? 'text-center mx-auto' : bioOverride?.alignment === 'right' ? 'text-right ml-auto' : 'text-left'}`}>
-            <p className="text-sm font-sans-ui leading-relaxed max-w-lg font-normal pt-2" style={{ color: theme.mutedHex }}>
+          <div
+            style={bioTransform}
+            className={`transition-transform ${
+              bioOverride?.alignment === 'center'
+                ? 'text-center mx-auto'
+                : bioOverride?.alignment === 'right'
+                ? 'text-right ml-auto'
+                : 'text-left'
+            }`}
+          >
+            <p
+              className="text-sm font-sans-ui leading-relaxed max-w-lg font-normal pt-2"
+              style={{ color: theme.mutedHex }}
+            >
               {profile.bio}
             </p>
           </div>
@@ -458,8 +688,20 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       headerContent = (
         <section key={cfg.instanceKey || cfg.id} className="text-left space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            <div style={avatarTransform} className={`shrink-0 transition-transform ${avatarOverride?.alignment === 'center' ? 'mx-auto' : avatarOverride?.alignment === 'right' ? 'ml-auto' : ''}`}>
-              <div style={avatarAnim.style} className={`relative group ${avatarAnim.className} ${avatarHover}`}>
+            <div
+              style={avatarTransform}
+              className={`shrink-0 transition-transform ${
+                avatarOverride?.alignment === 'center'
+                  ? 'mx-auto'
+                  : avatarOverride?.alignment === 'right'
+                  ? 'ml-auto'
+                  : ''
+              }`}
+            >
+              <div
+                style={avatarAnim.style}
+                className={`relative group ${avatarAnim.className} ${avatarHover}`}
+              >
                 <img
                   src={profile.avatarUrl}
                   alt={profile.name}
@@ -475,21 +717,35 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                       borderColor: theme.borderHex,
                     }}
                   >
-                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: accentColor }} />
-                    <span className="truncate max-w-[140px]">{profile.statusBadge.replace(/^●\s*/, '')}</span>
+                    <span
+                      className="w-2 h-2 rounded-full animate-pulse"
+                      style={{ backgroundColor: accentColor }}
+                    />
+                    <span className="truncate max-w-[140px]">
+                      {profile.statusBadge.replace(/^●\s*/, '')}
+                    </span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs" style={{ color: theme.mutedHex }}>
+            <div
+              className="flex flex-wrap items-center gap-2 text-xs"
+              style={{ color: theme.mutedHex }}
+            >
               {profile.location && (
-                <span className="flex items-center gap-1 border px-2.5 py-1 rounded-full" style={{ borderColor: theme.borderHex }}>
+                <span
+                  className="flex items-center gap-1 border px-2.5 py-1 rounded-full"
+                  style={{ borderColor: theme.borderHex }}
+                >
                   <MapPin className="w-3 h-3" /> {profile.location}
                 </span>
               )}
               {profile.pronouns && (
-                <span className="border px-2.5 py-1 rounded-full" style={{ borderColor: theme.borderHex }}>
+                <span
+                  className="border px-2.5 py-1 rounded-full"
+                  style={{ borderColor: theme.borderHex }}
+                >
                   {profile.pronouns}
                 </span>
               )}
@@ -497,14 +753,34 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           </div>
 
           <div>
-            <div style={nameTransform} className={`transition-transform ${nameOverride?.alignment === 'center' ? 'text-center' : nameOverride?.alignment === 'right' ? 'text-right' : 'text-left'}`}>
+            <div
+              style={nameTransform}
+              className={`transition-transform ${
+                nameOverride?.alignment === 'center'
+                  ? 'text-center'
+                  : nameOverride?.alignment === 'right'
+                  ? 'text-right'
+                  : 'text-left'
+              }`}
+            >
               <div style={headerAnim.style} className={headerAnim.className}>
-                <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight mb-1 ${displayFontClass}`}>
+                <h1
+                  className={`text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight mb-1 ${displayFontClass}`}
+                >
                   {profile.name}
                 </h1>
 
                 {(profile.role || profile.organization) && (
-                  <div className={`text-sm font-medium flex items-center gap-2 mb-2 ${nameOverride?.alignment === 'center' ? 'justify-center' : nameOverride?.alignment === 'right' ? 'justify-end' : ''}`} style={{ color: accentColor }}>
+                  <div
+                    className={`text-sm font-medium flex items-center gap-2 mb-2 ${
+                      nameOverride?.alignment === 'center'
+                        ? 'justify-center'
+                        : nameOverride?.alignment === 'right'
+                        ? 'justify-end'
+                        : ''
+                    }`}
+                    style={{ color: accentColor }}
+                  >
                     <span>{profile.role}</span>
                     {profile.organization && <span>@ {profile.organization}</span>}
                     <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 font-bold">
@@ -515,8 +791,26 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               </div>
             </div>
 
-            <div style={bioTransform} className={`transition-transform ${bioOverride?.alignment === 'center' ? 'text-center mx-auto' : bioOverride?.alignment === 'right' ? 'text-right ml-auto' : 'text-left'}`}>
-              <p className={`text-sm sm:text-base leading-relaxed max-w-lg font-light ${bioOverride?.alignment === 'center' ? 'text-center mx-auto' : bioOverride?.alignment === 'right' ? 'text-right ml-auto' : 'text-left'}`} style={{ color: theme.mutedHex }}>
+            <div
+              style={bioTransform}
+              className={`transition-transform ${
+                bioOverride?.alignment === 'center'
+                  ? 'text-center mx-auto'
+                  : bioOverride?.alignment === 'right'
+                  ? 'text-right ml-auto'
+                  : 'text-left'
+              }`}
+            >
+              <p
+                className={`text-sm sm:text-base leading-relaxed max-w-lg font-light ${
+                  bioOverride?.alignment === 'center'
+                    ? 'text-center mx-auto'
+                    : bioOverride?.alignment === 'right'
+                    ? 'text-right ml-auto'
+                    : 'text-left'
+                }`}
+                style={{ color: theme.mutedHex }}
+              >
                 {profile.bio}
               </p>
             </div>
@@ -526,7 +820,10 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     }
 
     return (
-      <div style={headerSectionTransform} className={`w-full transition-all duration-300 ${headerSectionAlign}`}>
+      <div
+        style={headerSectionTransform}
+        className={`w-full transition-all duration-300 ${headerSectionAlign}`}
+      >
         {headerContent}
       </div>
     );
@@ -536,12 +833,25 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   const renderNowSection = (cfg: ProfileSectionConfig) => {
     if (!profile.nowSection) return null;
     return (
-      <section key={cfg.instanceKey || cfg.id} className={`p-5 border rounded-2xl space-y-3 ${getShapeStyle()}`} style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}>
-        <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: theme.borderHex }}>
-          <span className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5" style={{ color: accentColor }}>
+      <section
+        key={cfg.instanceKey || cfg.id}
+        className={`p-5 border rounded-2xl space-y-3 ${getShapeStyle()}`}
+        style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+      >
+        <div
+          className="flex items-center justify-between border-b pb-2"
+          style={{ borderColor: theme.borderHex }}
+        >
+          <span
+            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            style={{ color: accentColor }}
+          >
             <Activity className="w-3.5 h-3.5" /> {cfg.customTitle || 'NOW Live Activity'}
           </span>
-          <span className="text-[10px] font-mono-code" style={{ color: theme.mutedHex }}>
+          <span
+            className="text-[10px] font-mono-code"
+            style={{ color: theme.mutedHex }}
+          >
             {themeFamily === 'terminal' ? '$ cat now.status' : 'Real-Time'}
           </span>
         </div>
@@ -549,25 +859,45 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           {profile.nowSection.building && (
             <div>
-              <span className="font-mono-code text-[10px] uppercase block" style={{ color: theme.mutedHex }}>Building</span>
+              <span
+                className="font-mono-code text-[10px] uppercase block"
+                style={{ color: theme.mutedHex }}
+              >
+                Building
+              </span>
               <span className="font-medium">{profile.nowSection.building}</span>
             </div>
           )}
           {profile.nowSection.learning && (
             <div>
-              <span className="font-mono-code text-[10px] uppercase block" style={{ color: theme.mutedHex }}>Learning</span>
+              <span
+                className="font-mono-code text-[10px] uppercase block"
+                style={{ color: theme.mutedHex }}
+              >
+                Learning
+              </span>
               <span className="font-medium">{profile.nowSection.learning}</span>
             </div>
           )}
           {profile.nowSection.workingOn && (
             <div>
-              <span className="font-mono-code text-[10px] uppercase block" style={{ color: theme.mutedHex }}>Working On</span>
+              <span
+                className="font-mono-code text-[10px] uppercase block"
+                style={{ color: theme.mutedHex }}
+              >
+                Working On
+              </span>
               <span className="font-medium">{profile.nowSection.workingOn}</span>
             </div>
           )}
           {profile.nowSection.reading && (
             <div>
-              <span className="font-mono-code text-[10px] uppercase block" style={{ color: theme.mutedHex }}>Reading</span>
+              <span
+                className="font-mono-code text-[10px] uppercase block"
+                style={{ color: theme.mutedHex }}
+              >
+                Reading
+              </span>
               <span className="font-medium">{profile.nowSection.reading}</span>
             </div>
           )}
@@ -578,15 +908,27 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
   // 3. PROJECTS SECTION
   const renderProjectsSection = (cfg: ProfileSectionConfig) => {
-    const linkHover = getMicroHoverClass(profile.motionConfig?.microInteractions?.linkHoverEffect || 'lift');
+    const linkHover = getMicroHoverClass(
+      profile.motionConfig?.microInteractions?.linkHoverEffect || 'lift'
+    );
 
     return (
       <section key={cfg.instanceKey || cfg.id} className="space-y-6">
-        <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: theme.borderHex }}>
-          <span className="text-[11px] font-mono-code uppercase font-bold tracking-widest flex items-center gap-1.5" style={{ color: theme.mutedHex }}>
-            <Folder className="w-3.5 h-3.5" style={{ color: accentColor }} /> {cfg.customTitle || 'Projects & Works'}
+        <div
+          className="flex items-center justify-between border-b pb-2"
+          style={{ borderColor: theme.borderHex }}
+        >
+          <span
+            className="text-[11px] font-mono-code uppercase font-bold tracking-widest flex items-center gap-1.5"
+            style={{ color: theme.mutedHex }}
+          >
+            <Folder className="w-3.5 h-3.5" style={{ color: accentColor }} />{' '}
+            {cfg.customTitle || 'Projects & Works'}
           </span>
-          <span className="text-[10px] font-mono-code" style={{ color: theme.mutedHex }}>
+          <span
+            className="text-[10px] font-mono-code"
+            style={{ color: theme.mutedHex }}
+          >
             {regularLinks.length} Items
           </span>
         </div>
@@ -618,7 +960,10 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                     {link.title} <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
                   </h4>
                   {link.description && (
-                    <p className="text-xs font-light line-clamp-2 mt-1" style={{ color: theme.mutedHex }}>
+                    <p
+                      className="text-xs font-light line-clamp-2 mt-1"
+                      style={{ color: theme.mutedHex }}
+                    >
                       {link.description}
                     </p>
                   )}
@@ -628,9 +973,12 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           </div>
         ) : themeFamily === 'terminal' ? (
           /* TERMINAL DIRECTORY LIST */
-          <div className="p-4 border font-mono-code text-xs rounded-xl space-y-2" style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}>
+          <div
+            className="p-4 border font-mono-code text-xs rounded-xl space-y-2"
+            style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+          >
             <div className="text-emerald-400 font-bold">$ ls -la projects/</div>
-            {regularLinks.map((link, idx) => (
+            {regularLinks.map((link) => (
               <a
                 key={link.id}
                 href={link.url}
@@ -641,9 +989,13 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               >
                 <div className="flex items-center gap-2">
                   <span className="text-[#6B665E]">drwxr-xr-x</span>
-                  <span className="font-bold">{link.title.toLowerCase().replace(/\s+/g, '-')}</span>
+                  <span className="font-bold">
+                    {link.title.toLowerCase().replace(/\s+/g, '-')}
+                  </span>
                 </div>
-                <span className="text-[10px]" style={{ color: accentColor }}>[EXECUTE →]</span>
+                <span className="text-[10px]" style={{ color: accentColor }}>
+                  [EXECUTE →]
+                </span>
               </a>
             ))}
           </div>
@@ -695,7 +1047,10 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                       )}
                     </div>
                     {link.description && (
-                      <p className="text-xs truncate font-light mt-0.5" style={{ color: theme.mutedHex }}>
+                      <p
+                        className="text-xs truncate font-light mt-0.5"
+                        style={{ color: theme.mutedHex }}
+                      >
                         {link.description}
                       </p>
                     )}
@@ -722,7 +1077,10 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     return (
       <section key={cfg.instanceKey || cfg.id} className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] uppercase tracking-widest font-mono-code font-semibold" style={{ color: accentColor }}>
+          <span
+            className="text-[11px] uppercase tracking-widest font-mono-code font-semibold"
+            style={{ color: accentColor }}
+          >
             {cfg.customTitle || 'FEATURED HIGHLIGHT'}
           </span>
           {featuredLink.badge && (
@@ -758,11 +1116,16 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className={`text-xl sm:text-2xl font-normal leading-snug mb-1.5 group-hover:underline ${displayFontClass}`}>
+              <h3
+                className={`text-xl sm:text-2xl font-normal leading-snug mb-1.5 group-hover:underline ${displayFontClass}`}
+              >
                 {featuredLink.title}
               </h3>
               {featuredLink.description && (
-                <p className="text-xs sm:text-sm leading-relaxed mb-3" style={{ color: theme.mutedHex }}>
+                <p
+                  className="text-xs sm:text-sm leading-relaxed mb-3"
+                  style={{ color: theme.mutedHex }}
+                >
                   {featuredLink.description}
                 </p>
               )}
@@ -784,8 +1147,14 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     if (!profile.skills || profile.skills.length === 0) return null;
     return (
       <section key={cfg.instanceKey || cfg.id} className="space-y-3">
-        <div className="flex items-center justify-between border-b pb-1.5" style={{ borderColor: theme.borderHex }}>
-          <span className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5" style={{ color: theme.mutedHex }}>
+        <div
+          className="flex items-center justify-between border-b pb-1.5"
+          style={{ borderColor: theme.borderHex }}
+        >
+          <span
+            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            style={{ color: theme.mutedHex }}
+          >
             <Cpu className="w-3.5 h-3.5" /> {cfg.customTitle || 'Skills & Technical Stack'}
           </span>
         </div>
@@ -794,9 +1163,14 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           {profile.skills.map((skill, sIdx) => (
             <span
               key={sIdx}
-              className={`text-xs font-mono-code px-3 py-1.5 border ${themeFamily === 'modernist' ? 'rounded-none border-2' : 'rounded-lg'
-                }`}
-              style={{ borderColor: theme.borderHex, color: theme.textHex, backgroundColor: theme.cardBgHex }}
+              className={`text-xs font-mono-code px-3 py-1.5 border ${
+                themeFamily === 'modernist' ? 'rounded-none border-2' : 'rounded-lg'
+              }`}
+              style={{
+                borderColor: theme.borderHex,
+                color: theme.textHex,
+                backgroundColor: theme.cardBgHex,
+              }}
             >
               {skill}
             </span>
@@ -811,23 +1185,42 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     if (!profile.experience || profile.experience.length === 0) return null;
     return (
       <section key={cfg.instanceKey || cfg.id} className="space-y-3">
-        <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: theme.borderHex }}>
-          <span className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5" style={{ color: theme.mutedHex }}>
+        <div
+          className="flex items-center justify-between border-b pb-2"
+          style={{ borderColor: theme.borderHex }}
+        >
+          <span
+            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            style={{ color: theme.mutedHex }}
+          >
             <Briefcase className="w-3.5 h-3.5" /> {cfg.customTitle || 'Work Experience'}
           </span>
         </div>
 
         <div className="space-y-2">
           {profile.experience.map((exp) => (
-            <div key={exp.id} className={`p-4 border rounded-xl space-y-1 ${getShapeStyle()}`} style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}>
+            <div
+              key={exp.id}
+              className={`p-4 border rounded-xl space-y-1 ${getShapeStyle()}`}
+              style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+            >
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm">{exp.title}</span>
-                <span className="text-[10px] font-mono-code px-2 py-0.5 rounded border" style={{ borderColor: theme.borderHex, color: theme.mutedHex }}>
+                <span
+                  className="text-[10px] font-mono-code px-2 py-0.5 rounded border"
+                  style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
+                >
                   {exp.period}
                 </span>
               </div>
-              <div className="text-xs font-medium" style={{ color: accentColor }}>{exp.company}</div>
-              {exp.description && <p className="text-xs font-light mt-1" style={{ color: theme.mutedHex }}>{exp.description}</p>}
+              <div className="text-xs font-medium" style={{ color: accentColor }}>
+                {exp.company}
+              </div>
+              {exp.description && (
+                <p className="text-xs font-light mt-1" style={{ color: theme.mutedHex }}>
+                  {exp.description}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -842,11 +1235,20 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
     return (
       <section key={cfg.instanceKey || cfg.id} className="space-y-3">
-        <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: theme.borderHex }}>
-          <span className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5" style={{ color: theme.mutedHex }}>
+        <div
+          className="flex items-center justify-between border-b pb-2"
+          style={{ borderColor: theme.borderHex }}
+        >
+          <span
+            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            style={{ color: theme.mutedHex }}
+          >
             <Clock className="w-3.5 h-3.5" /> {cfg.customTitle || 'Work & Timeline'}
           </span>
-          <span className="text-[10px] font-mono-code" style={{ color: theme.mutedHex }}>
+          <span
+            className="text-[10px] font-mono-code"
+            style={{ color: theme.mutedHex }}
+          >
             {profile.timeline.length} milestones
           </span>
         </div>
@@ -924,7 +1326,10 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                   </div>
 
                   {tl.description && (
-                    <p className="text-xs font-light leading-relaxed" style={{ color: theme.mutedHex }}>
+                    <p
+                      className="text-xs font-light leading-relaxed"
+                      style={{ color: theme.mutedHex }}
+                    >
                       {tl.description}
                     </p>
                   )}
@@ -1004,7 +1409,10 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 </div>
 
                 {tl.description && (
-                  <p className="text-xs font-light leading-relaxed" style={{ color: theme.mutedHex }}>
+                  <p
+                    className="text-xs font-light leading-relaxed"
+                    style={{ color: theme.mutedHex }}
+                  >
                     {tl.description}
                   </p>
                 )}
@@ -1034,10 +1442,21 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   const renderOpenSourceSection = (cfg: ProfileSectionConfig) => {
     if (!profile.openSourceStats) return null;
     return (
-      <section key={cfg.instanceKey || cfg.id} className={`p-5 border rounded-2xl space-y-4 ${getShapeStyle()}`} style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}>
-        <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: theme.borderHex }}>
-          <span className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5" style={{ color: accentColor }}>
-            <GitBranch className="w-3.5 h-3.5" /> {cfg.customTitle || 'Open Source GitHub Activity'}
+      <section
+        key={cfg.instanceKey || cfg.id}
+        className={`p-5 border rounded-2xl space-y-4 ${getShapeStyle()}`}
+        style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+      >
+        <div
+          className="flex items-center justify-between border-b pb-2"
+          style={{ borderColor: theme.borderHex }}
+        >
+          <span
+            className="text-[11px] font-mono-code uppercase font-bold flex items-center gap-1.5"
+            style={{ color: accentColor }}
+          >
+            <GitBranch className="w-3.5 h-3.5" />{' '}
+            {cfg.customTitle || 'Open Source GitHub Activity'}
           </span>
           <span className="text-[10px] font-mono-code font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
             Verified ✓
@@ -1046,16 +1465,40 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="p-2 rounded-xl border" style={{ borderColor: theme.borderHex }}>
-            <div className="font-mono-code font-bold text-base">{profile.openSourceStats.reposCount}</div>
-            <div className="text-[9px] uppercase font-mono-code" style={{ color: theme.mutedHex }}>Repos</div>
+            <div className="font-mono-code font-bold text-base">
+              {profile.openSourceStats.reposCount}
+            </div>
+            <div
+              className="text-[9px] uppercase font-mono-code"
+              style={{ color: theme.mutedHex }}
+            >
+              Repos
+            </div>
           </div>
           <div className="p-2 rounded-xl border" style={{ borderColor: theme.borderHex }}>
-            <div className="font-mono-code font-bold text-base" style={{ color: accentColor }}>{profile.openSourceStats.mergedPRsCount}</div>
-            <div className="text-[9px] uppercase font-mono-code" style={{ color: theme.mutedHex }}>PRs Merged</div>
+            <div
+              className="font-mono-code font-bold text-base"
+              style={{ color: accentColor }}
+            >
+              {profile.openSourceStats.mergedPRsCount}
+            </div>
+            <div
+              className="text-[9px] uppercase font-mono-code"
+              style={{ color: theme.mutedHex }}
+            >
+              PRs Merged
+            </div>
           </div>
           <div className="p-2 rounded-xl border" style={{ borderColor: theme.borderHex }}>
-            <div className="font-mono-code font-bold text-base">{profile.openSourceStats.totalStarsCount}</div>
-            <div className="text-[9px] uppercase font-mono-code" style={{ color: theme.mutedHex }}>Stars</div>
+            <div className="font-mono-code font-bold text-base">
+              {profile.openSourceStats.totalStarsCount}
+            </div>
+            <div
+              className="text-[9px] uppercase font-mono-code"
+              style={{ color: theme.mutedHex }}
+            >
+              Stars
+            </div>
           </div>
         </div>
       </section>
@@ -1065,7 +1508,9 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   // 9. SOCIALS SECTION
   const renderSocialsSection = (cfg: ProfileSectionConfig) => {
     if (!profile.socials || profile.socials.length === 0) return null;
-    const socialsHover = getMicroHoverClass(profile.motionConfig?.microInteractions?.socialsHoverEffect || 'scale');
+    const socialsHover = getMicroHoverClass(
+      profile.motionConfig?.microInteractions?.socialsHoverEffect || 'scale'
+    );
     const socialsOverride = profile.elementOverrides?.['socials'];
     const alignJustify =
       socialsOverride?.alignment === 'center'
@@ -1075,7 +1520,11 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           : 'justify-start';
 
     return (
-      <section key={cfg.instanceKey || cfg.id} className="pt-2 border-t" style={{ borderColor: theme.borderHex }}>
+      <section
+        key={cfg.instanceKey || cfg.id}
+        className="pt-2 border-t"
+        style={{ borderColor: theme.borderHex }}
+      >
         <div className={`flex flex-wrap items-center gap-2 ${alignJustify}`}>
           {profile.socials.map((soc, idx) => (
             <a
@@ -1113,7 +1562,8 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             <div>
               <div className="font-bold">Available for Collaboration</div>
               <div className="text-[11px]" style={{ color: theme.mutedHex }}>
-                {profile.availability.preferredRole} • {profile.availability.locationPreference}
+                {profile.availability.preferredRole} •{' '}
+                {profile.availability.locationPreference}
               </div>
             </div>
           </div>
@@ -1148,7 +1598,10 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           <h3 className={`text-2xl font-normal mb-1.5 ${displayFontClass}`}>
             {profile.newsletterHeadline || 'Subscribe to field notes.'}
           </h3>
-          <p className="text-xs sm:text-sm leading-relaxed mb-4" style={{ color: theme.mutedHex }}>
+          <p
+            className="text-xs sm:text-sm leading-relaxed mb-4"
+            style={{ color: theme.mutedHex }}
+          >
             {profile.newsletterSubtext || 'A thoughtful periodic newsletter.'}
           </p>
 
@@ -1192,10 +1645,15 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   // 12. CONTACT ROUTER SECTION
   const renderContactSection = (cfg: ProfileSectionConfig) => {
     return (
-      <section key={cfg.instanceKey || cfg.id} className="p-4 border rounded-2xl text-center space-y-2" style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}>
+      <section
+        key={cfg.instanceKey || cfg.id}
+        className="p-4 border rounded-2xl text-center space-y-2"
+        style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+      >
         <h4 className="font-serif-display text-sm font-bold">Smart Intent Contact</h4>
         <p className="text-xs font-light" style={{ color: theme.mutedHex }}>
-          Direct intent-based inquiry routing for hiring, freelance, and speaking opportunities.
+          Direct intent-based inquiry routing for hiring, freelance, and speaking
+          opportunities.
         </p>
         <button
           type="button"
@@ -1214,19 +1672,45 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
   const renderSectionByConfig = (cfg: ProfileSectionConfig) => {
     let node: React.ReactNode = null;
     switch (cfg.id) {
-      case 'header': node = renderHeaderSection(cfg); break;
-      case 'socials': node = renderSocialsSection(cfg); break;
-      case 'availability': node = renderAvailabilitySection(cfg); break;
-      case 'now': node = renderNowSection(cfg); break;
-      case 'featured_project': node = renderFeaturedProjectSection(cfg); break;
-      case 'projects': node = renderProjectsSection(cfg); break;
-      case 'timeline': node = renderTimelineSection(cfg); break;
-      case 'experience': node = renderExperienceSection(cfg); break;
-      case 'skills': node = renderSkillsSection(cfg); break;
-      case 'opensource': node = renderOpenSourceSection(cfg); break;
-      case 'newsletter': node = renderNewsletterSection(cfg); break;
-      case 'contact': node = renderContactSection(cfg); break;
-      default: node = null; break;
+      case 'header':
+        node = renderHeaderSection(cfg);
+        break;
+      case 'socials':
+        node = renderSocialsSection(cfg);
+        break;
+      case 'availability':
+        node = renderAvailabilitySection(cfg);
+        break;
+      case 'now':
+        node = renderNowSection(cfg);
+        break;
+      case 'featured_project':
+        node = renderFeaturedProjectSection(cfg);
+        break;
+      case 'projects':
+        node = renderProjectsSection(cfg);
+        break;
+      case 'timeline':
+        node = renderTimelineSection(cfg);
+        break;
+      case 'experience':
+        node = renderExperienceSection(cfg);
+        break;
+      case 'skills':
+        node = renderSkillsSection(cfg);
+        break;
+      case 'opensource':
+        node = renderOpenSourceSection(cfg);
+        break;
+      case 'newsletter':
+        node = renderNewsletterSection(cfg);
+        break;
+      case 'contact':
+        node = renderContactSection(cfg);
+        break;
+      default:
+        node = null;
+        break;
     }
 
     if (!node) return null;
@@ -1239,7 +1723,9 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
     const animSetting =
       profile.motionConfig?.elementAnimations?.[cfg.id] ||
-      (cfg.id === 'projects' ? profile.motionConfig?.elementAnimations?.['links'] : undefined);
+      (cfg.id === 'projects'
+        ? profile.motionConfig?.elementAnimations?.['links']
+        : undefined);
     const anim = getElementAnimationStyle(animSetting, profile.motionConfig, 1);
 
     return (
@@ -1248,10 +1734,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
         style={transformStyle}
         className={`transition-all duration-300 w-full ${alignClasses}`}
       >
-        <div
-          style={anim.style}
-          className={`w-full ${anim.className}`}
-        >
+        <div style={anim.style} className={`w-full ${anim.className}`}>
           {node}
         </div>
       </div>
@@ -1263,14 +1746,106 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
     theme.bgHex
   );
 
+  // PRIVATE PROFILE GATE
+  if (!profile.isPublic && !isEmbeddedPreview) {
+    return (
+      <div
+        className="min-h-screen w-full flex items-center justify-center p-6 text-center font-sans-ui"
+        style={{ backgroundColor: theme.bgHex, color: theme.textHex }}
+      >
+        <div
+          className="max-w-sm w-full p-8 border rounded-2xl space-y-3"
+          style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+        >
+          <Lock className="w-8 h-8 mx-auto opacity-60" />
+          <h2 className={`text-2xl ${displayFontClass}`}>Profile Currently Private</h2>
+          <p className="text-xs leading-relaxed" style={{ color: theme.mutedHex }}>
+            @{profile.username} has temporarily disabled public access to this identity
+            page.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // PASSCODE PROTECTION GATE
+  if (profile.isPasswordProtected && !isUnlocked && !isEmbeddedPreview) {
+    return (
+      <div
+        className="min-h-screen w-full flex items-center justify-center p-6 text-center font-sans-ui"
+        style={{ backgroundColor: theme.bgHex, color: theme.textHex }}
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (passcodeAttempt === (profile.passwordCode || '1234')) {
+              setIsUnlocked(true);
+              setPasscodeError(false);
+              onShowToast('Profile unlocked!');
+            } else {
+              setPasscodeError(true);
+            }
+          }}
+          className="max-w-sm w-full p-8 border rounded-2xl space-y-4"
+          style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+        >
+          <Lock className="w-8 h-8 mx-auto" style={{ color: accentColor }} />
+          <div>
+            <h2 className={`text-2xl ${displayFontClass}`}>Protected Identity</h2>
+            <p className="text-xs mt-1" style={{ color: theme.mutedHex }}>
+              Enter the passcode to view @{profile.username}&apos;s profile.
+            </p>
+          </div>
+          <input
+            type="password"
+            required
+            value={passcodeAttempt}
+            onChange={(e) => {
+              setPasscodeAttempt(e.target.value);
+              setPasscodeError(false);
+            }}
+            placeholder="Enter passcode..."
+            className="w-full px-3.5 py-2.5 text-xs rounded-xl border bg-transparent text-center focus:outline-none"
+            style={{
+              borderColor: passcodeError ? '#EF4444' : theme.borderHex,
+              color: theme.textHex,
+            }}
+          />
+          {passcodeError && (
+            <p className="text-[11px] text-red-500">
+              Incorrect passcode. Please try again.
+            </p>
+          )}
+          <button
+            type="submit"
+            className="w-full py-2.5 rounded-xl text-xs font-medium transition-transform hover:scale-102"
+            style={{ backgroundColor: theme.textHex, color: theme.bgHex }}
+          >
+            Unlock Profile
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  const profileShareUrl = profile.customDomain
+    ? `https://${profile.customDomain}`
+    : `https://conn.bio/${profile.username}`;
+  const qrColorHex = (theme.textHex || '#1C1B18').replace('#', '');
+  const qrBgHex = (theme.cardBgHex || '#FAF8F5').replace('#', '');
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+    profileShareUrl
+  )}&color=${qrColorHex}&bgcolor=${qrBgHex}&margin=10`;
+
   return (
     <div
       className={`min-h-full w-full transition-colors duration-300 relative ${theme.showNoiseGrain ? 'paper-grain' : ''
         }`}
       style={{
-        background: theme.useGradientBg && theme.gradientBgHex
-          ? `linear-gradient(135deg, ${theme.bgHex} 0%, ${theme.gradientBgHex} 100%)`
-          : theme.bgHex,
+        background:
+          theme.useGradientBg && theme.gradientBgHex
+            ? `linear-gradient(135deg, ${theme.bgHex} 0%, ${theme.gradientBgHex} 100%)`
+            : theme.bgHex,
         color: theme.textHex,
         ...containerStyle,
       }}
@@ -1280,6 +1855,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
       {/* Floating Decorative Objects */}
       {renderDecorativeObjects(profile.decorativeObjects)}
+
       {/* Top Floating Header */}
       {!isEmbeddedPreview && (
         <header
@@ -1287,10 +1863,10 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           style={{ borderColor: theme.borderHex }}
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            {onNavigateDashboard && (
+            {(onNavigateDashboard || onBack) && (
               <button
                 type="button"
-                onClick={onNavigateDashboard}
+                onClick={onNavigateDashboard || onBack}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border shadow-2xs transition-all hover:scale-105 cursor-pointer shrink-0"
                 style={{
                   borderColor: theme.borderHex,
@@ -1353,6 +1929,15 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             </button>
 
             <button
+              onClick={handleDownloadVCard}
+              className="p-2 rounded-full border transition-transform hover:scale-105"
+              style={{ borderColor: theme.borderHex, color: theme.textHex }}
+              title="Save Contact (vCard)"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+            </button>
+
+            <button
               onClick={() => setIsQrModalOpen(true)}
               className="p-2 rounded-full border transition-transform hover:scale-105 cursor-pointer"
               style={{ borderColor: theme.borderHex, color: theme.textHex }}
@@ -1360,6 +1945,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
             >
               <QrCode className="w-3.5 h-3.5" />
             </button>
+
             <button
               onClick={onOpenShare}
               className="flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-full transition-all hover:scale-105 cursor-pointer"
@@ -1377,10 +1963,15 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
 
       {/* Main Profile Canvas */}
       <main className="max-w-xl mx-auto px-5 sm:px-6 py-8 sm:py-12 font-sans-ui space-y-8">
-
         {/* AUDIENCE CONTEXT BAR */}
-        <div className="p-1.5 rounded-xl border flex items-center gap-1 overflow-x-auto text-[11px]" style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}>
-          <span className="text-[10px] font-mono-code uppercase px-2 py-1 shrink-0 font-bold" style={{ color: theme.mutedHex }}>
+        <div
+          className="p-1.5 rounded-xl border flex items-center gap-1 overflow-x-auto text-[11px]"
+          style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
+        >
+          <span
+            className="text-[10px] font-mono-code uppercase px-2 py-1 shrink-0 font-bold"
+            style={{ color: theme.mutedHex }}
+          >
             👁 Context:
           </span>
           {[
@@ -1391,11 +1982,15 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
           ].map((ctx) => (
             <button
               key={ctx.id}
-              onClick={() => setActiveContext(ctx.id as any)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ${activeContext === ctx.id ? 'font-bold underline' : 'opacity-70 hover:opacity-100'
-                }`}
+              onClick={() => setActiveContext(ctx.id as AudienceContext)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ${
+                activeContext === ctx.id
+                  ? 'font-bold underline'
+                  : 'opacity-70 hover:opacity-100'
+              }`}
               style={{
-                backgroundColor: activeContext === ctx.id ? theme.textHex : 'transparent',
+                backgroundColor:
+                  activeContext === ctx.id ? theme.textHex : 'transparent',
                 color: activeContext === ctx.id ? theme.bgHex : theme.textHex,
               }}
             >
@@ -1408,9 +2003,13 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
         {activeSections.map((cfg) => renderSectionByConfig(cfg))}
 
         {/* Footnote */}
-        <footer className="mt-16 pt-8 border-t text-center font-mono-code text-[11px]" style={{ borderColor: theme.borderHex, color: theme.mutedHex }}>
+        <footer
+          className="mt-16 pt-8 border-t text-center font-mono-code text-[11px]"
+          style={{ borderColor: theme.borderHex, color: theme.mutedHex }}
+        >
           <p>
-            Designed with <span className="font-serif-display text-sm">Conn</span> — Living Identity System ({themeFamily.toUpperCase()}).
+            Designed with <span className="font-serif-display text-sm">Conn</span> —
+            Living Identity System ({themeFamily.toUpperCase()}).
           </p>
         </footer>
       </main>
@@ -1439,12 +2038,16 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               <div className="py-8 text-center space-y-2">
                 <Check className="w-8 h-8 text-emerald-600 mx-auto" />
                 <div className="font-bold text-sm">Inquiry Routed Successfully!</div>
-                <p className="text-xs text-[#6B665E]">{profile.name} will respond directly to {inquiryEmail}.</p>
+                <p className="text-xs text-[#6B665E]">
+                  {profile.name} will respond directly to {inquiryEmail}.
+                </p>
               </div>
             ) : (
               <form onSubmit={handleSendInquiry} className="space-y-3">
                 <div>
-                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">Select Inquiry Intent</label>
+                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">
+                    Select Inquiry Intent
+                  </label>
                   <div className="grid grid-cols-2 gap-1.5">
                     {[
                       { id: 'hiring', label: 'Brief / Hiring' },
@@ -1456,8 +2059,11 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                         type="button"
                         key={opt.id}
                         onClick={() => setInquiryIntent(opt.id as any)}
-                        className={`p-2 rounded-lg border text-xs text-left ${inquiryIntent === opt.id ? 'bg-[#1C1B18] text-[#FAF8F5] font-bold' : 'bg-[#FAF8F5] text-[#1C1B18]'
-                          }`}
+                        className={`p-2 rounded-lg border text-xs text-left ${
+                          inquiryIntent === opt.id
+                            ? 'bg-[#1C1B18] text-[#FAF8F5] font-bold'
+                            : 'bg-[#FAF8F5] text-[#1C1B18]'
+                        }`}
                       >
                         {opt.label}
                       </button>
@@ -1466,7 +2072,9 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">Your Name</label>
+                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">
+                    Your Name
+                  </label>
                   <input
                     type="text"
                     required
@@ -1478,7 +2086,9 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">Your Email</label>
+                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">
+                    Your Email
+                  </label>
                   <input
                     type="email"
                     required
@@ -1490,7 +2100,9 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">Message</label>
+                  <label className="text-[11px] font-mono-code uppercase block mb-1 text-[#6B665E]">
+                    Message
+                  </label>
                   <textarea
                     rows={3}
                     required
@@ -1513,7 +2125,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
         </div>
       )}
 
-      {/* QR CODE MODAL */}
+      {/* REAL SCANNABLE QR CODE MODAL */}
       {isQrModalOpen && (
         <div
           onClick={() => setIsQrModalOpen(false)}
@@ -1533,40 +2145,47 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               </button>
             </div>
 
-            <div className="p-4 bg-[#FAF8F5] border border-[#E8E4D9] rounded-xl inline-block mx-auto">
-              <svg className="w-40 h-40 mx-auto" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="5" y="5" width="30" height="30" fill="#1C1B18" />
-                <rect x="10" y="10" width="20" height="20" fill="#FAF8F5" />
-                <rect x="15" y="15" width="10" height="10" fill="#1C1B18" />
-
-                <rect x="65" y="5" width="30" height="30" fill="#1C1B18" />
-                <rect x="70" y="10" width="20" height="20" fill="#FAF8F5" />
-                <rect x="75" y="15" width="10" height="10" fill="#1C1B18" />
-
-                <rect x="5" y="65" width="30" height="30" fill="#1C1B18" />
-                <rect x="10" y="70" width="20" height="20" fill="#FAF8F5" />
-                <rect x="15" y="75" width="10" height="10" fill="#1C1B18" />
-
-                <rect x="45" y="45" width="10" height="10" fill="#C85A32" />
-                <rect x="60" y="60" width="15" height="15" fill="#1C1B18" />
-                <rect x="80" y="80" width="10" height="10" fill="#1C1B18" />
-              </svg>
+            <div
+              className="p-4 border rounded-xl inline-block mx-auto"
+              style={{
+                backgroundColor: theme.cardBgHex,
+                borderColor: theme.borderHex,
+              }}
+            >
+              <img
+                src={qrImageUrl}
+                alt={`QR Code for @${profile.username}`}
+                className="w-44 h-44 mx-auto rounded-lg"
+              />
             </div>
 
             <div className="text-xs font-mono-code font-bold">
-              conn.bio/{profile.username}
+              {profile.customDomain || `conn.bio/${profile.username}`}
             </div>
 
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(`https://conn.bio/${profile.username}`);
-                onShowToast('Copied permanent Conn identity link!');
-              }}
-              className="w-full py-2 bg-[#1C1B18] text-[#FAF8F5] text-xs font-medium rounded-xl flex items-center justify-center gap-1.5"
-            >
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy Permanent Identity Link</span>
-            </button>
+            <div className="flex flex-col gap-2">
+              <a
+                href={qrImageUrl}
+                download={`conn-qr-${profile.username}.png`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-2 border border-[#1C1B18] text-[#1C1B18] hover:bg-[#FAF8F5] text-xs font-medium rounded-xl flex items-center justify-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download QR Image</span>
+              </a>
+
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(profileShareUrl);
+                  onShowToast('Copied permanent Conn identity link!');
+                }}
+                className="w-full py-2 bg-[#1C1B18] text-[#FAF8F5] text-xs font-medium rounded-xl flex items-center justify-center gap-1.5"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>Copy Permanent Identity Link</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

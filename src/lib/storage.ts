@@ -247,6 +247,10 @@ export const saveActiveProfile = (profile: ConnProfile): void => {
       allProfiles.push(profile);
     }
     localStorage.setItem(ALL_PROFILES_KEY, JSON.stringify(allProfiles));
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('conn_profile_updated'));
+    }
   } catch (e) {
     console.error('Failed to save profile:', e);
   }
@@ -303,17 +307,19 @@ export const saveAnalytics = (data: AnalyticsData): void => {
 };
 
 export const recordLinkClick = (linkId: string): void => {
-  const profile = loadActiveProfile();
+  const allProfiles = loadAllProfiles();
+  const activeProfile = loadActiveProfile();
+  const targetProfile = allProfiles.find(p => (p.links || []).some(l => l.id === linkId)) || activeProfile;
   let clickedTitle = 'Link';
 
-  const updatedLinks = profile.links.map(l => {
+  const updatedLinks = (targetProfile.links || []).map(l => {
     if (l.id === linkId) {
       clickedTitle = l.title;
-      return { ...l, clicks: l.clicks + 1 };
+      return { ...l, clicks: (l.clicks || 0) + 1 };
     }
     return l;
   });
-  saveActiveProfile({ ...profile, links: updatedLinks });
+  saveActiveProfile({ ...targetProfile, links: updatedLinks });
 
   const analytics = loadAnalytics();
   const device = getDeviceType();

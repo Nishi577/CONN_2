@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ConnProfile } from '../types';
-import { X, Copy, Check, QrCode, Share2, ExternalLink, Send } from 'lucide-react';
+
+import { X, Copy, Check, QrCode, Share2, ExternalLink, Download } from 'lucide-react';
+
 
 interface ShareModalProps {
   profile: ConnProfile;
@@ -30,9 +32,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({ profile, isOpen, onClose
 
   if (!isOpen) return null;
 
-  const profileUrl = typeof window !== 'undefined'
+  // Use custom domain if set, otherwise use clean username-based URL
+  const profileUrl = profile.customDomain
+    ? `https://${profile.customDomain}`
+    : typeof window !== 'undefined'
     ? `${window.location.origin}/${profile.username}`
     : `https://conn.bio/${profile.username}`;
+
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(profileUrl)}&margin=8`;
 
   const handleCopy = async () => {
     try {
@@ -74,6 +81,24 @@ export const ShareModal: React.FC<ShareModalProps> = ({ profile, isOpen, onClose
   const handleShareTwitter = () => {
     const text = encodeURIComponent(`Check out my Conn profile: ${profile.name}`);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(profileUrl)}`, '_blank');
+  };
+
+  const handleDownloadQr = async () => {
+    try {
+      const response = await fetch(qrImageUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${profile.username}-conn-qr.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      onShowToast('Downloaded QR Code image!');
+    } catch (e) {
+      window.open(qrImageUrl, '_blank');
+    }
   };
 
   return (
@@ -202,29 +227,26 @@ export const ShareModal: React.FC<ShareModalProps> = ({ profile, isOpen, onClose
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-4 text-center">
-            {/* SVG QR Code */}
-            <div className="p-4 bg-white rounded-2xl border border-[#E8E4D9] shadow-sm mb-4">
-              <svg className="w-48 h-48" viewBox="0 0 100 100" fill="currentColor">
-                <path d="M0,0 h35 v35 h-35 z M5,5 v25 h25 v-25 z M10,10 h15 v15 h-15 z" />
-                <path d="M65,0 h35 v35 h-35 z M70,5 v25 h25 v-25 z M75,10 h15 v15 h-15 z" />
-                <path d="M0,65 h35 v35 h-35 z M5,70 v25 h25 v-25 z M10,75 h15 v15 h-15 z" />
-                <rect x="45" y="10" width="10" height="10" />
-                <rect x="45" y="25" width="10" height="20" />
-                <rect x="10" y="45" width="20" height="10" />
-                <rect x="35" y="45" width="10" height="10" />
-                <rect x="55" y="45" width="20" height="10" />
-                <rect x="80" y="45" width="10" height="10" />
-                <rect x="45" y="65" width="10" height="15" />
-                <rect x="65" y="65" width="15" height="10" />
-                <rect x="85" y="65" width="10" height="25" />
-                <rect x="65" y="85" width="15" height="10" />
-                <rect x="45" y="85" width="15" height="10" />
-              </svg>
+          <div className="flex flex-col items-center justify-center py-2 text-center">
+            {/* Scannable Real QR Code Image */}
+            <div className="p-3 bg-white rounded-2xl border border-[#E8E4D9] shadow-sm mb-3">
+              <img
+                src={qrImageUrl}
+                alt={`QR Code for @${profile.username}`}
+                className="w-44 h-44 rounded-lg object-contain"
+                loading="lazy"
+              />
             </div>
-            <p className="text-xs text-[#6B665E] max-w-xs">
-              Scan this code with any phone camera to instantly open @{profile.username}&apos;s Conn profile.
+            <p className="text-xs text-[#6B665E] max-w-xs mb-3">
+              Scan with any camera or QR scanner to instantly open @{profile.username}&apos;s Conn profile.
             </p>
+            <button
+              onClick={handleDownloadQr}
+              className="px-4 py-2 bg-[#1C1B18] text-[#FAF8F5] hover:bg-[#33312B] rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shadow-2xs hover:scale-102"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download High-Res QR (.png)</span>
+            </button>
           </div>
         )}
       </div>

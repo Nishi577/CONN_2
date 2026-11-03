@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "tsx server.ts",
-    "clean": "rm -rf dist server.js",
+    "clean": "node -e \"try{require('fs').rmSync('dist',{recursive:true,force:true})}catch{}\"",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
