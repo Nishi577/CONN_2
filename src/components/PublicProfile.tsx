@@ -912,31 +912,17 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
       profile.motionConfig?.microInteractions?.linkHoverEffect || 'lift'
     );
 
-    return (
-      <section key={cfg.instanceKey || cfg.id} className="space-y-6">
-        <div
-          className="flex items-center justify-between border-b pb-2"
-          style={{ borderColor: theme.borderHex }}
-        >
-          <span
-            className="text-[11px] font-mono-code uppercase font-bold tracking-widest flex items-center gap-1.5"
-            style={{ color: theme.mutedHex }}
-          >
-            <Folder className="w-3.5 h-3.5" style={{ color: accentColor }} />{' '}
-            {cfg.customTitle || 'Projects & Works'}
-          </span>
-          <span
-            className="text-[10px] font-mono-code"
-            style={{ color: theme.mutedHex }}
-          >
-            {regularLinks.length} Items
-          </span>
-        </div>
+    const relevantLinks = cfg.subCategoryFilter
+      ? regularLinks.filter((l) => l.category === cfg.subCategoryFilter)
+      : regularLinks;
 
-        {themeFamily === 'studio' ? (
-          /* STUDIO VISUAL GRID */
+    const relevantCategories = Array.from(new Set(relevantLinks.map((l) => l.category)));
+
+    const renderLinksList = (links: LinkItem[]) => {
+      if (themeFamily === 'studio') {
+        return (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {regularLinks.map((link) => (
+            {links.map((link) => (
               <a
                 key={link.id}
                 href={link.url}
@@ -971,14 +957,17 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               </a>
             ))}
           </div>
-        ) : themeFamily === 'terminal' ? (
-          /* TERMINAL DIRECTORY LIST */
+        );
+      }
+
+      if (themeFamily === 'terminal') {
+        return (
           <div
             className="p-4 border font-mono-code text-xs rounded-xl space-y-2"
             style={{ borderColor: theme.borderHex, backgroundColor: theme.cardBgHex }}
           >
             <div className="text-emerald-400 font-bold">$ ls -la projects/</div>
-            {regularLinks.map((link) => (
+            {links.map((link) => (
               <a
                 key={link.id}
                 href={link.url}
@@ -999,73 +988,142 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({
               </a>
             ))}
           </div>
-        ) : (
-          /* STANDARD / EDITORIAL / PAPER LIST */
-          <div className="space-y-3">
-            {regularLinks.map((link) => (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noreferrer"
-                onClick={(e) => handleLinkClick(link, e)}
-                className={`group flex items-center justify-between p-4 border transition-all duration-200 ${getShapeStyle()} ${linkHover}`}
-                style={{
-                  backgroundColor: theme.cardBgHex,
-                  borderColor: theme.borderHex,
-                }}
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  {link.thumbnailUrl ? (
-                    <img
-                      src={link.thumbnailUrl}
-                      alt=""
-                      className="w-10 h-10 rounded-lg object-cover shrink-0 border"
-                      style={{ borderColor: theme.borderHex }}
-                    />
-                  ) : (
-                    <div
-                      className="w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 text-sm"
-                      style={{ borderColor: theme.borderHex, color: accentColor }}
-                    >
-                      {renderIcon(link.iconName)}
-                    </div>
-                  )}
+        );
+      }
 
-                  <div className="min-w-0 pr-2">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm sm:text-base font-medium tracking-tight truncate group-hover:underline">
-                        {link.title}
-                      </h4>
-                      {link.badge && (
-                        <span
-                          className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0"
-                          style={{ backgroundColor: accentColor, color: '#FFFFFF' }}
-                        >
-                          {link.badge}
-                        </span>
-                      )}
-                    </div>
-                    {link.description && (
-                      <p
-                        className="text-xs truncate font-light mt-0.5"
-                        style={{ color: theme.mutedHex }}
+      return (
+        <div className="space-y-3">
+          {links.map((link) => (
+            <a
+              key={link.id}
+              href={link.url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => handleLinkClick(link, e)}
+              className={`group flex items-center justify-between p-4 border transition-all duration-200 ${getShapeStyle()} ${linkHover}`}
+              style={{
+                backgroundColor: theme.cardBgHex,
+                borderColor: theme.borderHex,
+              }}
+            >
+              <div className="flex items-center gap-3.5 min-w-0">
+                {link.thumbnailUrl ? (
+                  <img
+                    src={link.thumbnailUrl}
+                    alt=""
+                    className="w-10 h-10 rounded-lg object-cover shrink-0 border"
+                    style={{ borderColor: theme.borderHex }}
+                  />
+                ) : (
+                  <div
+                    className="w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 text-sm"
+                    style={{ borderColor: theme.borderHex, color: accentColor }}
+                  >
+                    {renderIcon(link.iconName)}
+                  </div>
+                )}
+
+                <div className="min-w-0 pr-2">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm sm:text-base font-medium tracking-tight truncate group-hover:underline">
+                      {link.title}
+                    </h4>
+                    {link.badge && (
+                      <span
+                        className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0"
+                        style={{ backgroundColor: accentColor, color: '#FFFFFF' }}
                       >
-                        {link.description}
-                      </p>
+                        {link.badge}
+                      </span>
                     )}
                   </div>
+                  {link.description && (
+                    <p
+                      className="text-xs truncate font-light mt-0.5"
+                      style={{ color: theme.mutedHex }}
+                    >
+                      {link.description}
+                    </p>
+                  )}
                 </div>
+              </div>
 
-                <div
-                  className="p-1.5 rounded-full border shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
-                  style={{ borderColor: theme.borderHex }}
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
+              <div
+                className="p-1.5 rounded-full border shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
+                style={{ borderColor: theme.borderHex }}
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </div>
+            </a>
+          ))}
+        </div>
+      );
+    };
+
+    return (
+      <section key={cfg.instanceKey || cfg.id} className="space-y-6">
+        <div
+          className="flex items-center justify-between border-b pb-2"
+          style={{ borderColor: theme.borderHex }}
+        >
+          <span
+            className="text-[11px] font-mono-code uppercase font-bold tracking-widest flex items-center gap-1.5"
+            style={{ color: theme.mutedHex }}
+          >
+            <Folder className="w-3.5 h-3.5" style={{ color: accentColor }} />{' '}
+            {cfg.customTitle || 'Projects & Works'}
+          </span>
+          <span
+            className="text-[10px] font-mono-code"
+            style={{ color: theme.mutedHex }}
+          >
+            {relevantLinks.length} Items
+          </span>
+        </div>
+
+        {relevantCategories.length > 1 ? (
+          <div className="space-y-6">
+            {relevantCategories.map((catName) => {
+              const catLinks = relevantLinks.filter((l) => l.category === catName);
+              if (catLinks.length === 0) return null;
+              const isCollapsed = !!collapsedCats[catName];
+
+              return (
+                <div key={catName} className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleCategoryCollapse(catName)}
+                    className="w-full flex items-center justify-between py-1.5 border-b text-left group cursor-pointer transition-colors"
+                    style={{ borderColor: `${theme.borderHex}80` }}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isCollapsed ? (
+                        <ChevronRight className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-transform" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-transform" />
+                      )}
+                      <span
+                        className="text-xs font-mono-code font-bold uppercase tracking-wider"
+                        style={{ color: theme.textHex }}
+                      >
+                        {catName}
+                      </span>
+                    </div>
+                    <span
+                      className="text-[10px] font-mono-code opacity-60"
+                      style={{ color: theme.mutedHex }}
+                    >
+                      {catLinks.length} {catLinks.length === 1 ? 'item' : 'items'}
+                    </span>
+                  </button>
+
+                  {!isCollapsed && renderLinksList(catLinks)}
                 </div>
-              </a>
-            ))}
+              );
+            })}
           </div>
+        ) : (
+          renderLinksList(relevantLinks)
         )}
       </section>
     );

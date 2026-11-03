@@ -107,6 +107,7 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
     id: 'custom-1',
     name: 'Atelier Gold Custom',
     description: 'Bespoke custom theme.',
+    themeFamily: 'editorial',
     bgClass: '',
     bgHex: '#FAF8F5',
     textHex: '#1C1B18',

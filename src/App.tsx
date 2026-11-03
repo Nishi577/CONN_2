@@ -368,7 +368,7 @@ export default function App() {
         if (error) {
           console.error('Supabase profile sync error:', error);
           setSaveStatus('error');
-          showToast(`Cloud sync warning: ${error.message}`, 'error');
+          // showToast(`Cloud sync warning: ${error.message}`, 'error');
         } else {
           setSaveStatus('saved');
           setTimeout(() => setSaveStatus('idle'), 2500);

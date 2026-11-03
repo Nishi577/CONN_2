@@ -89,6 +89,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   ];
   const completedCount = completionTasks.filter((t) => t.done).length;
   const completionPercentage = Math.round((completedCount / completionTasks.length) * 100);
+  const categoriesCount = new Set((profile.links || []).map((l) => l.category)).size;
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#1C1B18] font-sans-ui flex flex-col">
@@ -193,14 +194,28 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
                 <button
                   onClick={() => setActiveTab('links')}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
                     activeTab === 'links'
                       ? 'bg-[#1C1B18] text-[#FAF8F5] shadow-xs'
                       : 'text-[#6B665E] hover:text-[#1C1B18] hover:bg-[#E8E4D9]/40'
                   }`}
                 >
-                  <LinkIcon className="w-4 h-4 shrink-0" />
-                  <span>Links & Items</span>
+                  <div className="flex items-center gap-3">
+                    <LinkIcon className="w-4 h-4 shrink-0" />
+                    <span>Links & Categories</span>
+                  </div>
+                  {(profile.links || []).length > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      {categoriesCount > 1 && (
+                        <span className="text-[9px] font-mono-code font-bold px-1.5 py-0.2 bg-[#C85A32]/10 text-[#C85A32] rounded">
+                          {categoriesCount} cats
+                        </span>
+                      )}
+                      <span className="text-[10px] font-mono-code font-bold px-1.5 py-0.2 bg-[#E8E4D9] text-[#1C1B18] rounded-full">
+                        {(profile.links || []).length}
+                      </span>
+                    </div>
+                  )}
                 </button>
 
                 <button

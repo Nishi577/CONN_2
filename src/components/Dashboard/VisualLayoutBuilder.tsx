@@ -219,8 +219,19 @@ export const VisualLayoutBuilder: React.FC<VisualLayoutBuilderProps> = ({
 
   // Combine built-in theme families with user-created custom families
   const customFamiliesList = profile.customDesignFamilies || [];
-  const allFamiliesList = [
-    ...BUILTIN_THEME_FAMILIES,
+  const allFamiliesList: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    description: string;
+    isCustom?: boolean;
+    data?: CustomDesignFamily;
+  }> = [
+    ...BUILTIN_THEME_FAMILIES.map((bf) => ({
+      ...bf,
+      isCustom: false,
+      data: undefined,
+    })),
     ...customFamiliesList.map((cf) => ({
       id: cf.id,
       name: cf.name,
