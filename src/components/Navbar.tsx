@@ -50,14 +50,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand */}
         <div className="flex items-center gap-6">
           <button
+
+            onClick={() => onNavigate('landing')}
+            className="flex items-center gap-2 group text-left"
             onClick={() => handleMobileNav('landing')}
             className="flex items-center gap-2.5 group text-left cursor-pointer"
           >
             <span className="font-serif-display text-3xl font-normal tracking-tight text-[#1C1B18] group-hover:opacity-80 transition-opacity">
               Conn.
-            </span>
-            <span className="hidden sm:inline text-[11px] uppercase font-mono-code px-2.5 py-0.5 rounded-full border border-[#E8E4D9] text-[#6B665E]">
-              Editorial Profiles
             </span>
           </button>
 
@@ -65,7 +65,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           <nav className="hidden md:flex items-center gap-1 text-xs font-medium">
             <button
               onClick={() => onNavigate('landing')}
+
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+
               className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
+
                 currentView === 'landing'
                   ? 'bg-[#E8E4D9]/60 text-[#1C1B18]'
                   : 'text-[#6B665E] hover:text-[#1C1B18]'
@@ -78,6 +82,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isLoggedIn && (
               <button
                 onClick={() => onNavigate('dashboard')}
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+
                 className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                   currentView === 'dashboard'
                     ? 'bg-[#1C1B18] text-[#FAF8F5]'
@@ -100,7 +106,29 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Profile Switcher & Actions */}
+
+        <div className="flex items-center gap-3">
+          {/* Sample Profile Selector Dropdown */}
+          <div className="hidden sm:flex items-center gap-2 border border-[#E8E4D9] bg-white rounded-xl px-2.5 py-1 text-xs">
+            <span className="text-[10px] uppercase font-mono-code text-[#6B665E]">Active:</span>
+            <select
+              value={activeProfile.username}
+              onChange={(e) => {
+                const selected = allProfiles.find((p) => p.username === e.target.value);
+                if (selected) onSelectProfile(selected);
+              }}
+              className="bg-transparent font-medium text-[#1C1B18] outline-none text-xs cursor-pointer"
+            >
+              {allProfiles.map((p) => (
+                <option key={p.id} value={p.username}>
+                  {p.name} (@{p.username})
+                </option>
+              ))}
+            </select>
+          </div>
+
         <div className="flex items-center gap-2 sm:gap-3">
+
           {/* Share Button */}
           <button
             onClick={onOpenShare}
